@@ -29,5 +29,5 @@ CRYPTO_NAME = "eth"
 if __name__ == '__main__':
     data = common.get_crypto_data_from_csv_file(
         CRYPTO_NAME, DATA_NAME, bt.TimeFrame.Days)
-    datas = [(DATA_NAME, data)]
+    datas = [(CRYPTO_NAME, data)]
     base.do_analysis(datas, mim.MIMStrategy)
