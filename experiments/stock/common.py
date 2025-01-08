@@ -41,14 +41,17 @@ def return_with_name(name):
     return name + "_return"
 
 
-def get_backtrader_data_from_yahoo_finance(name):
+def get_backtrader_data_from_yahoo_finance(
+        name,
+        start_date=None,
+        end_date=None):
 
     """
     Get the data from yahoo finance and convert it to the format
     expected by backtrader.
     """
 
-    df = yf.download(name, period="max")
+    df = yf.download(name, period="max", start=start_date, end=end_date)
     df = df.xs(key=name, axis=1, level="Ticker")
 
     # pylint: disable=too-many-function-args,unexpected-keyword-arg
@@ -80,12 +83,18 @@ class YahooFinanceTickers():
     The output is always stored in a pandas dataframe.
     """
 
-    def __init__(self, tickers):
+    def __init__(self, tickers, start_date=None, end_date=None):
         self.tickers = tickers
+        self.start_date = start_date
+        self.end_date = end_date
 
     def download_from_yfinance(self, name):
         """Download ticker data from yahoo finance."""
-        df = yf.download(name, period="max")
+        df = yf.download(
+            name,
+            period="max",
+            start=self.start_date,
+            end=self.end_date)
         return df
 
     def transform(self, df, name):
@@ -179,11 +188,17 @@ class YahooFinanceTickers():
         return df
 
 
-def do_analysis(tickers, analysis_single=False):
+def do_analysis(
+        tickers,
+        analysis_single=False,
+        start_date=None,
+        end_date=None):
+
     """Analyze a number of tickers."""
+
     panda_util.init_pandas()
 
-    y = YahooFinanceTickers(tickers)
+    y = YahooFinanceTickers(tickers, start_date=start_date, end_date=end_date)
     df = y.load_tickers()
 
     return_columns = []
@@ -201,14 +216,22 @@ def do_analysis(tickers, analysis_single=False):
     print("correlation coefficient of tickers")
     print(cc)
 
+    start_date = df.index[0]
     if analysis_single:
         for name in tickers:
-            do_analysis_ticker(name)
+            do_analysis_ticker(name, start_date, end_date)
 
 
-def do_analysis_ticker(ticker):
+def do_analysis_ticker(ticker, start_date=None, end_date=None):
     """Analyze a single ticker."""
-    datas = [(
+    datas = [
+        (
             ticker,
-            get_backtrader_data_from_yahoo_finance(ticker))]
+            get_backtrader_data_from_yahoo_finance(
+                ticker,
+                start_date,
+                end_date)
+        )
+    ]
+
     base_analysis.do_analysis(datas, base_strategy.BaseStrategy)
