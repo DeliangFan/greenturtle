@@ -33,6 +33,8 @@ BRK_B = "BRK-B"
 TLT = "TLT"
 # iShares 7-10 Year Treasury Bond ETF (IEF) in yahoo finance.
 IEF = "IEF"
+# Vanguard Long-Term Corporate Bond ETF.
+VCLT = "VCLT"
 # iShares Short Treasury Bond ETF (SHV) in yahoo finance.
 SHV = "SHV"
 # SPDR Bloomberg High Yield Bond ETF (JNK) in yahoo finance.
