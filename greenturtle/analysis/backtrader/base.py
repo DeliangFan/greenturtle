@@ -24,7 +24,7 @@ import pandas as pd
 from greenturtle.util import panda_util
 
 
-def do_analysis(datas, strategy):
+def do_analysis(datas, strategy, *strategy_args, **strategy_kwargs):
     """analysis the performance according to the data and strategy."""
 
     # initiate the panda options.
@@ -32,7 +32,7 @@ def do_analysis(datas, strategy):
 
     # setting the strategy and data.
     analysis = Analysis()
-    analysis.add_strategy(strategy)
+    analysis.add_strategy(strategy, *strategy_args, **strategy_kwargs)
     for name, data in datas:
         analysis.add_data(data, name=name)
 
@@ -82,9 +82,9 @@ class Analysis():
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
 
-    def add_strategy(self, strategy):
+    def add_strategy(self, strategy, *args, **kwargs):
         """add strategy to cerebro."""
-        self.cerebro.addstrategy(strategy)
+        self.cerebro.addstrategy(strategy, *args, **kwargs)
 
     def add_data(self, data, name=None):
         """add data to cerebro."""

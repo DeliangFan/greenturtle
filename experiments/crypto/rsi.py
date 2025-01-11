@@ -21,11 +21,15 @@ from greenturtle.analysis.backtrader import base
 from greenturtle.stragety.backtrader import rsi
 from experiments.crypto import common
 
+# pylint: disable=R0801
+DATA_NAME = "../../download/crypto/csv/btc_1d.csv"
+CRYPTO_NAME = "btc"
+
 
 if __name__ == '__main__':
     data = common.get_crypto_data_from_csv_file(
-        "btc",
-        "../../download/crypto/csv/btc_1d.csv",
+        CRYPTO_NAME,
+        DATA_NAME,
         bt.TimeFrame.Days)
     datas = [("btc", data)]
     base.do_analysis(datas, rsi.RSIStrategy)

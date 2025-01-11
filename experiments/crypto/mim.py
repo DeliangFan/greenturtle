@@ -21,7 +21,7 @@ from greenturtle.analysis.backtrader import base
 from greenturtle.stragety.backtrader import mim
 from experiments.crypto import common
 
-
+# pylint: disable=R0801
 DATA_NAME = "../../download/crypto/csv/eth_1d.csv"
 CRYPTO_NAME = "eth"
 
