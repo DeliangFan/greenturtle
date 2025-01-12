@@ -35,6 +35,8 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 CN_MARKETS = ("CFFEX", "SHFE", "INE", "CZCE", "DCE", "GFEX")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 
 
 def get_month_list():
@@ -69,6 +71,9 @@ def download_cn_future_by_market(market):
                 start_date=month[0],
                 end_date=month[1],
                 market=market)
+            file_name = f"{market}-{month[0]}.csv"
+            daily_df.to_csv(os.path.join(OUTPUT_DIR, file_name))
+
             df = pd.concat([df, daily_df])
             logger.info(
                 "download %s %s-%s success", market, month[0], month[1])
@@ -80,14 +85,12 @@ def download_cn_future_by_market(market):
 
 if __name__ == '__main__':
     # create output directory
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(base_dir, "output")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
     # download future data and write to csv file
     for cn_market in CN_MARKETS:
         logger.info("start to download market %s", cn_market)
         data = download_cn_future_by_market(cn_market)
-        data.to_csv(os.path.join(output_dir, f"{cn_market}.csv"))
+        data.to_csv(os.path.join(OUTPUT_DIR, f"{cn_market}.csv"))
         logger.info("market %s download finished", cn_market)
