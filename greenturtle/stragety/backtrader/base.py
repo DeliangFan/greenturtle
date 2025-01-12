@@ -19,6 +19,11 @@ import math
 
 import backtrader as bt
 
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
+
 
 class BaseStrategy(bt.Strategy):
 
@@ -32,7 +37,7 @@ class BaseStrategy(bt.Strategy):
         """ Logging function fot this strategy."""
         dt = dt or self.datas[0].datetime.date(0)
         iso_time = dt.isoformat()
-        print(f"{iso_time}, {txt}")
+        logger.info("%s: %s", iso_time, txt)
 
     def start(self):
         self.order = None

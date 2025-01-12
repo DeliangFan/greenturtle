@@ -24,6 +24,10 @@ import yfinance as yf
 from greenturtle.analysis.backtrader import base as base_analysis
 from greenturtle.stragety.backtrader import base as base_strategy
 from greenturtle.util import panda_util
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
 
 
 def change_with_name(name):
@@ -213,8 +217,8 @@ def do_analysis(
     df_change = df[change_columns]
     cc = df_change.corr(method="spearman")
 
-    print("correlation coefficient of tickers")
-    print(cc)
+    logger.info("correlation coefficient of tickers")
+    logger.info("\n%s", cc)
 
     start_date = df.index[0]
     if analysis_single:
