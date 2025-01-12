@@ -15,9 +15,8 @@
 
 """ RSRS class strategy for backtrader"""
 
-import numpy as np
-from sklearn.linear_model import LinearRegression
 
+from greenturtle.indicators.backtrader import rsrs
 from greenturtle.stragety.backtrader import base
 
 
@@ -36,36 +35,19 @@ class RSRSStrategy(base.BaseStrategy):
         self.period = period
         # according to the experiment in btc, the performance depends a lot
         # on the upper and lower parameters.
+        # pylint: disable=unexpected-keyword-arg
+        self.rsrs = rsrs.RSRS(period=period)
         self.upper = upper
         self.lower = lower
 
-    def compute_rsrs(self):
-        """compute teh rsrs value."""
-        high = self.data.high.get(size=self.period)
-        low = self.data.low.get(size=self.period)
-
-        if len(high) == 0 or len(low) == 0:
-            return None
-
-        x = np.array(low).reshape(-1, 1)
-        y = np.array(high).reshape(-1, 1)
-        lr = LinearRegression().fit(x, y)
-        lr.predict(x)
-        rsrs = lr.coef_[0]
-        return rsrs
-
     def next(self):
-        if self.order:
-            return
-
-        rsrs = self.compute_rsrs()
-        if rsrs is None:
+        if self.order or self.rsrs[0] <= -1:
             return
 
         if self.position:
-            if rsrs <= self.lower:
+            if self.rsrs[0] <= self.lower:
                 self.order_target_percent(target=0)
         # not in the market
         else:
-            if rsrs >= self.upper:
+            if self.rsrs[0] >= self.upper:
                 self.order_target_percent(target=1.0)
