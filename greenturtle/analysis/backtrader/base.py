@@ -194,3 +194,5 @@ class Analysis():
         self.show_trade_analyzer(result)
         # plot the figures.
         self.plot_figure(result)
+
+        self.cerebro.plot()
