@@ -22,6 +22,10 @@ from matplotlib import pyplot
 import pandas as pd
 
 from greenturtle.util import panda_util
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
 
 
 def do_analysis(datas, strategy, *strategy_args, **strategy_kwargs):
@@ -94,14 +98,14 @@ class Analysis():
         """run the analysis."""
         # Print out the starting conditions
         value = self.cerebro.broker.getvalue()
-        print(f"Starting Portfolio Value: {value:.2f}")
+        logger.info("starting portfolio value: %.2f", value)
 
         # Run over everything
         result = self.cerebro.run()
 
         # Print out the final result
         value = self.cerebro.broker.getvalue()
-        print(f"Final Portfolio Value: {value:.2f}")
+        logger.info("final Portfolio Value: %.2f", value)
 
         return result
 
@@ -110,20 +114,20 @@ class Analysis():
         returns = result[0].analyzers.Returns.get_analysis()
         total_return = math.exp(returns["rtot"]) * 100
         annual_return = returns["rnorm"] * 100
-        print(f"total return: {total_return:0.1f}%")
-        print(f"annual return: {annual_return:0.1f}%")
+        logger.info("total return: %.1f%%", total_return)
+        logger.info("annual return: %.1f%%", annual_return)
 
     def show_max_draw_down(self, result):
         """analyze the max draw down."""
         draw_down = result[0].analyzers.DrawDown.get_analysis()
         max_draw_down = draw_down["max"]["drawdown"]
-        print(f"Max draw down: {max_draw_down:0.1f}%")
+        logger.info("max draw down: %.1f%%", max_draw_down)
 
     def show_sharpe_ratio(self, result):
         """analyze the sharpe ratio."""
         sharpe = result[0].analyzers.SharpeRatio_A.get_analysis()
         sharpe_ratio = sharpe["sharperatio"]
-        print(f"Sharpe Ratio: {sharpe_ratio:0.3f}")
+        logger.info("sharpe ratio: %.3f", sharpe_ratio)
 
     def show_trade_analyzer(self, result):
         """analyze the trade."""
@@ -152,15 +156,22 @@ class Analysis():
         lost_profit_total = trade_analyzer["lost"]["pnl"]["total"]
         lost_profit_average = trade_analyzer["lost"]["pnl"]["average"]
 
-        print(
-            f"net: {net:.0f}, won: {won_profit_total:.0f}, " +
-            f"lost: {lost_profit_total:.0f}, comm: {comm:.0f}")
-        print(
-            f"total trade number: {total}, won: {won_total}," +
-            f"lost: {lost_total}, ratio: {won_ratio:.2f}")
-        print(
-            f"won profit average: {won_profit_average:.0f}, " +
-            f"lost profit average: {lost_profit_average:.0f}")
+        logger.info(
+            "\nnet: %.0f, won: %.0f, lost: %.0f, comm: %.0f",
+            net,
+            won_profit_total,
+            lost_profit_total,
+            comm)
+        logger.info(
+            "\ntotal trade number: %d, won: %d, lost: %d, ratio: %.2f",
+            total,
+            won_total,
+            lost_total,
+            won_ratio)
+        logger.info(
+            "\nwon profit average: %.0f, lost profit average: %.0f",
+            won_profit_average,
+            lost_profit_average)
 
     def plot_figure(self, result):
         """plot the figure."""
@@ -182,7 +193,7 @@ class Analysis():
 
     def show(self, result):
         """show the backtest result."""
-        print("*************** Overview *************")
+        logger.info("\n*************** Overview *************")
 
         # show the return.
         self.show_return(result)

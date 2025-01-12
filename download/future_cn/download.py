@@ -30,7 +30,10 @@ import os
 import akshare as ak
 import pandas as pd
 
+from greenturtle.util.logging import logging
 
+
+logger = logging.get_logger()
 CN_MARKETS = ("CFFEX", "SHFE", "INE", "CZCE", "DCE", "GFEX")
 
 
@@ -58,6 +61,7 @@ def download_cn_future_by_market(market):
 
     month_list = get_month_list()
     for month in month_list:
+        logger.info("start to download %s %s-%s", market, month[0], month[1])
         try:
             # please refer the following link for more details
             # https://akshare.akfamily.xyz/data/futures/futures.html#id53
@@ -66,8 +70,10 @@ def download_cn_future_by_market(market):
                 end_date=month[1],
                 market=market)
             df = pd.concat([df, daily_df])
+            logger.info(
+                "download %s %s-%s success", market, month[0], month[1])
         except (Exception, ) as e:  # pylint: disable=broad-except
-            print(e)
+            logger.error(e)
 
     return df
 
@@ -81,5 +87,7 @@ if __name__ == '__main__':
 
     # download future data and write to csv file
     for cn_market in CN_MARKETS:
+        logger.info("start to download market %s", cn_market)
         data = download_cn_future_by_market(cn_market)
         data.to_csv(os.path.join(output_dir, f"{cn_market}.csv"))
+        logger.info("market %s download finished", cn_market)

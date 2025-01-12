@@ -22,8 +22,11 @@ from sklearn.linear_model import LinearRegression
 
 from greenturtle.analysis.backtrader import base
 from greenturtle.stragety.backtrader import rsrs
+from greenturtle.util.logging import logging
 from experiments.crypto import common
 
+
+logger = logging.get_logger()
 
 # pylint: disable=R0801
 DATA_NAME = "../../download/crypto/csv/btc_1d.csv"
@@ -52,7 +55,9 @@ def get_rsrs_series(period=18):
 
 def show_rsrs_distribution(series):
     """describe and show the rsrs series."""
-    print(series.describe())
+
+    describe = series.describe()
+    logger.info("\n%s", describe)
 
     # plot
     series.plot.hist(
