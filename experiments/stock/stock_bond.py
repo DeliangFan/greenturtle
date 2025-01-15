@@ -17,19 +17,21 @@
 
 from greenturtle.stragety.backtrader import stock_bond
 from greenturtle.analysis.backtrader import base
-from greenturtle.util import constants
+from greenturtle.util.constants import constants_stock
 from experiments.stock import common
 
 
 if __name__ == '__main__':
     datas = [
         (
-            constants.STOCK,
-            common.get_backtrader_data_from_yahoo_finance(constants.VFIAX)
+            constants_stock.STOCK,
+            common.get_backtrader_data_from_yahoo_finance(
+                constants_stock.VFIAX,
+            )
          ),
         (
-            constants.BOND,
-            common.get_backtrader_data_from_yahoo_finance(constants.TLT)
+            constants_stock.BOND,
+            common.get_backtrader_data_from_yahoo_finance(constants_stock.TLT)
          ),
     ]
 
