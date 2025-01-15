@@ -24,6 +24,7 @@ import yfinance as yf
 from greenturtle.analysis.backtrader import base as base_analysis
 from greenturtle.stragety.backtrader import base as base_strategy
 from greenturtle.util import panda_util
+from greenturtle.util import yf_util
 from greenturtle.util.logging import logging
 
 
@@ -101,33 +102,10 @@ class YahooFinanceTickers():
             end=self.end_date)
         return df
 
-    def transform(self, df, name):
-        """
-        transform the pandas structure
-        - removing the multi-index column
-        - renaming column name
-        - add datetime as a column
-        """
-
-        # Remove multi-index column
-        df = df.xs(key=name, axis=1, level="Ticker")
-
-        # rename the columns
-        df.rename(columns={"Open": "open"}, inplace=True)
-        df.rename(columns={"Adj Close": "adj_close"}, inplace=True)
-        df.rename(columns={"Close": "close"}, inplace=True)
-        df.rename(columns={"High": "high"}, inplace=True)
-        df.rename(columns={"Low": "low"}, inplace=True)
-        df.rename(columns={"Volume": "volume"}, inplace=True)
-
-        # add datetime index as a column
-        df["datetime"] = df.index
-        return df
-
     def get_ticker_by_name(self, name):
         """Download and transform the ticker by name."""
         df = self.download_from_yfinance(name)
-        df = self.transform(df, name)
+        df = yf_util.transform(df, name)
         df = df[["adj_close"]]
         df.rename(columns={"adj_close": adj_with_name(name)}, inplace=True)
         return df

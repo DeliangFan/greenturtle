@@ -16,7 +16,7 @@
 """ Balanced stock and bond class strategy for backtrader"""
 
 from greenturtle.stragety.backtrader import base
-from greenturtle.util import constants
+from greenturtle.util.constants import constants_stock
 
 
 class BalancedStockAndBondStrategy(base.BaseStrategy):
@@ -34,25 +34,25 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
 
         # Keep a reference to the "close" for different data series.
         for data in self.datas:
-            if data._name == constants.STOCK:
+            if data._name == constants_stock.STOCK:
                 self.stock_close = data.close
-            if data._name == constants.BOND:
+            if data._name == constants_stock.BOND:
                 self.bond_close = data.close
 
     def next(self):
 
         # Initiate the stock.
-        stock_position = self.getpositionbyname(constants.STOCK)
+        stock_position = self.getpositionbyname(constants_stock.STOCK)
         if stock_position.size == 0:
             self.order_target_percent(
-                data=constants.STOCK,
+                data=constants_stock.STOCK,
                 target=self.stock_ratio)
 
         # Initiate the stock.
-        bond_position = self.getpositionbyname(constants.BOND)
+        bond_position = self.getpositionbyname(constants_stock.BOND)
         if bond_position.size == 0:
             self.order_target_percent(
-                data=constants.BOND,
+                data=constants_stock.BOND,
                 target=self.bond_ratio)
 
         # Calculate the values of stock and bond.
@@ -65,18 +65,18 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
         # Re-balance between stock and bond
         if stock_value_ratio >= (self.stock_ratio + self.diff_ratio):
             self.order_target_percent(
-                data=constants.STOCK,
+                data=constants_stock.STOCK,
                 target=self.stock_ratio)
 
             self.order_target_percent(
-                data=constants.BOND,
+                data=constants_stock.BOND,
                 target=self.bond_ratio)
 
         if bond_value_ratio >= (self.bond_ratio + self.diff_ratio):
             self.order_target_percent(
-                data=constants.BOND,
+                data=constants_stock.BOND,
                 target=self.bond_ratio)
 
             self.order_target_percent(
-                data=constants.STOCK,
+                data=constants_stock.STOCK,
                 target=self.stock_ratio)
