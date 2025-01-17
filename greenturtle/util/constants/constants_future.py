@@ -30,6 +30,59 @@ AGRICULTURE = {
     "ZO": {YAHOO_CODE: "ZO=F", "description": "Oats"},  # 燕麦
 }
 
+SOFTS = {
+    "CC": {YAHOO_CODE: "CC=F", "description": "Cocoa ICE"},
+    "SB": {YAHOO_CODE: "SB=F", "description": "Sugar"},
+    "KC": {YAHOO_CODE: "KC=F", "description": "Coffee"},
+}
+
+METALS = {
+    "GC": {YAHOO_CODE: "GC=F", "description": "Gold"},
+    "SI": {YAHOO_CODE: "SI=F", "description": "Silver"},
+    "HG": {YAHOO_CODE: "HG=F", "description": "Copper"},
+    "PL": {YAHOO_CODE: "PL=F", "description": "Platinum"},  # 铂
+    "PA": {YAHOO_CODE: "PA=F", "description": "Palladium"},  # 钯
+}
+
+ENERGY = {
+    "CL": {YAHOO_CODE: "CL=F", "description": "Crude Oil"},
+    "NG": {YAHOO_CODE: "NG=F", "description": "Natural Gas"},
+    "HO": {YAHOO_CODE: "HO=F", "description": "Heating Oil"},
+    "RB": {YAHOO_CODE: "RB=F", "description": "RBOB Gasoline"},  # 氧化混調型精制汽油
+}
+
+CRYPTO = {
+    "BTC": {YAHOO_CODE: "BTC=F", "description": "Bitcoin"},
+    "ETH": {YAHOO_CODE: "ETH=F", "description": "Ether"},
+}
+
+CURRENCY = {
+    "6B": {YAHOO_CODE: "6B=F", "description": "British Pound Futures"},
+    "6J": {YAHOO_CODE: "6J=F", "description": "Japanese Yen"},
+    "DX": {YAHOO_CODE: "DX=F", "description": "US Dollar"},
+    "6E": {YAHOO_CODE: "6E=F", "description": "Euro FX"},
+}
+
+STOCK_INDICES = {
+    "ES": {YAHOO_CODE: "ES=F", "description": "E-Mini S&P 500"},
+    "NQ": {YAHOO_CODE: "NQ=F", "description": "E-mini Nasdaq"},
+    "YM": {YAHOO_CODE: "YM=F", "description": "Mini Dow Jones Indus"},
+    "NKD": {YAHOO_CODE: "NKD=F", "description": "Nikkei/USD Futures"},
+}
+
+INTEREST_RATES = {
+    "ZB": {YAHOO_CODE: "ZB=F", "description": "U.S. Treasury Bond Futures"},
+    "ZN": {YAHOO_CODE: "ZN=F", "description": "10-Year T-Note Futures"},
+    "ZT": {YAHOO_CODE: "ZT=F", "description": "U.S. 2-Year Note	"},
+}
+
 FUTURE = {
     "agriculture": AGRICULTURE,
+    "soft": SOFTS,
+    "metal": METALS,
+    "energy": ENERGY,
+    "crypto": CRYPTO,
+    "currency": CURRENCY,
+    "stock_indices": STOCK_INDICES,
+    "interest_rates": INTEREST_RATES,
 }
