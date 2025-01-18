@@ -32,6 +32,7 @@ class BaseStrategy(bt.Strategy):
     def __init__(self):
         super().__init__()
         self.order = None
+        self.target = 0.95
 
     def log(self, txt, dt=None):
         """ Logging function fot this strategy."""
@@ -48,7 +49,26 @@ class BaseStrategy(bt.Strategy):
 
         # not in the market
         if not self.position:
-            self.order_target_percent(target=0.99)
+            self.order_target_percent_with_log(
+                data=self.data,
+                target=self.target)
+
+    def order_target_percent_with_log(self, data=None, target=0.0):
+        """
+        Order the target percent with loging the price.
+
+        In most case, the strategy computing the signal with close price, and
+        here is to log the close price.
+        """
+        if isinstance(data, str):
+            data = self.getdatabyname(data)
+        elif data is None:
+            data = self.data
+
+        close = data.close[0]
+        self.log(f"try to order {target} percent with expected price {close}")
+
+        self.order_target_percent(data=data, target=target)
 
     def notify_order(self, order):
         """

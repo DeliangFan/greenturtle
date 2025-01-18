@@ -46,8 +46,12 @@ class RSRSStrategy(base.BaseStrategy):
 
         if self.position:
             if self.rsrs[0] <= self.lower:
-                self.order_target_percent(target=0)
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=0)
         # not in the market
         else:
             if self.rsrs[0] >= self.upper:
-                self.order_target_percent(target=1.0)
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=self.target)

@@ -40,8 +40,12 @@ class MIMStrategy(base.BaseStrategy):
 
         if self.position:
             if self.data[0] < self.movav[0]:
-                self.order_target_percent(target=0)
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=0)
         # not in the market
         else:
             if self.data[0] > self.movav[0]:
-                self.order_target_percent(target=1.0)
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=self.target)
