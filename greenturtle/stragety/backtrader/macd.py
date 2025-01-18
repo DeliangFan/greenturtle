@@ -27,10 +27,6 @@ class RefinedMACDStrategy(base.BaseStrategy):
     def __init__(self, period_me1=12, period_me2=26, period_signal=9):
         super().__init__()
 
-        # TODO(wsfdl), figure out the theory about the parameters in python3
-        # Keep a reference to the "close" line in the data[0] dataseries
-        self.target_ratio = 1.0
-
         # pylint: disable=too-many-function-args,unexpected-keyword-arg
         self.macd = bt.indicators.MACD(self.data,
                                        period_me1=period_me1,
@@ -44,20 +40,26 @@ class RefinedMACDStrategy(base.BaseStrategy):
         # valina macd strategy
         #
         # if self.position and self.mcross[0] < 0:
-        #     self.order_target_percent(target=0)
+        #     self.order_target_percent_with_log(data=self.data, target=0)
         # elif not self.position and self.mcross[0] > 0:
-        #     self.order_target_percent(target=1.0)
+        #     self.order_target_percent_with_log(data=self.data, target=1.0)
         #
         # The following optimized strategy works better in both btc and eth
         # in the market
         diff = self.macd.macd[0] - self.macd.signal[0]
         if self.position:
             if diff < -0.05 * self.macd.signal[0]:
-                self.order_target_percent(target=0)
+                # sell
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=0)
         # not in the market
         else:
             if diff > -0.01 * self.macd.signal[0]:
-                self.order_target_percent(target=1.0)
+                # buy
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=self.target)
 
 
 # MACDWithATRStrategy is copied from backtrader/samples/macd-settings.py
@@ -128,7 +130,11 @@ class MACDWithATRStrategy(base.BaseStrategy):
 
         if not self.position:  # not in the market
             if self.mcross[0] > 0.0 > self.smadir:
-                self.order_target_percent(target=1.0)
+                # buy
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=self.target)
+
                 pdist = self.atr[0] * self.atr_dist
                 self.pstop = self.data.close[0] - pdist
 
@@ -136,7 +142,10 @@ class MACDWithATRStrategy(base.BaseStrategy):
             pclose = self.data.close[0]
 
             if pclose < self.pstop:
-                self.order_target_percent(target=0)  # stop met - get out
+                # sell
+                self.order_target_percent_with_log(
+                    data=self.data,
+                    target=0)  # stop met - get out
             else:
                 pdist = self.atr[0] * self.atr_dist
                 # Update only if greater than
