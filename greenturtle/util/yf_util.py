@@ -17,6 +17,8 @@
 
 import yfinance as yf
 
+from greenturtle.util import time_util
+
 
 def download_with_max_period(yahoo_code):
     """download the data with max period"""
@@ -43,6 +45,7 @@ def transform(df, yahoo_code):
     df.rename(columns={"Volume": "volume"}, inplace=True)
 
     # add datetime index as a column
+    df.index = df.index.map(lambda x: x.strftime(time_util.DEFAULT_FORMAT))
     df["datetime"] = df.index
 
     return df

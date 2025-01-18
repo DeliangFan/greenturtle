@@ -17,8 +17,6 @@
 
 import os
 
-import pandas as pd
-
 from greenturtle.util.constants import constants_future
 from greenturtle.util import yf_util
 
@@ -32,9 +30,12 @@ if __name__ == '__main__':
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    future_df = pd.DataFrame()
-
     for category_name, category_value in constants_future.FUTURE.items():
+
+        category_dir = os.path.join(OUTPUT_DIR, category_name)
+        if not os.path.exists(category_dir):
+            os.makedirs(category_dir)
+
         for name, future in category_value.items():
 
             # pylint: disable=invalid-name
@@ -46,7 +47,4 @@ if __name__ == '__main__':
             # add the future name and category
             df["name"] = name
             df["category"] = category_name
-
-            future_df = pd.concat([future_df, df])
-
-    future_df.to_csv(os.path.join(OUTPUT_DIR, "future_us.csv"))
+            df.to_csv(os.path.join(category_dir, f"{name}.csv"))
