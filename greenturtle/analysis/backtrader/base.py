@@ -80,8 +80,8 @@ class Analysis():
         # Set our desired cash start
         self.cerebro.broker.setcash(1000000.0)
 
-        # what's cheat on close
-        self.cerebro.broker.set_coc(True)
+        # Disable cheat on close
+        self.cerebro.broker.set_coc(False)
 
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
