@@ -180,7 +180,7 @@ class Analysis():
 
         # create the canvas
         _, ax1 = pyplot.subplots(figsize=(20, 12), dpi=200)
-        ax1.set_title("crypto profit", fontsize=30)
+        ax1.set_title("profit", fontsize=30)
         pyplot.grid(True, linestyle="--")
 
         ax1.plot(

@@ -19,6 +19,8 @@ from datetime import datetime
 import os
 import pandas as pd
 
+from greenturtle.util import time_util
+
 
 # columns of the file.
 cols = [
@@ -66,9 +68,9 @@ def load_data_from_files(directory):
     df = df.sort_index(ascending=True)
 
     # convert the time format from unix timestamp to %Y-%m-%d %H:%M:%S.
-    fmt = '%Y-%m-%d %H:%M:%S'
     df.index = df.index.map(
-        lambda x: datetime.utcfromtimestamp(x / 1000).strftime(fmt),
+        lambda x: datetime.utcfromtimestamp(
+            x / 1000).strftime(time_util.DEFAULT_FORMAT),
     )
     return df
 
