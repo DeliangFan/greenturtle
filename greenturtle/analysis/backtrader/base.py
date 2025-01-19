@@ -86,6 +86,14 @@ class Analysis():
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
 
+        # Initiate some analysis result
+        self.total_return = None
+        self.annual_return = None
+        self.max_draw_down = None
+        self.sharpe_ratio = None
+        self.total = None
+        self.won_ratio = None
+
     def add_strategy(self, strategy, *args, **kwargs):
         """add strategy to cerebro."""
         self.cerebro.addstrategy(strategy, *args, **kwargs)
@@ -112,22 +120,22 @@ class Analysis():
     def show_return(self, result):
         """analyze the return."""
         returns = result[0].analyzers.Returns.get_analysis()
-        total_return = math.exp(returns["rtot"]) * 100
-        annual_return = returns["rnorm"] * 100
-        logger.info("total return: %.1f%%", total_return)
-        logger.info("annual return: %.1f%%", annual_return)
+        self.total_return = math.exp(returns["rtot"]) * 100
+        self.annual_return = returns["rnorm"] * 100
+        logger.info("total return: %.1f%%", self.total_return)
+        logger.info("annual return: %.1f%%", self.annual_return)
 
     def show_max_draw_down(self, result):
         """analyze the max draw down."""
         draw_down = result[0].analyzers.DrawDown.get_analysis()
-        max_draw_down = draw_down["max"]["drawdown"]
-        logger.info("max draw down: %.1f%%", max_draw_down)
+        self.max_draw_down = draw_down["max"]["drawdown"]
+        logger.info("max draw down: %.1f%%", self.max_draw_down)
 
     def show_sharpe_ratio(self, result):
         """analyze the sharpe ratio."""
         sharpe = result[0].analyzers.SharpeRatio_A.get_analysis()
-        sharpe_ratio = sharpe["sharperatio"]
-        logger.info("sharpe ratio: %.3f", sharpe_ratio)
+        self.sharpe_ratio = sharpe["sharperatio"]
+        logger.info("sharpe ratio: %.3f", self.sharpe_ratio)
 
     def show_trade_analyzer(self, result):
         """analyze the trade."""
@@ -142,13 +150,13 @@ class Analysis():
         ):
             return
 
-        total = trade_analyzer["total"]["total"]
+        self.total = trade_analyzer["total"]["total"]
         net = trade_analyzer["pnl"]["net"]["total"]
         gross = trade_analyzer["pnl"]["gross"]["total"]
         comm = gross - net
 
         won_total = trade_analyzer["won"]["total"]
-        won_ratio = won_total * 1.0 / total
+        self.won_ratio = won_total * 1.0 / self.total
         won_profit_total = trade_analyzer["won"]["pnl"]["total"]
         won_profit_average = trade_analyzer["won"]["pnl"]["average"]
 
@@ -164,10 +172,10 @@ class Analysis():
             comm)
         logger.info(
             "\ntotal trade number: %d, won: %d, lost: %d, ratio: %.2f",
-            total,
+            self.total,
             won_total,
             lost_total,
-            won_ratio)
+            self.won_ratio)
         logger.info(
             "\nwon profit average: %.0f, lost profit average: %.0f",
             won_profit_average,
