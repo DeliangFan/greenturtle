@@ -13,22 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""some common functions for crypto experiments"""
+"""some common functions for us future experiments"""
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
 
 
-def get_crypto_data_from_csv_file(
+def get_us_future_data_from_csv_file(
         name,
-        dataname,
-        timeframe=bt.TimeFrame.Minutes):
+        filename,
+        timeframe=bt.TimeFrame.Minutes,
+        todate=None):
 
-    """get the crypto data from local csv file."""
+    """get the us future data from local csv file."""
+
     # pylint: disable=R0801
     data = btfeeds.GenericCSVData(
         name=name,
-        dataname=dataname,
+        dataname=filename,
         timeframe=timeframe,
         datatime=0,
         open=1,
@@ -37,7 +39,8 @@ def get_crypto_data_from_csv_file(
         close=4,
         volume=5,
         openinterest=None,
-        plot=False
+        plot=False,
+        todate=todate,
     )
 
     return data
