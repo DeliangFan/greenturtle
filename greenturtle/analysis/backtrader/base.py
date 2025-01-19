@@ -28,7 +28,7 @@ from greenturtle.util.logging import logging
 logger = logging.get_logger()
 
 
-def do_analysis(datas, strategy, *strategy_args, **strategy_kwargs):
+def do_analysis(datas, strategy, *strategy_args, plot=True, **strategy_kwargs):
     """analysis the performance according to the data and strategy."""
 
     # initiate the panda options.
@@ -42,7 +42,9 @@ def do_analysis(datas, strategy, *strategy_args, **strategy_kwargs):
 
     # show the result.
     result = analysis.run()
-    analysis.show(result)
+    analysis.show(result, plot=plot)
+
+    return analysis
 
 
 class Analysis():
@@ -199,7 +201,7 @@ class Analysis():
 
         pyplot.show()
 
-    def show(self, result):
+    def show(self, result, plot=True):
         """show the backtest result."""
         logger.info("\n*************** Overview *************")
 
@@ -211,7 +213,8 @@ class Analysis():
         self.show_sharpe_ratio(result)
         # show the trade analyzer
         self.show_trade_analyzer(result)
-        # plot the figures.
-        self.plot_figure(result)
 
-        self.cerebro.plot()
+        # plot the figures.
+        if plot:
+            self.plot_figure(result)
+            self.cerebro.plot()
