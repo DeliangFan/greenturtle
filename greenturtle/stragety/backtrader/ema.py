@@ -13,22 +13,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" EMA with Filter strategy for backtrader"""
+"""Collection of EMA strategies for backtrader"""
 
 from backtrader.indicators import MovAv
 from greenturtle.stragety.backtrader import base
 
 
-class EMAF(base.BaseStrategy):
+class EMA(base.BaseStrategy):
 
     """ EMA with Filter class strategy for backtrader"""
 
-    def __init__(self, fast_period=10, slow_period=100):
+    def __init__(self, fast_period=5, slow_period=16):
         super().__init__()
         self.fast_period = fast_period
         self.slow_period = slow_period
-        self.fast_ema = MovAv.Exponential(self.data, period=self.fast_period)
-        self.slow_ema = MovAv.Exponential(self.data, period=self.slow_period)
+        self.data_close = self.data.close
+        self.fast_ema = MovAv.Exponential(
+            self.data_close,
+            period=self.fast_period)
+        self.slow_ema = MovAv.Exponential(
+            self.data_close,
+            period=self.slow_period)
 
     def next(self):
         if self.order:

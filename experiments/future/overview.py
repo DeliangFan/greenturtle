@@ -28,6 +28,7 @@ from experiments.future import common
 
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output"
+SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT")
 
 # pylint: disable=line-too-long
 """
@@ -80,6 +81,8 @@ if __name__ == '__main__':
     for category_name, category_value in constants_future.FUTURE.items():
         category_dir = os.path.join(DATA_DIR, category_name)
         for name, future in category_value.items():
+            if name in SKIP_LIST:
+                continue
             # get the data
             filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")
             data = common.get_us_future_data_from_csv_file(
@@ -90,7 +93,7 @@ if __name__ == '__main__':
             datas = [(name, data)]
 
             # do analysis
-            ana = base.do_analysis(datas, macd.RefinedMACDStrategy, plot=False)
+            ana = base.do_analysis(datas, macd.MACDWithATRStrategy, plot=False)
 
             # construct the result and append it to the dataframe
             row = {
