@@ -28,7 +28,7 @@ class RefinedMACDStrategy(base.BaseStrategy):
         super().__init__()
 
         # pylint: disable=too-many-function-args,unexpected-keyword-arg
-        self.macd = bt.indicators.MACD(self.data,
+        self.macd = bt.indicators.MACD(self.data0,
                                        period_me1=period_me1,
                                        period_me2=period_me2,
                                        period_signal=period_signal)
@@ -51,14 +51,14 @@ class RefinedMACDStrategy(base.BaseStrategy):
             if diff < -0.05 * self.macd.signal[0]:
                 # sell
                 self.order_target_percent_with_log(
-                    data=self.data,
+                    data=self.data0,
                     target=0)
         # not in the market
         else:
             if diff > -0.01 * self.macd.signal[0]:
                 # buy
                 self.order_target_percent_with_log(
-                    data=self.data,
+                    data=self.data0,
                     target=self.target)
 
 
