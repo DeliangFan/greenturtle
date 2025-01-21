@@ -93,7 +93,7 @@ if __name__ == '__main__':
             datas = [(name, data)]
 
             # do analysis
-            ana = base.do_analysis(datas, macd.MACDWithATRStrategy, plot=False)
+            ana = base.do_analysis(datas, macd.RefinedMACDStrategy, plot=False)
 
             # construct the result and append it to the dataframe
             row = {

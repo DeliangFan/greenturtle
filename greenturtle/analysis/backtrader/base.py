@@ -51,7 +51,7 @@ class Analysis():
 
     """Basic analysis class for backtrader."""
 
-    def __init__(self):
+    def __init__(self, commission=0.001, slippage=0.001):
         self.cerebro = bt.Cerebro()
 
         # add analyzer
@@ -76,8 +76,8 @@ class Analysis():
             _name="TradeAnalyzer")
 
         # Set the commission
-        self.cerebro.broker.setcommission(commission=0.001)
-        self.cerebro.broker.set_slippage_perc(perc=0.001)
+        self.cerebro.broker.setcommission(commission=commission)
+        self.cerebro.broker.set_slippage_perc(perc=slippage)
 
         # Set our desired cash start
         self.cerebro.broker.setcash(1000000.0)
