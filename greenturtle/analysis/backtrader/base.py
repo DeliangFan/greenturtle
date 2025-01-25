@@ -28,14 +28,20 @@ from greenturtle.util.logging import logging
 logger = logging.get_logger()
 
 
-def do_analysis(datas, strategy, *strategy_args, plot=True, **strategy_kwargs):
+def do_analysis(datas,
+                strategy,
+                *strategy_args,
+                plot=True,
+                commission=0.001,
+                slippage=0.001,
+                **strategy_kwargs):
     """analysis the performance according to the data and strategy."""
 
     # initiate the panda options.
     panda_util.init_pandas()
 
     # setting the strategy and data.
-    analysis = Analysis()
+    analysis = Analysis(commission=commission, slippage=slippage)
     analysis.add_strategy(strategy, *strategy_args, **strategy_kwargs)
     for name, data in datas:
         analysis.add_data(data, name=name)

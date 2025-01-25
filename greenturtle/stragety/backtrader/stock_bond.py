@@ -44,14 +44,14 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
         # Initiate the stock.
         stock_position = self.getpositionbyname(constants_stock.STOCK)
         if stock_position.size == 0:
-            self.self.order_target_percent_with_log(
+            self.order_target_percent_with_log(
                 data=constants_stock.STOCK,
                 target=self.stock_ratio)
 
         # Initiate the stock.
         bond_position = self.getpositionbyname(constants_stock.BOND)
         if bond_position.size == 0:
-            self.self.order_target_percent_with_log(
+            self.order_target_percent_with_log(
                 data=constants_stock.BOND,
                 target=self.bond_ratio)
 

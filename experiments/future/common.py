@@ -23,6 +23,7 @@ def get_us_future_data_from_csv_file(
         name,
         filename,
         timeframe=bt.TimeFrame.Minutes,
+        fromdate=None,
         todate=None):
 
     """get the us future data from local csv file."""
@@ -40,6 +41,7 @@ def get_us_future_data_from_csv_file(
         volume=5,
         openinterest=None,
         plot=False,
+        fromdate=fromdate,
         todate=todate,
     )
 
