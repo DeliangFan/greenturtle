@@ -32,26 +32,23 @@ class RSRSStrategy(base.BaseStrategy):
 
     def __init__(self, period=18, upper=1.1, lower=0.7):
         super().__init__()
-        self.period = period
-        # according to the experiment in btc, the performance depends a lot
-        # on the upper and lower parameters.
-        # pylint: disable=unexpected-keyword-arg
-        self.rsrs = rsrs.RSRS(period=period)
+
         self.upper = upper
         self.lower = lower
+        self.rsrses = {}
+        # according to the experiment in btc, the performance depends a lot
+        # on the upper and lower parameters.
+        for name in self.names:
+            data = self.symbols_data[name]
+            # pylint: disable=unexpected-keyword-arg
+            self.rsrses[name] = rsrs.RSRS(data=data, period=period)
 
-    def next(self):
-        if self.order or self.rsrs[0] <= -1:
-            return
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        r = self.rsrses[name]
+        return r[0] >= self.upper
 
-        if self.position:
-            if self.rsrs[0] <= self.lower:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=0)
-        # not in the market
-        else:
-            if self.rsrs[0] >= self.upper:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=self.target)
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        r = self.rsrses[name]
+        return r[0] <= self.lower

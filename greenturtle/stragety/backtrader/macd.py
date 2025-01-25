@@ -16,50 +16,57 @@
 """ MACD class strategy for backtrader"""
 
 import backtrader as bt
+
 from greenturtle.stragety.backtrader import base
 
 
 class RefinedMACDStrategy(base.BaseStrategy):
 
-    """ MACD class strategy for backtrader"""
+    """Multi value class strategy for backtrader"""
 
-    # Standard MACD Parameters
-    def __init__(self, period_me1=12, period_me2=26, period_signal=9):
+    def __init__(self,
+                 period_me1=12,
+                 period_me2=26,
+                 period_signal=9,
+                 atr_period=14):
+
         super().__init__()
+        self.macds = {}
+        self.atrs = {}
+        for name in self.names:
+            data = self.getdatabyname(name)
+            # pylint: disable=too-many-function-args,unexpected-keyword-arg
+            self.macds[name] = bt.indicators.MACD(
+                                        data,
+                                        period_me1=period_me1,
+                                        period_me2=period_me2,
+                                        period_signal=period_signal)
 
-        # pylint: disable=too-many-function-args,unexpected-keyword-arg
-        self.macd = bt.indicators.MACD(self.data0,
-                                       period_me1=period_me1,
-                                       period_me2=period_me2,
-                                       period_signal=period_signal)
+            # Set the stop price
+            self.atrs[name] = bt.indicators.ATR(data, period=atr_period)
 
-    def next(self):
-        if self.order:
-            return
+    # valina macd strategy
+    #
+    # if self.position and self.mcross[0] < 0:
+    #     self.order_target_percent_with_log(data=self.data, target=0)
+    # elif not self.position and self.mcross[0] > 0:
+    #     self.order_target_percent_with_log(data=self.data, target=1.0)
+    #
+    # The following optimized strategy works better in both btc and eth
+    # in the market
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        macd = self.macds[name]
+        # TODO(refine the code)
+        diff = macd.macd[0] - macd.signal[0]
+        return diff < -0.05 * macd.signal[0]
 
-        # valina macd strategy
-        #
-        # if self.position and self.mcross[0] < 0:
-        #     self.order_target_percent_with_log(data=self.data, target=0)
-        # elif not self.position and self.mcross[0] > 0:
-        #     self.order_target_percent_with_log(data=self.data, target=1.0)
-        #
-        # The following optimized strategy works better in both btc and eth
-        # in the market
-        diff = self.macd.macd[0] - self.macd.signal[0]
-        if self.position:
-            if diff < -0.05 * self.macd.signal[0]:
-                # sell
-                self.order_target_percent_with_log(
-                    data=self.data0,
-                    target=0)
-        # not in the market
-        else:
-            if diff > -0.01 * self.macd.signal[0]:
-                # buy
-                self.order_target_percent_with_log(
-                    data=self.data0,
-                    target=self.target)
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        macd = self.macds[name]
+        # TODO(refine the code)
+        diff = macd.macd[0] - macd.signal[0]
+        return diff > -0.01 * macd.signal[0]
 
 
 # MACDWithATRStrategy is copied from backtrader/samples/macd-settings.py
@@ -103,50 +110,69 @@ class MACDWithATRStrategy(base.BaseStrategy):
                  atr_dist=3.0,
                  sma_period=30,
                  dir_period=10):
+
         super().__init__()
+
         self.atr_dist = atr_dist
-        self.pstop = 0
+        self.pstops = {}
+        self.macds = {}
+        self.mcrosses = {}
+        self.atrs = {}
+        self.smas = {}
+        self.smadirs = {}
 
-        # pylint: disable=unexpected-keyword-arg,too-many-function-args
-        self.macd = bt.indicators.MACD(self.data,
-                                       period_me1=period_me1,
-                                       period_me2=period_me2,
-                                       period_signal=period_signal)
+        for name in self.names:
+            self.pstops[name] = 0
+            data = self.getdatabyname(name)
 
-        # Cross of macd.macd and macd.signal
-        # pylint: disable=unexpected-keyword-arg,too-many-function-args
-        self.mcross = bt.indicators.CrossOver(self.macd.macd, self.macd.signal)
+            # pylint: disable=unexpected-keyword-arg,too-many-function-args
+            macd = bt.indicators.MACD(
+                data,
+                period_me1=period_me1,
+                period_me2=period_me2,
+                period_signal=period_signal)
 
-        # To set the stop price
-        self.atr = bt.indicators.ATR(self.data, period=atr_period)
+            self.macds[name] = macd
 
-        # Control market trend
-        self.sma = bt.indicators.SMA(self.data, period=sma_period)
-        self.smadir = self.sma - self.sma(-dir_period)
+            # Cross of macd.macd and macd.signal
+            # pylint: disable=unexpected-keyword-arg,too-many-function-args
+            self.mcrosses[name] = bt.indicators.CrossOver(
+                macd.macd,
+                macd.signal)
 
-    def next(self):
-        if self.order:
-            return  # pending order execution
+            # To set the stop price
+            self.atrs[name] = bt.indicators.ATR(data, period=atr_period)
 
-        if not self.position:  # not in the market
-            if self.mcross[0] > 0.0 > self.smadir:
-                # buy
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=self.target)
+            # Control market trend
+            sma = bt.indicators.SMA(data, period=sma_period)
+            self.smas[name] = sma
+            self.smadirs[name] = sma - sma(-dir_period)
 
-                pdist = self.atr[0] * self.atr_dist
-                self.pstop = self.data.close[0] - pdist
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
 
-        else:  # in the market
-            pclose = self.data.close[0]
+        mcross = self.mcrosses[name]
+        smadir = self.smadirs[name]
+        data = self.symbols_data[name]
+        atr = self.atrs[name]
 
-            if pclose < self.pstop:
-                # sell
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=0)  # stop met - get out
-            else:
-                pdist = self.atr[0] * self.atr_dist
-                # Update only if greater than
-                self.pstop = max(self.pstop, pclose - pdist)
+        if mcross[0] > 0.0 > smadir:
+            pdist = atr[0] * self.atr_dist
+            self.pstops[name] = data.close[0] - pdist
+            return True
+        return False
+
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+
+        data = self.symbols_data[name]
+        atr = self.atrs[name]
+        pstop = self.pstops[name]
+        pclose = data.close[0]
+
+        if pstop > pclose:
+            return True
+
+        pdist = atr[0] * self.atr_dist
+        self.pstops[name] = max(pstop, pclose - pdist)
+        return False

@@ -25,30 +25,27 @@ class EMA(base.BaseStrategy):
 
     def __init__(self, fast_period=5, slow_period=16):
         super().__init__()
-        self.fast_period = fast_period
-        self.slow_period = slow_period
-        self.data_close = self.data.close
-        self.fast_ema = MovAv.Exponential(
-            self.data_close,
-            period=self.fast_period)
-        self.slow_ema = MovAv.Exponential(
-            self.data_close,
-            period=self.slow_period)
 
-    def next(self):
-        if self.order:
-            return
+        self.fast_emas = {}
+        self.slow_emas = {}
+        for name in self.names:
+            data = self.getdatabyname(name)
+            self.fast_emas[name] = MovAv.Exponential(
+                data,
+                period=fast_period)
 
-        if self.position:
-            if self.fast_ema[0] < self.slow_ema[0]:
-                # sell
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=0)
-        # not in the market
-        else:
-            if self.fast_ema[0] > self.slow_ema[0]:
-                # buy
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=self.target)
+            self.slow_emas[name] = MovAv.Exponential(
+                data,
+                period=slow_period)
+
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+        return fast_ema[0] > slow_ema[0]
+
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+        return fast_ema[0] < slow_ema[0]

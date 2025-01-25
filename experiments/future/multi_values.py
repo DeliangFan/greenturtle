@@ -21,7 +21,7 @@ import os
 import backtrader as bt
 
 from greenturtle.analysis.backtrader import base
-from greenturtle.stragety.backtrader import multi_values
+from greenturtle.stragety.backtrader import mim
 from greenturtle.util.constants import constants_future
 from experiments.future import common
 
@@ -59,6 +59,6 @@ if __name__ == '__main__':
     # after 20 years.
     base.do_analysis(
         datas,
-        multi_values.MultiValueStrategy,
+        mim.MIMStrategy,
         commission=0.001,
         plot=True)

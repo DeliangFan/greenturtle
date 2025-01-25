@@ -23,6 +23,8 @@ from greenturtle.util.logging import logging
 
 
 logger = logging.get_logger()
+MAX_PORTFOLIO_PER_SYMBOL = 0.95
+TOTAL_PORTFOLIO = 0.95
 
 
 class BaseStrategy(bt.Strategy):
@@ -32,7 +34,12 @@ class BaseStrategy(bt.Strategy):
     def __init__(self):
         super().__init__()
         self.order = None
-        self.target = 0.95
+        self.target = TOTAL_PORTFOLIO
+        self.symbols_data = {}
+        self.names = self.getdatanames()
+        for name in self.names:
+            data = self.getdatabyname(name)
+            self.symbols_data[name] = data
 
     def log(self, txt, dt=None):
         """ Logging function fot this strategy."""
@@ -44,14 +51,118 @@ class BaseStrategy(bt.Strategy):
         self.order = None
 
     def next(self):
+        """
+        1. get the hold position
+        2. compute the position to sell
+        3. compute the position to buy
+        4. compute the desired position list
+        5. compute the desired portfolio
+        6. execute
+        """
         if self.order:
             return
 
-        # not in the market
-        if not self.position:
-            self.order_target_percent_with_log(
-                data=self.data,
-                target=self.target)
+        symbols = self.get_symbols_within_positions()
+
+        bought_symbols = self.symbols_to_be_bought()
+        desired_symbols = symbols.union(bought_symbols)
+
+        sold_sysmbols = self.symbols_to_be_sold()
+        desired_symbols = desired_symbols.difference(sold_sysmbols)
+
+        if symbols != desired_symbols:
+            self.log(
+                f"symbols\ncurrent: {sorted(list(symbols))}" +
+                f"\ndesired: {sorted(list(desired_symbols))}" +
+                f"\nbuy: {sorted(list(bought_symbols))}," +
+                f"\nsell: {sorted(list(sold_sysmbols))},")
+
+            desired_portfolios = self.compute_desired_portfolios(
+                desired_symbols)
+            self.execute(sold_sysmbols, desired_portfolios)
+
+    def get_symbols_within_positions(self):
+        """symbols in the positions."""
+        symbols = set()
+
+        positions = self.getpositions()
+        for k in positions:
+            position = positions[k]
+            if position.size != 0:
+                # pylint: disable=protected-access
+                symbols.add(k._name)
+
+        return symbols
+
+    def symbols_to_be_sold(self):
+        """symbols in the position which should be sold."""
+        symbols = set()
+
+        positions = self.get_symbols_within_positions()
+        for name in positions:
+            if self.should_sell(name):
+                symbols.add(name)
+
+        return symbols
+
+    def symbols_to_be_bought(self):
+        """symbols not in the position which should be bought."""
+
+        symbols = set()
+
+        positions = self.get_symbols_within_positions()
+        for name in self.names:
+            if name in positions:
+                continue
+            if self.should_buy(name):
+                symbols.add(name)
+
+        return symbols
+
+    def compute_desired_portfolios(self, symbols):
+        """
+        compute the desired portfolio
+        1. no symbols will more than 25%.
+        """
+
+        portfolios = {}
+        for name in symbols:
+            portfolio = min(
+                TOTAL_PORTFOLIO / len(symbols),
+                MAX_PORTFOLIO_PER_SYMBOL)
+            portfolios[name] = portfolio
+
+        return portfolios
+
+    def execute(self, sold_sysmbols, desired_portfolios):
+        """execute the orders."""
+
+        total_value = self.broker.get_value() * 1.0
+
+        # sell the unwanted symbols first.
+        for name in sold_sysmbols:
+            position = self.getpositionbyname(name)
+            if position.size != 0:
+                self.order_target_percent_with_log(name, 0)
+
+        # trade the symbols with position more than desired
+        positions = self.getpositions()
+        for k in positions:
+            # pylint: disable=protected-access
+            name = k._name
+            if name in desired_portfolios:
+                position = positions[k]
+                position_value = position.size * position.price
+                current_portfolio = position_value / total_value
+                desired_portfolio = desired_portfolios[name]
+                if current_portfolio > desired_portfolio:
+                    self.order_target_percent_with_log(name, desired_portfolio)
+                    desired_portfolios.pop(name)
+
+        # trade the remaining symbols
+        for name in desired_portfolios:
+            portfolio = desired_portfolios[name]
+            self.order_target_percent_with_log(name, portfolio)
 
     def order_target_percent_with_log(self, data=None, target=0.0):
         """
@@ -113,3 +224,11 @@ class BaseStrategy(bt.Strategy):
             self.log('Order Canceled/Margin/Rejected')
 
         self.order = None
+
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        raise NotImplementedError
+
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        raise NotImplementedError
