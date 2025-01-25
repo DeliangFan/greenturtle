@@ -23,6 +23,8 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 
+MAX_PORTFOLIO_PER_SYMBOL = 0.25
+
 
 class MultiValueStrategy(base.BaseStrategy):
 
@@ -103,8 +105,10 @@ class MultiValueStrategy(base.BaseStrategy):
 
         positions = self.getpositions()
         for k in positions:
-            # pylint: disable=protected-access
-            symbols.add(k._name)
+            position = positions[k]
+            if position.size != 0:
+                # pylint: disable=protected-access
+                symbols.add(k._name)
 
         return symbols
 
@@ -141,7 +145,7 @@ class MultiValueStrategy(base.BaseStrategy):
 
         portfolios = {}
         for name in symbols:
-            portfolio = min(0.95 / len(symbols), 0.25)
+            portfolio = min(0.95 / len(symbols), MAX_PORTFOLIO_PER_SYMBOL)
             portfolios[name] = portfolio
 
         return portfolios
@@ -153,7 +157,9 @@ class MultiValueStrategy(base.BaseStrategy):
 
         # sell the unwanted symbols first.
         for name in sold_sysmbols:
-            self.order_target_percent_with_log(name, 0)
+            position = self.getpositionbyname(name)
+            if position.size != 0:
+                self.order_target_percent_with_log(name, 0)
 
         # trade the symbols with position more than desired
         positions = self.getpositions()

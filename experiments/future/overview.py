@@ -80,6 +80,7 @@ FYI, the RefinedMACDStrategy works pretty good in most of the future
 if __name__ == '__main__':
 
     df = pd.DataFrame()
+    fromdate = datetime.datetime(2004, 1, 1)
     todate = x = datetime.datetime(2024, 12, 31)
     for category_name, category_value in constants_future.FUTURE.items():
         category_dir = os.path.join(DATA_DIR, category_name)
@@ -92,6 +93,7 @@ if __name__ == '__main__':
                 name,
                 filename,
                 bt.TimeFrame.Days,
+                fromdate=fromdate,
                 todate=todate)
             datas = [(name, data)]
 
@@ -113,7 +115,7 @@ if __name__ == '__main__':
             new_df = pd.DataFrame(row)
             df = pd.concat([df, new_df])
 
-    logger.info(df.to_string())
+    logger.info("\n%s", df.to_string())
 
     # TODO(wsfdl), add corelation analysis for different future within
     # same strategy
