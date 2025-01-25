@@ -24,30 +24,22 @@ class RSIStrategy(base.BaseStrategy):
 
     """ RSI class strategy for backtrader"""
 
-    params = (
-        # Standard MIM Parameters
-        ('period', 14),
-    )
-
     def __init__(self, rsi_period=14, upper=70, lower=30):
         super().__init__()
-        # Keep a reference to the "close" line in the data[0] dataseries
+
         self.upper = upper
         self.lower = lower
-        self.rsi = bt.indicators.RSI(period=rsi_period)
+        self.rsis = {}
+        for name in self.names:
+            data = self.symbols_data[name]
+            self.rsis[name] = bt.indicators.RSI(data, period=rsi_period)
 
-    def next(self):
-        if self.order:
-            return
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        rsi = self.rsis[name]
+        return rsi[0] < self.lower
 
-        if self.position:
-            if self.rsi[0] > self.upper:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=0)
-        # not in the market
-        else:
-            if self.rsi[0] < self.lower:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=self.target)
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        rsi = self.rsis[name]
+        return rsi[0] > self.upper

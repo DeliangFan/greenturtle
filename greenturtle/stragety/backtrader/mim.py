@@ -23,27 +23,21 @@ class MIMStrategy(base.BaseStrategy):
 
     """ MIM class strategy for backtrader"""
 
-    params = (
-        # Standard MIM Parameters
-        ('period', 100),
-    )
-
-    def __init__(self):
+    def __init__(self, period=100):
         super().__init__()
-        self.movav = MovAv.Exponential(self.data, period=self.p.period)
+        self.movs = {}
+        for name in self.names:
+            data = self.getdatabyname(name)
+            self.movs[name] = MovAv.Exponential(data, period=period)
 
-    def next(self):
-        if self.order:
-            return
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        mov = self.movs[name]
+        data = self.symbols_data[name]
+        return data[0] > mov[0]
 
-        if self.position:
-            if self.data[0] < self.movav[0]:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=0)
-        # not in the market
-        else:
-            if self.data[0] > self.movav[0]:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=self.target)
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        mov = self.movs[name]
+        data = self.symbols_data[name]
+        return data[0] < mov[0]

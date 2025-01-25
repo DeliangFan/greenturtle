@@ -80,3 +80,11 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
             self.order_target_percent_with_log(
                 data=constants_stock.STOCK,
                 target=self.stock_ratio)
+
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        raise NotImplementedError
+
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        raise NotImplementedError

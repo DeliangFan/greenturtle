@@ -29,26 +29,26 @@ class DonchianChannel(base.BaseStrategy):
 
     def __init__(self, short_period=25, long_period=50):
         super().__init__()
-        self.short_period = short_period
-        self.long_period = long_period
-        self.data_close = self.data.close
-        self.long_highest = Highest(self.data.high, period=self.long_period)
-        self.long_lowest = Lowest(self.data.low, period=self.long_period)
-        self.short_highest = Highest(self.data.high, period=self.short_period)
-        self.short_lowest = Lowest(self.data.low, period=self.short_period)
 
-    def next(self):
-        if self.order:
-            return
+        self.long_highests = {}
+        self.long_lowests = {}
+        self.short_highests = {}
+        self.short_lowests = {}
+        for name in self.names:
+            data = self.symbols_data[name]
+            self.long_highests[name] = Highest(data.high, period=long_period)
+            self.long_lowests[name] = Lowest(data.low, period=long_period)
+            self.short_highests[name] = Highest(data.high, period=short_period)
+            self.short_lowests[name] = Lowest(data.low, period=short_period)
 
-        if self.position:
-            if self.data_close[0] <= self.short_lowest[-1]:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=0)
-        # not in the market
-        else:
-            if self.data_close[0] >= self.long_highest[-1]:
-                self.order_target_percent_with_log(
-                    data=self.data,
-                    target=self.target)
+    def should_buy(self, name):
+        """determine whether a position should be bought or not."""
+        data = self.symbols_data[name]
+        long_highest = self.long_highests[name]
+        return data.close[0] >= long_highest[-1]
+
+    def should_sell(self, name):
+        """determine whether a position should be sold or not."""
+        data = self.symbols_data[name]
+        short_lowest = self.short_lowests[name]
+        return data.close[0] <= short_lowest[-1]
