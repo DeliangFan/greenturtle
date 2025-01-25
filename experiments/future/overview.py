@@ -24,8 +24,11 @@ import pandas as pd
 from greenturtle.analysis.backtrader import base
 from greenturtle.stragety.backtrader import macd
 from greenturtle.util.constants import constants_future
+from greenturtle.util.logging import logging
 from experiments.future import common
 
+
+logger = logging.get_logger()
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output"
 SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT")
@@ -110,4 +113,7 @@ if __name__ == '__main__':
             new_df = pd.DataFrame(row)
             df = pd.concat([df, new_df])
 
-    print(df.to_string())
+    logger.info(df.to_string())
+
+    # TODO(wsfdl), add corelation analysis for different future within
+    # same strategy
