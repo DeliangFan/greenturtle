@@ -74,10 +74,10 @@ class MultiValueStrategy(base.BaseStrategy):
 
         if symbols != desired_symbols:
             self.log(
-                f"current symbols: {symbols}," +
-                f"desired symbols: {desired_symbols}" +
-                f"symbols to be bought: {bought_symbols}," +
-                f"symbols to be sold: {sold_sysmbols},")
+                f"symbols\ncurrent: {sorted(list(symbols))}" +
+                f"\ndesired: {sorted(list(desired_symbols))}" +
+                f"\nbuy: {sorted(list(bought_symbols))}," +
+                f"\nsell: {sorted(list(sold_sysmbols))},")
 
             desired_portfolios = self.compute_desired_portfolios(
                 desired_symbols)

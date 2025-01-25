@@ -65,8 +65,11 @@ class BaseStrategy(bt.Strategy):
         elif data is None:
             data = self.data
 
+        # pylint: disable=protected-access
+        name = data._name
         close = data.close[0]
-        self.log(f"try to order {target} percent with expected price {close}")
+        self.log(f"try to order {name} {target*100:.3f}%" +
+                 f" with expected price {close:.3f}")
 
         self.order_target_percent(data=data, target=target)
 
@@ -86,21 +89,25 @@ class BaseStrategy(bt.Strategy):
 
             if order.isbuy():
                 self.log(
-                    f"BUY EXECUTED, name: {name}, price: {price:.2f}, " +
+                    f"BUY EXECUTED, name: {name}, price: {price:.3f}, " +
                     f"size: {size:.0f}, value: {value:.2f}, comm: {comm:.2f}"
                 )
             elif order.issell():
                 self.log(
-                    f"SELL EXECUTED, name: {name}, price: {price:.2f}, " +
+                    f"SELL EXECUTED, name: {name}, price: {price:.3f}, " +
                     f"size: {size:.0f}, value: {value:.2f}, comm: {comm:.2f}"
                 )
 
             total_value = self.broker.get_value()
-            position_size = self.position.size
-            position_price = self.position.price
+            position = self.getpositionbyname(name)
+            position_size = position.size
+            position_price = position.price
+            position_value = position_price * position_size
             self.log(
-                f"total value: {total_value}, position size: {position_size}" +
-                f", position price: {position_price}")
+                f"total value: {total_value:.2f}, " +
+                f"position value {position_value:.2f}, " +
+                f"size: {position_size} " +
+                f"price: {position_price:.3f}")
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log('Order Canceled/Margin/Rejected')

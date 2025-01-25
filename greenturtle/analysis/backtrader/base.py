@@ -133,6 +133,11 @@ class Analysis():
         logger.info("total return: %.1f%%", self.total_return)
         logger.info("annual return: %.1f%%", self.annual_return)
 
+        years_return = result[0].analyzers.AnnualReturn.get_analysis()
+        for year in years_return:
+            r = years_return[year] * 100
+            logger.info("%d return: %.2f%%", year, r)
+
     def show_max_draw_down(self, result):
         """analyze the max draw down."""
         draw_down = result[0].analyzers.DrawDown.get_analysis()
