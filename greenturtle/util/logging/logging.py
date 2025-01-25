@@ -42,7 +42,8 @@ def init_logger():
     if not os.path.exists(LOGGER_PATH):
         os.mkdir(LOGGER_PATH)
 
-    file_name = get_log_file_name()
+    suffix = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    file_name = get_log_file_name(suffix)
     file_handler = logging.FileHandler(file_name)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -54,9 +55,8 @@ def init_logger():
     logger.addHandler(console_handler)
 
 
-def get_log_file_name():
+def get_log_file_name(suffix):
     """get the log file name according to the path and current time."""
-    suffix = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     name = f"{LOGGER_PATH}/{LOGGER_NAME}-{suffix}.log"
     return name
 
