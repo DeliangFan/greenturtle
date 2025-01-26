@@ -40,8 +40,8 @@ class RSRSStrategy(base.BaseStrategy):
         # on the upper and lower parameters.
         for name in self.names:
             data = self.symbols_data[name]
-            # pylint: disable=unexpected-keyword-arg
-            self.rsrses[name] = rsrs.RSRS(data=data, period=period)
+            # pylint: disable=unexpected-keyword-arg,too-many-function-args
+            self.rsrses[name] = rsrs.RSRS(data, period=period)
 
     def should_buy(self, name):
         """determine whether a position should be bought or not."""
