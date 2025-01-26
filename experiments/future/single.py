@@ -20,7 +20,7 @@ import os
 
 import backtrader as bt
 
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import macd
 from experiments.future import common
 
@@ -45,4 +45,4 @@ if __name__ == '__main__':
     datas = [(NAME, data)]
 
     # do analysis
-    base.do_analysis(datas, macd.RefinedMACDStrategy, plot=True)
+    simulator.do_simulate(datas, macd.RefinedMACDStrategy, plot=True)

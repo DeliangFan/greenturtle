@@ -28,7 +28,7 @@ from greenturtle.util.logging import logging
 logger = logging.get_logger()
 
 
-def do_analysis(datas,
+def do_simulate(datas,
                 strategy,
                 *strategy_args,
                 plot=True,
@@ -41,7 +41,7 @@ def do_analysis(datas,
     panda_util.init_pandas()
 
     # setting the strategy and data.
-    analysis = Analysis(commission=commission, slippage=slippage)
+    analysis = Simulator(commission=commission, slippage=slippage)
     analysis.add_strategy(strategy, *strategy_args, **strategy_kwargs)
     for name, data in datas:
         analysis.add_data(data, name=name)
@@ -53,7 +53,7 @@ def do_analysis(datas,
     return analysis
 
 
-class Analysis():
+class Simulator:
 
     """Basic analysis class for backtrader."""
 

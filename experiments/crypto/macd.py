@@ -17,7 +17,7 @@
 
 import backtrader as bt
 
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import macd
 from experiments.crypto import common
 
@@ -32,4 +32,4 @@ if __name__ == '__main__':
         DATA_NAME,
         bt.TimeFrame.Days)
     datas = [(CRYPTO_NAME, data)]
-    base.do_analysis(datas, macd.RefinedMACDStrategy)
+    simulator.do_simulate(datas, macd.RefinedMACDStrategy)
