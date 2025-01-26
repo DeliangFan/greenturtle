@@ -20,7 +20,7 @@ import os
 
 import backtrader as bt
 
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import mim
 from greenturtle.util.constants import constants_future
 from experiments.future import common
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # do analysis
     # TODO(fixme), why the benchmark looks so good as if I would be very rich
     # after 20 years.
-    base.do_analysis(
+    simulator.do_simulate(
         datas,
         mim.MIMStrategy,
         commission=0.001,

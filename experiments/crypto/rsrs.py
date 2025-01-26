@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import rsrs
 from greenturtle.util.logging import logging
 from experiments.crypto import common
@@ -82,4 +82,4 @@ if __name__ == '__main__':
 
     lower = rsrs_series.mean() - 1 * rsrs_series.std()
     upper = rsrs_series.mean() + 1.3 * rsrs_series.std()
-    base.do_analysis(datas, rsrs.RSRSStrategy, lower=lower, upper=upper)
+    simulator.do_simulate(datas, rsrs.RSRSStrategy, lower=lower, upper=upper)

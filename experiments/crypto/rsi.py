@@ -17,7 +17,7 @@
 
 import backtrader as bt
 
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import rsi
 from experiments.crypto import common
 
@@ -32,4 +32,4 @@ if __name__ == '__main__':
         DATA_NAME,
         bt.TimeFrame.Days)
     datas = [("btc", data)]
-    base.do_analysis(datas, rsi.RSIStrategy)
+    simulator.do_simulate(datas, rsi.RSIStrategy)

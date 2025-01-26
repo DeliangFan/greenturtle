@@ -16,7 +16,7 @@
 """Analysis the profit by combining stock and bond."""
 
 from greenturtle.stragety.backtrader import stock_bond
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.util.constants import constants_stock
 from experiments.stock import common
 
@@ -35,4 +35,4 @@ if __name__ == '__main__':
          ),
     ]
 
-    base.do_analysis(datas, stock_bond.BalancedStockAndBondStrategy)
+    simulator.do_simulate(datas, stock_bond.BalancedStockAndBondStrategy)

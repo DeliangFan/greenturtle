@@ -21,7 +21,7 @@ import os
 import backtrader as bt
 import pandas as pd
 
-from greenturtle.analysis.backtrader import base
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import macd
 from greenturtle.util.constants import constants_future
 from greenturtle.util.logging import logging
@@ -98,18 +98,21 @@ if __name__ == '__main__':
             datas = [(name, data)]
 
             # do analysis
-            ana = base.do_analysis(datas, macd.RefinedMACDStrategy, plot=False)
+            s = simulator.do_simulate(
+                datas,
+                macd.RefinedMACDStrategy,
+                plot=False)
 
             # construct the result and append it to the dataframe
             row = {
                 "name": [name],
                 "category": [category_name],
-                "total_return": [ana.total_return],
-                "annual_return": [ana.annual_return],
-                "sharpe_ratio": [ana.sharpe_ratio],
-                "max_draw_down": [ana.max_draw_down],
-                "total_trade": [ana.total],
-                "won_ratio": [ana.won_ratio],
+                "total_return": [s.total_return],
+                "annual_return": [s.annual_return],
+                "sharpe_ratio": [s.sharpe_ratio],
+                "max_draw_down": [s.max_draw_down],
+                "total_trade": [s.total],
+                "won_ratio": [s.won_ratio],
             }
 
             new_df = pd.DataFrame(row)

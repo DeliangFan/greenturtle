@@ -21,7 +21,7 @@ import pandas as pd
 import plotly.express as px
 import yfinance as yf
 
-from greenturtle.analysis.backtrader import base as base_analysis
+from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import base as base_strategy
 from greenturtle.util import panda_util
 from greenturtle.util import yf_util
@@ -216,4 +216,4 @@ def do_analysis_ticker(ticker, start_date=None, end_date=None):
         )
     ]
 
-    base_analysis.do_analysis(datas, base_strategy.BaseStrategy)
+    simulator.do_simulate(datas, base_strategy.BaseStrategy)
