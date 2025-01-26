@@ -18,9 +18,11 @@
 import math
 
 import backtrader as bt
+from backtrader import analyzers
 from matplotlib import pyplot
 import pandas as pd
 
+from greenturtle.analyzers.backtrader import position_pnl
 from greenturtle.util import panda_util
 from greenturtle.util.logging import logging
 
@@ -63,27 +65,30 @@ class Simulator():
 
         # add analyzer
         self.cerebro.addanalyzer(
-            bt.analyzers.AnnualReturn,
+            analyzers.AnnualReturn,
             _name="AnnualReturn")
         self.cerebro.addanalyzer(
-            bt.analyzers.TimeReturn,
+            analyzers.TimeReturn,
             _name="TimeReturn")
         self.cerebro.addanalyzer(
-            bt.analyzers.Returns,
+            analyzers.Returns,
             _name="Returns",
             tann=252)
         self.cerebro.addanalyzer(
-            bt.analyzers.DrawDown,
+            analyzers.DrawDown,
             _name="DrawDown")
         self.cerebro.addanalyzer(
-            bt.analyzers.SharpeRatio_A,
+            analyzers.SharpeRatio_A,
             _name="SharpeRatio_A")
         self.cerebro.addanalyzer(
-            bt.analyzers.TradeAnalyzer,
+            analyzers.TradeAnalyzer,
             _name="TradeAnalyzer")
         self.cerebro.addanalyzer(
-            bt.analyzers.GrossLeverage,
+            analyzers.GrossLeverage,
             _name="GrossLeverage")
+        self.cerebro.addanalyzer(
+            position_pnl.PositionPNL,
+            _name="PositionPNL")
 
         # Set the commission
         self.cerebro.broker.setcommission(commission=commission)
@@ -208,6 +213,24 @@ class Simulator():
             won_profit_average,
             lost_profit_average)
 
+    def show_position_pnl(self, result):
+        """show profit and lost for all positions."""
+
+        message = ""
+        analysis = result[0].analyzers.PositionPNL.get_analysis()
+
+        for name in analysis:
+            pln = analysis[name]
+            net = pln["net"]
+            profit = pln["profit"]
+            lost = pln["lost"]
+            comm = pln["gross"] - pln["net"]
+            count = pln["count"]
+            message += f"\n{name}, net: {net:.0f}, profit: {profit:.0f}, " + \
+                f"lost: {lost:.0f}, comm: {comm:.0f}, trader number: {count}"
+
+        logger.info(message)
+
     def plot_figure(self, result):
         """plot the figure."""
 
@@ -232,11 +255,13 @@ class Simulator():
 
         # show the return.
         self.show_return(result)
+        # show position pln
+        self.show_position_pnl(result)
         # show the max draw down.
         self.show_max_draw_down(result)
         # show the sharpe ratio
         self.show_sharpe_ratio(result)
-        # show the positions ratio
+        # show the leverage
         self.show_leverage(result)
         # show the trade analyzer
         self.show_trade_analyzer(result)
