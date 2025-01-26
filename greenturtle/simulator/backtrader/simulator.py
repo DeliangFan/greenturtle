@@ -21,6 +21,7 @@ import backtrader as bt
 from matplotlib import pyplot
 import pandas as pd
 
+from greenturtle.analyzers.backtrader import positions_ratio
 from greenturtle.util import panda_util
 from greenturtle.util.logging import logging
 
@@ -53,7 +54,8 @@ def do_simulate(datas,
     return analysis
 
 
-class Simulator:
+# pylint: disable=too-many-instance-attributes
+class Simulator():
 
     """Basic analysis class for backtrader."""
 
@@ -80,6 +82,9 @@ class Simulator:
         self.cerebro.addanalyzer(
             bt.analyzers.TradeAnalyzer,
             _name="TradeAnalyzer")
+        self.cerebro.addanalyzer(
+            positions_ratio.PositionsRatio,
+            _name="PositionsRatio")
 
         # Set the commission
         self.cerebro.broker.setcommission(commission=commission)
@@ -97,6 +102,7 @@ class Simulator:
         # Initiate some analysis result
         self.total_return = None
         self.annual_return = None
+        self.positions_ratio = None
         self.max_draw_down = None
         self.sharpe_ratio = None
         self.total = None
@@ -149,6 +155,15 @@ class Simulator:
         sharpe = result[0].analyzers.SharpeRatio_A.get_analysis()
         self.sharpe_ratio = sharpe["sharperatio"]
         logger.info("sharpe ratio: %.3f", self.sharpe_ratio)
+
+    def show_positions_ratio(self, result):
+        """analyze the positions ratio."""
+        analysis = result[0].analyzers.PositionsRatio.get_analysis()
+        total = 0.0
+        for k in analysis:
+            total = total + analysis[k]
+        self.positions_ratio = total / len(analysis)
+        logger.info("positions ratio: %.2f", self.positions_ratio)
 
     def show_trade_analyzer(self, result):
         """analyze the trade."""
@@ -222,6 +237,8 @@ class Simulator:
         self.show_max_draw_down(result)
         # show the sharpe ratio
         self.show_sharpe_ratio(result)
+        # show the positions ratio
+        self.show_positions_ratio(result)
         # show the trade analyzer
         self.show_trade_analyzer(result)
 
