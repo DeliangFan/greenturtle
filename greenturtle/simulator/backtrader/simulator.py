@@ -21,7 +21,6 @@ import backtrader as bt
 from matplotlib import pyplot
 import pandas as pd
 
-from greenturtle.analyzers.backtrader import positions_ratio
 from greenturtle.util import panda_util
 from greenturtle.util.logging import logging
 
@@ -83,8 +82,8 @@ class Simulator():
             bt.analyzers.TradeAnalyzer,
             _name="TradeAnalyzer")
         self.cerebro.addanalyzer(
-            positions_ratio.PositionsRatio,
-            _name="PositionsRatio")
+            bt.analyzers.GrossLeverage,
+            _name="GrossLeverage")
 
         # Set the commission
         self.cerebro.broker.setcommission(commission=commission)
@@ -102,7 +101,7 @@ class Simulator():
         # Initiate some analysis result
         self.total_return = None
         self.annual_return = None
-        self.positions_ratio = None
+        self.leverage = None
         self.max_draw_down = None
         self.sharpe_ratio = None
         self.total = None
@@ -133,64 +132,64 @@ class Simulator():
 
     def show_return(self, result):
         """analyze the return."""
-        returns = result[0].analyzers.Returns.get_analysis()
-        self.total_return = math.exp(returns["rtot"]) * 100
-        self.annual_return = returns["rnorm"] * 100
+        analysis = result[0].analyzers.Returns.get_analysis()
+        self.total_return = math.exp(analysis["rtot"]) * 100
+        self.annual_return = analysis["rnorm"] * 100
         logger.info("total return: %.1f%%", self.total_return)
         logger.info("annual return: %.1f%%", self.annual_return)
 
-        years_return = result[0].analyzers.AnnualReturn.get_analysis()
-        for year in years_return:
-            r = years_return[year] * 100
+        analysis = result[0].analyzers.AnnualReturn.get_analysis()
+        for year in analysis:
+            r = analysis[year] * 100
             logger.info("%d return: %.2f%%", year, r)
 
     def show_max_draw_down(self, result):
         """analyze the max draw down."""
-        draw_down = result[0].analyzers.DrawDown.get_analysis()
-        self.max_draw_down = draw_down["max"]["drawdown"]
+        analysis = result[0].analyzers.DrawDown.get_analysis()
+        self.max_draw_down = analysis["max"]["drawdown"]
         logger.info("max draw down: %.1f%%", self.max_draw_down)
 
     def show_sharpe_ratio(self, result):
         """analyze the sharpe ratio."""
-        sharpe = result[0].analyzers.SharpeRatio_A.get_analysis()
-        self.sharpe_ratio = sharpe["sharperatio"]
+        analysis = result[0].analyzers.SharpeRatio_A.get_analysis()
+        self.sharpe_ratio = analysis["sharperatio"]
         logger.info("sharpe ratio: %.3f", self.sharpe_ratio)
 
-    def show_positions_ratio(self, result):
-        """analyze the positions ratio."""
-        analysis = result[0].analyzers.PositionsRatio.get_analysis()
+    def show_leverage(self, result):
+        """analyze the leverage."""
+        analysis = result[0].analyzers.GrossLeverage.get_analysis()
         total = 0.0
         for k in analysis:
             total = total + analysis[k]
-        self.positions_ratio = total / len(analysis)
-        logger.info("positions ratio: %.2f", self.positions_ratio)
+        self.leverage = total / len(analysis)
+        logger.info("leverage ratio: %.2f", self.leverage)
 
     def show_trade_analyzer(self, result):
         """analyze the trade."""
 
-        trade_analyzer = result[0].analyzers.TradeAnalyzer.get_analysis()
+        analysis = result[0].analyzers.TradeAnalyzer.get_analysis()
 
         if (
-                ("pnl" not in trade_analyzer) or
-                ("total" not in trade_analyzer) or
-                ("won" not in trade_analyzer) or
-                ("lost" not in trade_analyzer)
+                ("pnl" not in analysis) or
+                ("total" not in analysis) or
+                ("won" not in analysis) or
+                ("lost" not in analysis)
         ):
             return
 
-        self.total = trade_analyzer["total"]["total"]
-        net = trade_analyzer["pnl"]["net"]["total"]
-        gross = trade_analyzer["pnl"]["gross"]["total"]
+        self.total = analysis["total"]["total"]
+        net = analysis["pnl"]["net"]["total"]
+        gross = analysis["pnl"]["gross"]["total"]
         comm = gross - net
 
-        won_total = trade_analyzer["won"]["total"]
+        won_total = analysis["won"]["total"]
         self.won_ratio = won_total * 1.0 / self.total
-        won_profit_total = trade_analyzer["won"]["pnl"]["total"]
-        won_profit_average = trade_analyzer["won"]["pnl"]["average"]
+        won_profit_total = analysis["won"]["pnl"]["total"]
+        won_profit_average = analysis["won"]["pnl"]["average"]
 
-        lost_total = trade_analyzer["lost"]["total"]
-        lost_profit_total = trade_analyzer["lost"]["pnl"]["total"]
-        lost_profit_average = trade_analyzer["lost"]["pnl"]["average"]
+        lost_total = analysis["lost"]["total"]
+        lost_profit_total = analysis["lost"]["pnl"]["total"]
+        lost_profit_average = analysis["lost"]["pnl"]["average"]
 
         logger.info(
             "\nnet: %.0f, won: %.0f, lost: %.0f, comm: %.0f",
@@ -238,7 +237,7 @@ class Simulator():
         # show the sharpe ratio
         self.show_sharpe_ratio(result)
         # show the positions ratio
-        self.show_positions_ratio(result)
+        self.show_leverage(result)
         # show the trade analyzer
         self.show_trade_analyzer(result)
 
