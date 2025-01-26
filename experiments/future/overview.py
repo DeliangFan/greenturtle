@@ -110,6 +110,7 @@ if __name__ == '__main__':
                 "total_return": [s.total_return],
                 "annual_return": [s.annual_return],
                 "sharpe_ratio": [s.sharpe_ratio],
+                "positions_ratio": [s.positions_ratio],
                 "max_draw_down": [s.max_draw_down],
                 "total_trade": [s.total],
                 "won_ratio": [s.won_ratio],
