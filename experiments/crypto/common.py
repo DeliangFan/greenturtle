@@ -22,7 +22,9 @@ import backtrader.feeds as btfeeds
 def get_crypto_data_from_csv_file(
         name,
         dataname,
-        timeframe=bt.TimeFrame.Minutes):
+        timeframe=bt.TimeFrame.Minutes,
+        fromdate=None,
+        todate=None):
 
     """get the crypto data from local csv file."""
     # pylint: disable=R0801
@@ -36,6 +38,8 @@ def get_crypto_data_from_csv_file(
         low=3,
         close=4,
         volume=5,
+        fromdate=fromdate,
+        todate=todate,
         openinterest=None,
         plot=False
     )
