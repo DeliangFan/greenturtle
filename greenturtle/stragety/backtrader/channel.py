@@ -27,8 +27,8 @@ class DonchianChannel(base.BaseStrategy):
     Actually, the channel is not good comparing to the EMVA line.
     """
 
-    def __init__(self, short_period=25, long_period=50):
-        super().__init__()
+    def __init__(self, *args, short_period=25, long_period=50, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.long_highests = {}
         self.long_lowests = {}
@@ -41,14 +41,26 @@ class DonchianChannel(base.BaseStrategy):
             self.short_highests[name] = Highest(data.high, period=short_period)
             self.short_lowests[name] = Lowest(data.low, period=short_period)
 
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
         data = self.symbols_data[name]
         long_highest = self.long_highests[name]
         return data.close[0] >= long_highest[-1]
 
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
         data = self.symbols_data[name]
         short_lowest = self.short_lowests[name]
         return data.close[0] <= short_lowest[-1]
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to open or not."""
+        data = self.symbols_data[name]
+        long_lowest = self.long_lowests[name]
+        return data.close[0] <= long_lowest[-1]
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
+        data = self.symbols_data[name]
+        short_highest = self.short_highests[name]
+        return data.close[0] >= short_highest[-1]

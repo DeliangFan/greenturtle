@@ -30,8 +30,8 @@ class RSRSStrategy(base.BaseStrategy):
     光大证券 <基于阻力支撑相对强度的市场择时>
     """
 
-    def __init__(self, period=18, upper=1.1, lower=0.7):
-        super().__init__()
+    def __init__(self, *args, period=18, upper=1.1, lower=0.7, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.upper = upper
         self.lower = lower
@@ -43,12 +43,20 @@ class RSRSStrategy(base.BaseStrategy):
             # pylint: disable=unexpected-keyword-arg,too-many-function-args
             self.rsrses[name] = rsrs.RSRS(data, period=period)
 
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
         r = self.rsrses[name]
         return r[0] >= self.upper
 
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
         r = self.rsrses[name]
         return r[0] <= self.lower
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to open or not."""
+        return False
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
+        return False

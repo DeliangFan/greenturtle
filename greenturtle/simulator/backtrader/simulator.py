@@ -19,8 +19,6 @@ import math
 
 import backtrader as bt
 from backtrader import analyzers
-from matplotlib import pyplot
-import pandas as pd
 
 from greenturtle.analyzers.backtrader import position_pnl
 from greenturtle.util import panda_util
@@ -96,6 +94,9 @@ class Simulator():
 
         # Set our desired cash start
         self.cerebro.broker.setcash(1000000.0)
+
+        # Set short cash
+        self.cerebro.broker.set_shortcash(False)
 
         # Disable cheat on close
         self.cerebro.broker.set_coc(False)
@@ -231,24 +232,6 @@ class Simulator():
 
         logger.info(message)
 
-    def plot_figure(self, result):
-        """plot the figure."""
-
-        ret = pd.Series(result[0].analyzers.TimeReturn.get_analysis())  #
-
-        # create the canvas
-        _, ax1 = pyplot.subplots(figsize=(20, 12), dpi=200)
-        ax1.set_title("profit", fontsize=30)
-        pyplot.grid(True, linestyle="--")
-
-        ax1.plot(
-            (ret + 1).cumprod().index,
-            (ret + 1).cumprod().values,
-            "r-",
-            label="profit")
-
-        pyplot.show()
-
     def show(self, result, plot=True):
         """show the backtest result."""
         logger.info("\n*************** Overview *************")
@@ -268,5 +251,4 @@ class Simulator():
 
         # plot the figures.
         if plot:
-            self.plot_figure(result)
             self.cerebro.plot()

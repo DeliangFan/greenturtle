@@ -18,7 +18,7 @@
 import backtrader as bt
 
 from greenturtle.simulator.backtrader import simulator
-from greenturtle.stragety.backtrader import mim
+from greenturtle.stragety.backtrader import ema
 from experiments.crypto import common
 
 # pylint: disable=R0801
@@ -30,4 +30,4 @@ if __name__ == '__main__':
     data = common.get_crypto_data_from_csv_file(
         CRYPTO_NAME, DATA_NAME, bt.TimeFrame.Days)
     datas = [(CRYPTO_NAME, data)]
-    simulator.do_simulate(datas, mim.MIMStrategy)
+    simulator.do_simulate(datas, ema.EMA)
