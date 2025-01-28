@@ -16,7 +16,8 @@
 """some common functions for us future experiments"""
 
 import backtrader as bt
-import backtrader.feeds as btfeeds
+
+from greenturtle.data.backtrader import future
 
 
 def get_us_future_data_from_csv_file(
@@ -29,7 +30,7 @@ def get_us_future_data_from_csv_file(
     """get the us future data from local csv file."""
 
     # pylint: disable=R0801
-    data = btfeeds.GenericCSVData(
+    data = future.FutureCSV(
         name=name,
         dataname=filename,
         timeframe=timeframe,
@@ -39,6 +40,8 @@ def get_us_future_data_from_csv_file(
         low=4,
         close=2,
         volume=6,
+        contract_unit=10,
+        margin_requirement_percent=11,
         openinterest=None,
         plot=False,
         fromdate=fromdate,
