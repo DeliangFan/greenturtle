@@ -20,6 +20,7 @@ import math
 
 import backtrader as bt
 
+from greenturtle.util.constants import constants_future
 from greenturtle.util.logging import logging
 from greenturtle import exception
 
@@ -230,17 +231,21 @@ class BaseStrategy(bt.Strategy):
         total_value = self.broker.get_value() * self.leverage_limit
         single_value = total_value / number
 
-        for name in long_desired:
+        for name in self.names:
             data = self.symbols_data[name]
             close = data.close[0]
-            size = int(single_value / close)
-            portfolios[name] = size
 
-        for name in short_desired:
-            data = self.symbols_data[name]
-            close = data.close[0]
-            size = int(single_value / close)
-            portfolios[name] = -size
+            contract_unit = 1
+            if hasattr(data, constants_future.CONTRACT_UNIT):
+                contract_unit = data.contract_unit
+
+            contract_number = int(single_value / close / contract_unit)
+            size = contract_number * contract_unit
+
+            if name in long_desired:
+                portfolios[name] = size
+            if name in short_desired:
+                portfolios[name] = -size
 
         return portfolios
 

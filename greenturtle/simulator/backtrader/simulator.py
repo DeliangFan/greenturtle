@@ -93,7 +93,7 @@ class Simulator():
         self.cerebro.broker.set_slippage_perc(perc=slippage)
 
         # Set our desired cash start
-        self.cerebro.broker.setcash(1000000.0)
+        self.cerebro.broker.setcash(100000000.0)
 
         # Set short cash
         self.cerebro.broker.set_shortcash(False)
