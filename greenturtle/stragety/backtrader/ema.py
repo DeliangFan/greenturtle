@@ -23,8 +23,8 @@ class EMA(base.BaseStrategy):
 
     """ EMA with Filter class strategy for backtrader"""
 
-    def __init__(self, fast_period=5, slow_period=16):
-        super().__init__()
+    def __init__(self, *args, fast_period=10, slow_period=100, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.fast_emas = {}
         self.slow_emas = {}
@@ -38,14 +38,26 @@ class EMA(base.BaseStrategy):
                 data,
                 period=slow_period)
 
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
         fast_ema = self.fast_emas[name]
         slow_ema = self.slow_emas[name]
         return fast_ema[0] > slow_ema[0]
 
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
         fast_ema = self.fast_emas[name]
         slow_ema = self.slow_emas[name]
         return fast_ema[0] < slow_ema[0]
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to open or not."""
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+        return fast_ema[0] < slow_ema[0]
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+        return fast_ema[0] > slow_ema[0]

@@ -20,55 +20,6 @@ import backtrader as bt
 from greenturtle.stragety.backtrader import base
 
 
-class RefinedMACDStrategy(base.BaseStrategy):
-
-    """Multi value class strategy for backtrader"""
-
-    def __init__(self,
-                 period_me1=12,
-                 period_me2=26,
-                 period_signal=9,
-                 atr_period=14):
-
-        super().__init__()
-        self.macds = {}
-        self.atrs = {}
-        for name in self.names:
-            data = self.getdatabyname(name)
-            # pylint: disable=too-many-function-args,unexpected-keyword-arg
-            self.macds[name] = bt.indicators.MACD(
-                                        data,
-                                        period_me1=period_me1,
-                                        period_me2=period_me2,
-                                        period_signal=period_signal)
-
-            # Set the stop price
-            self.atrs[name] = bt.indicators.ATR(data, period=atr_period)
-
-    # valina macd strategy
-    #
-    # if self.position and self.mcross[0] < 0:
-    #     self.order_target_percent_with_log(data=self.data, target=0)
-    # elif not self.position and self.mcross[0] > 0:
-    #     self.order_target_percent_with_log(data=self.data, target=1.0)
-    #
-    # The following optimized strategy works better in both btc and eth
-    # in the market
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
-        macd = self.macds[name]
-        # TODO(refine the code)
-        diff = macd.macd[0] - macd.signal[0]
-        return diff < -0.05 * macd.signal[0]
-
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
-        macd = self.macds[name]
-        # TODO(refine the code)
-        diff = macd.macd[0] - macd.signal[0]
-        return diff > -0.01 * macd.signal[0]
-
-
 # MACDWithATRStrategy is copied from backtrader/samples/macd-settings.py
 class MACDWithATRStrategy(base.BaseStrategy):
     """
@@ -148,8 +99,8 @@ class MACDWithATRStrategy(base.BaseStrategy):
             self.smas[name] = sma
             self.smadirs[name] = sma - sma(-dir_period)
 
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
 
         mcross = self.mcrosses[name]
         smadir = self.smadirs[name]
@@ -162,8 +113,8 @@ class MACDWithATRStrategy(base.BaseStrategy):
             return True
         return False
 
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
 
         data = self.symbols_data[name]
         atr = self.atrs[name]
@@ -175,4 +126,13 @@ class MACDWithATRStrategy(base.BaseStrategy):
 
         pdist = atr[0] * self.atr_dist
         self.pstops[name] = max(pstop, pclose - pdist)
+
+        return False
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to open or not."""
+        return False
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
         return False

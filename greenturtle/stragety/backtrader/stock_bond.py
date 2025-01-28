@@ -23,8 +23,8 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
 
     """Balance stock and bond strategy."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # the reserved_ratio is used to reduce the possibility of
         # failing orders.
         self.reserved_ratio = 0.01
@@ -81,10 +81,18 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
                 data=constants_stock.STOCK,
                 target=self.stock_ratio)
 
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
-        raise NotImplementedError
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
+        return False
 
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
-        raise NotImplementedError
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
+        return False
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to open or not."""
+        return False
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
+        return False

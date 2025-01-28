@@ -21,7 +21,7 @@ import os
 import backtrader as bt
 
 from greenturtle.simulator.backtrader import simulator
-from greenturtle.stragety.backtrader import mim
+from greenturtle.stragety.backtrader import ema
 from greenturtle.util.constants import constants_future
 from experiments.future import common
 
@@ -55,10 +55,10 @@ if __name__ == '__main__':
             datas.append((name, data))
 
     # do analysis
-    # TODO(fixme), why the benchmark looks so good as if I would be very rich
-    # after 20 years.
     simulator.do_simulate(
         datas,
-        mim.MIMStrategy,
+        ema.EMA,
+        allow_short=False,
         commission=0.001,
+        slippage=0.000,
         plot=True)

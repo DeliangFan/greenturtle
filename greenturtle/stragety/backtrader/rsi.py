@@ -24,8 +24,8 @@ class RSIStrategy(base.BaseStrategy):
 
     """ RSI class strategy for backtrader"""
 
-    def __init__(self, rsi_period=14, upper=70, lower=30):
-        super().__init__()
+    def __init__(self, *args, rsi_period=14, upper=70, lower=30, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.upper = upper
         self.lower = lower
@@ -34,12 +34,20 @@ class RSIStrategy(base.BaseStrategy):
             data = self.symbols_data[name]
             self.rsis[name] = bt.indicators.RSI(data, period=rsi_period)
 
-    def should_buy(self, name):
-        """determine whether a position should be bought or not."""
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
         rsi = self.rsis[name]
         return rsi[0] < self.lower
 
-    def should_sell(self, name):
-        """determine whether a position should be sold or not."""
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
         rsi = self.rsis[name]
         return rsi[0] > self.upper
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to open or not."""
+        return False
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
+        return False

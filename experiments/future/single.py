@@ -21,7 +21,7 @@ import os
 import backtrader as bt
 
 from greenturtle.simulator.backtrader import simulator
-from greenturtle.stragety.backtrader import macd
+from greenturtle.stragety.backtrader import ema
 from experiments.future import common
 
 # pylint: disable=R0801
@@ -45,4 +45,4 @@ if __name__ == '__main__':
     datas = [(NAME, data)]
 
     # do analysis
-    simulator.do_simulate(datas, macd.RefinedMACDStrategy, plot=True)
+    simulator.do_simulate(datas, ema.EMA, allow_short=True, plot=True)

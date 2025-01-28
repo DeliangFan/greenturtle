@@ -32,4 +32,4 @@ if __name__ == '__main__':
         DATA_NAME,
         bt.TimeFrame.Days)
     datas = [(CRYPTO_NAME, data)]
-    simulator.do_simulate(datas, macd.RefinedMACDStrategy)
+    simulator.do_simulate(datas, macd.MACDWithATRStrategy)
