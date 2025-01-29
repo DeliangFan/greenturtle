@@ -31,7 +31,8 @@ from experiments.future import common
 logger = logging.get_logger()
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output"
-SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT")
+# NOTE(fixme) ZR data in yahoo finance looks bad
+SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT", "ZR")
 
 
 if __name__ == '__main__':
@@ -52,27 +53,32 @@ if __name__ == '__main__':
                 bt.TimeFrame.Days,
                 fromdate=fromdate,
                 todate=todate)
-            datas = [(name, data)]
 
-            # do analysis
-            s = simulator.do_simulate(
-                datas,
-                ema.EMA,
-                commission=0.001,
-                slippage=0.000,
-                plot=False)
+            # do simulate
+            s = simulator.Simulator()
+            s.add_data(data, name)
+            s.add_strategy(ema.EMA)
+            s.do_simulate()
 
             # construct the result and append it to the dataframe
+
             row = {
                 "name": [name],
                 "category": [category_name],
-                "total_return": [s.total_return],
-                "annual_return": [s.annual_return],
-                "sharpe_ratio": [s.sharpe_ratio],
-                "leverage": [s.leverage],
-                "max_draw_down": [s.max_draw_down],
-                "total_trade": [s.total],
-                "won_ratio": [s.won_ratio],
+                "total_return": [
+                    s.summary.return_summary.total_return],
+                "annual_return": [
+                    s.summary.return_summary.annual_return],
+                "sharpe_ratio": [
+                    s.summary.sharpe_ratio_summary.sharpe_ratio],
+                "leverage": [
+                    s.summary.leverage_ratio_summary.leverage_ratio],
+                "max_draw_down": [
+                    s.summary.max_draw_down_summary.max_draw_down],
+                "trader_number": [
+                    s.summary.trade_summary.trader_number],
+                "win_trader_number": [
+                    s.summary.trade_summary.win_trader_number],
             }
 
             new_df = pd.DataFrame(row)

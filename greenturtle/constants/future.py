@@ -64,7 +64,7 @@ AGRICULTURE = {
         MARGIN_REQUIREMENT_RATIO: 0.1,
         DESCRIPTION: "Live Cattle",
     },  # 活牛
-    "ZR": {
+    "ZR": {  # seems problem with the yahoo finance data
         YAHOO_CODE: "ZR=F",
         CONTRACT_UNIT: 2000,
         MARGIN_REQUIREMENT_RATIO: 0.1,

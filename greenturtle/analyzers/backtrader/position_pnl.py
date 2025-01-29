@@ -46,11 +46,11 @@ class PositionPNL(Analyzer):
                 "profit": 0.0,
                 "net": 0.0,
                 "gross": 0.0,
-                "count": 0}
+                "trade_number": 0}
 
         position_pln["net"] += trade.pnlcomm
         position_pln["gross"] += trade.pnl
-        position_pln["count"] += 1
+        position_pln["trade_number"] += 1
 
         if trade.pnlcomm >= 0.0:
             position_pln["profit"] += trade.pnlcomm

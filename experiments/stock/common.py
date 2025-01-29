@@ -208,14 +208,18 @@ def do_analysis(
 
 def do_analysis_ticker(ticker, fromdate=None, todate=None):
     """Analyze a single ticker."""
-    datas = [
-        (
-            ticker,
-            get_backtrader_data_from_yahoo_finance(
-                ticker,
-                fromdate,
-                todate)
-        )
-    ]
+    s = simulator.Simulator()
 
-    simulator.do_simulate(datas, base_strategy.BaseStrategy)
+    # add data.
+    s.add_data(
+        get_backtrader_data_from_yahoo_finance(
+            ticker,
+            fromdate,
+            todate),
+        ticker)
+
+    # add strategy
+    s.add_strategy(base_strategy.BaseStrategy)
+
+    # do simulate
+    s.do_simulate()

@@ -31,5 +31,8 @@ if __name__ == '__main__':
         CRYPTO_NAME,
         DATA_NAME,
         bt.TimeFrame.Days)
-    datas = [("btc", data)]
-    simulator.do_simulate(datas, rsi.RSIStrategy)
+
+    s = simulator.Simulator()
+    s.add_data(data, CRYPTO_NAME)
+    s.add_strategy(rsi.RSIStrategy)
+    s.do_simulate()
