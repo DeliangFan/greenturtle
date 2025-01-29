@@ -21,9 +21,9 @@ import os
 import backtrader as bt
 import pandas as pd
 
+import greenturtle.constants.future as future_const
 from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import ema
-from greenturtle.util.constants import constants_future
 from greenturtle.util.logging import logging
 from experiments.future import common
 
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     df = pd.DataFrame()
     fromdate = datetime.datetime(2004, 1, 1)
     todate = x = datetime.datetime(2024, 12, 31)
-    for category_name, category_value in constants_future.FUTURE.items():
+    for category_name, category_value in future_const.FUTURE.items():
         category_dir = os.path.join(DATA_DIR, category_name)
         for name, future in category_value.items():
             if name in SKIP_LIST:

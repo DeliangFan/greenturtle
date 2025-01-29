@@ -16,17 +16,17 @@
 """Analysis the profit about CN ETF."""
 
 
-from greenturtle.util.constants import constants_stock
+import greenturtle.constants.stock as stock_const
 from experiments.stock import common
 
 
 TICKERS = (
-    constants_stock.VFIAX,
-    constants_stock.QQQ,
-    constants_stock.DIA,
-    constants_stock.BRK_B,
-    constants_stock.TLT,
-    constants_stock.IEF
+    stock_const.VFIAX,
+    stock_const.QQQ,
+    stock_const.DIA,
+    stock_const.BRK_B,
+    stock_const.TLT,
+    stock_const.IEF
 )
 
 

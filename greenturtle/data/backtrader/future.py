@@ -18,7 +18,7 @@
 
 from backtrader.feeds import GenericCSVData
 
-from greenturtle.util.constants import constants_future
+import greenturtle.constants.future as future_const
 
 
 class FutureCSV(GenericCSVData):
@@ -31,11 +31,11 @@ class FutureCSV(GenericCSVData):
     # Add "contract_unit" and "margin_requirement_ratio" line to the
     # inherited ones from the base class
     lines = (
-        constants_future.CONTRACT_UNIT,
-        constants_future.MARGIN_REQUIREMENT_RATIO
+        future_const.CONTRACT_UNIT,
+        future_const.MARGIN_REQUIREMENT_RATIO
     )
 
     params = (
-        (constants_future.CONTRACT_UNIT, 7),
-        (constants_future.MARGIN_REQUIREMENT_RATIO, 8),
+        (future_const.CONTRACT_UNIT, 7),
+        (future_const.MARGIN_REQUIREMENT_RATIO, 8),
     )

@@ -22,6 +22,6 @@ future_experiment:
 	cd experiments/future && python overview.py
 	cd experiments/future && python multi_values.py
 
-experiment: crypto_experiment stock_experiment
+experiment: crypto_experiment stock_experiment future_experiment
 
 all: fmt test
