@@ -32,10 +32,10 @@ class FutureCSV(GenericCSVData):
     # inherited ones from the base class
     lines = (
         constants_future.CONTRACT_UNIT,
-        constants_future.MARGIN_REQUIREMENT_PERCENT
+        constants_future.MARGIN_REQUIREMENT_RATIO
     )
 
     params = (
         (constants_future.CONTRACT_UNIT, 7),
-        (constants_future.MARGIN_REQUIREMENT_PERCENT, 8),
+        (constants_future.MARGIN_REQUIREMENT_RATIO, 8),
     )
