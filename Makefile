@@ -2,8 +2,13 @@ fmt:
 	pylint * --ignore="Makefile,README.md,requirements.txt,LICENSE"
 	flake8
 
-test:
-	python -m unittest
+unittest:
+	python -m unittest discover greenturtle/tests
+
+e2etest:
+	python -m unittest discover e2e
+
+test: unittest e2etest
 
 # TODO(wsfdl), rafactor experiments to e2e test
 crypto_experiment:
