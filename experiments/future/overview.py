@@ -21,6 +21,7 @@ import os
 import backtrader as bt
 import pandas as pd
 
+from greenturtle.analyzers import correlation
 import greenturtle.constants.future as future_const
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import simulator
@@ -37,6 +38,7 @@ SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT", "ZR")
 
 if __name__ == '__main__':
 
+    c = correlation.Correlation()
     df = pd.DataFrame()
 
     fromdate = datetime.datetime(2004, 1, 1)
@@ -48,6 +50,9 @@ if __name__ == '__main__':
             if name in SKIP_LIST:
                 continue
 
+            s = simulator.Simulator()
+            s.add_strategy(ema.EMA)
+
             # get the data
             filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")
             data = future_data.get_feed_from_csv_file(
@@ -56,15 +61,14 @@ if __name__ == '__main__':
                 timeframe=bt.TimeFrame.Days,
                 fromdate=fromdate,
                 todate=todate)
+            s.add_data(data, name)
 
             # do simulate
-            s = simulator.Simulator()
-            s.add_data(data, name)
-            s.add_strategy(ema.EMA)
             s.do_simulate()
 
-            # construct the result and append it to the dataframe
+            c.add_return_summary(name, s.summary.return_summary)
 
+            # construct the result and append it to the dataframe
             row = {
                 "name": [name],
                 "category": [category_name],
@@ -79,17 +83,15 @@ if __name__ == '__main__':
                 "max_draw_down": [
                     s.summary.max_draw_down_summary.max_draw_down],
             }
-
             if s.summary.trade_summary is not None:
                 row["trader_number"] = [
                     s.summary.trade_summary.trader_number]
                 row["win_trader_number"] = [
                     s.summary.trade_summary.win_trader_number]
-
             new_df = pd.DataFrame(row)
             df = pd.concat([df, new_df])
 
     logger.info("\n%s", df.to_string())
 
-    # TODO(wsfdl), add corelation analysis for different future within
-    # same strategy
+    corr = c.compute_correlation()
+    logger.info("\n%s", corr.to_string())
