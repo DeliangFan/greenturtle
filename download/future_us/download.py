@@ -48,7 +48,7 @@ if __name__ == '__main__':
             df["name"] = name
             df["category"] = category_name
             df[const.CONTRACT_UNIT] = future[const.CONTRACT_UNIT]
-            df[const.MARGIN_REQUIREMENT_PERCENT] = \
-                future[const.MARGIN_REQUIREMENT_PERCENT]
+            df[const.MARGIN_REQUIREMENT_RATIO] = \
+                future[const.MARGIN_REQUIREMENT_RATIO]
 
             df.to_csv(os.path.join(category_dir, f"{name}.csv"))
