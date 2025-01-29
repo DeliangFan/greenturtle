@@ -249,7 +249,7 @@ class Summary(BaseSummary):
         self.max_draw_down_summary = None
         self.leverage_ratio_summary = None
         self.trade_summary = None
-        self.position_summary = None
+        self.positions_pnl_summary = None
 
     def to_string(self):
         """string of the summary."""
@@ -270,8 +270,8 @@ class Summary(BaseSummary):
         if self.trade_summary is not None:
             message += self.trade_summary.to_string()
 
-        if self.position_summary is not None:
-            message += self.position_summary.to_string()
+        if self.positions_pnl_summary is not None:
+            message += self.positions_pnl_summary.to_string()
 
         if message != "":
             message = "\n" + message

@@ -233,9 +233,9 @@ class Simulator():
         """analysis profit and lost for all positions."""
         analysis = result[0].analyzers.PositionPNL.get_analysis()
 
-        positions_summary = summary.PositionsPNLSummary(
+        positions_pnl_summary = summary.PositionsPNLSummary(
             positions_pnl=analysis)
-        self.summary.positions_pnl_summary = positions_summary
+        self.summary.positions_pnl_summary = positions_pnl_summary
 
     def show(self):
         """show the backtest result."""
