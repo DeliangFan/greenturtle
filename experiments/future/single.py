@@ -42,7 +42,9 @@ if __name__ == '__main__':
         filename,
         bt.TimeFrame.Days,
         todate=todate)
-    datas = [(NAME, data)]
 
-    # do analysis
-    simulator.do_simulate(datas, ema.EMA, allow_short=True)
+    # do simulate
+    s = simulator.Simulator()
+    s.add_data(data, NAME)
+    s.add_strategy(ema.EMA)
+    s.do_simulate()

@@ -22,17 +22,23 @@ from experiments.stock import common
 
 
 if __name__ == '__main__':
-    datas = [
-        (
-            stock_const.STOCK,
-            common.get_backtrader_data_from_yahoo_finance(
-                stock_const.VFIAX,
-            )
-         ),
-        (
-            stock_const.BOND,
-            common.get_backtrader_data_from_yahoo_finance(stock_const.TLT)
-         ),
-    ]
 
-    simulator.do_simulate(datas, stock_bond.BalancedStockAndBondStrategy)
+    s = simulator.Simulator()
+
+    # add the bond and stock data.
+    s.add_data(
+        common.get_backtrader_data_from_yahoo_finance(
+            stock_const.VFIAX,
+        ),
+        stock_const.STOCK)
+    s.add_data(
+        common.get_backtrader_data_from_yahoo_finance(
+            stock_const.TLT,
+        ),
+        stock_const.BOND)
+
+    # add strategy
+    s.add_strategy(stock_bond.BalancedStockAndBondStrategy)
+
+    # do simulate
+    s.do_simulate()

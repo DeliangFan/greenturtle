@@ -29,7 +29,7 @@ from experiments.future import common
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output"
 SKIP_LIST = (
-    "6B", "6J", "DX", "6E", "ZN", "ZT", "DC", "BTC", "ETH", "NKD", "CL",
+    "6B", "6J", "DX", "6E", "ZN", "ZT", "DC", "BTC", "ETH", "NKD", "CL", "ZR"
 )
 
 
@@ -38,6 +38,9 @@ if __name__ == '__main__':
     datas = []
     fromdate = datetime.datetime(2004, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
+
+    s = simulator.Simulator()
+    s.add_strategy(ema.EMA)
 
     for category_name, category_value in future_const.FUTURE.items():
         category_dir = os.path.join(DATA_DIR, category_name)
@@ -52,13 +55,7 @@ if __name__ == '__main__':
                 bt.TimeFrame.Days,
                 fromdate=fromdate,
                 todate=todate)
-            datas.append((name, data))
+            s.add_data(data, name)
 
-    # do analysis
-    simulator.do_simulate(
-        datas,
-        ema.EMA,
-        allow_short=False,
-        commission=0.001,
-        slippage=0.000,
-        plot=False)
+    # do simulate
+    s.do_simulate()

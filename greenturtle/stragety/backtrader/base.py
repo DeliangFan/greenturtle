@@ -280,7 +280,8 @@ class BaseStrategy(bt.Strategy):
         for name in desired_portfolios:
             if name not in current_portfolios:
                 desired_size = desired_portfolios[name]
-                self.order_target_size_with_log(name, desired_size)
+                if desired_size != 0:
+                    self.order_target_size_with_log(name, desired_size)
 
     def order_target_percent_with_log(self, data=None, target=0.0):
         """

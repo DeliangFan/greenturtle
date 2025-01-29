@@ -31,5 +31,8 @@ if __name__ == '__main__':
         CRYPTO_NAME,
         DATA_NAME,
         bt.TimeFrame.Days)
-    datas = [(CRYPTO_NAME, data)]
-    simulator.do_simulate(datas, macd.MACDWithATRStrategy)
+
+    s = simulator.Simulator()
+    s.add_data(data, CRYPTO_NAME)
+    s.add_strategy(macd.MACDWithATRStrategy)
+    s.do_simulate()

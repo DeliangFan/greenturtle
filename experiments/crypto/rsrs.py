@@ -72,15 +72,17 @@ def show_rsrs_distribution(series, plot=True):
 # pylint: disable=R0801
 if __name__ == '__main__':
 
-    rsrs_series = get_rsrs_series(18)
-    show_rsrs_distribution(rsrs_series, plot=False)
-
     data = common.get_crypto_data_from_csv_file(
         CRYPTO_NAME,
         DATA_NAME,
         bt.TimeFrame.Days)
-    datas = [(CRYPTO_NAME, data)]
 
+    rsrs_series = get_rsrs_series(18)
+    show_rsrs_distribution(rsrs_series, plot=False)
     lower = rsrs_series.mean() - 1 * rsrs_series.std()
     upper = rsrs_series.mean() + 1.3 * rsrs_series.std()
-    simulator.do_simulate(datas, rsrs.RSRSStrategy, lower=lower, upper=upper)
+
+    s = simulator.Simulator()
+    s.add_data(data, CRYPTO_NAME)
+    s.add_strategy(rsrs.RSRSStrategy, lower=lower, upper=upper)
+    s.do_simulate()
