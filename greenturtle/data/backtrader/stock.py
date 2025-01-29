@@ -13,33 +13,42 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""some common functions for crypto experiments"""
+"""data feed for stock"""
 
 import backtrader as bt
-import backtrader.feeds as btfeeds
+import yfinance as yf
+
+from greenturtle.util import yf_util
 
 
-def get_crypto_data_from_csv_file(
+def get_feed_from_yahoo_finance(
         name,
-        dataname,
-        timeframe=bt.TimeFrame.Minutes,
         fromdate=None,
         todate=None):
+    """
+    Get the data from yahoo finance and convert it to the format
+    expected by backtrader.
+    """
 
-    """get the crypto data from local csv file."""
-    # pylint: disable=R0801
-    data = btfeeds.GenericCSVData(
-        name=name,
-        dataname=dataname,
-        timeframe=timeframe,
-        datatime=0,
-        open=1,
-        high=2,
-        low=3,
-        close=4,
-        volume=5,
-        fromdate=fromdate,
-        todate=todate,
+    # download the data from yahoo finance
+    df = yf.download(name, period="max", start=fromdate, end=todate)
+
+    # removing the multi-index column
+    df = df.xs(key=name, axis=1, level="Ticker")
+
+    # rename the columns
+    df = yf_util.rename_yf_column(df)
+
+    # pylint: disable=too-many-function-args,unexpected-keyword-arg
+    data = bt.feeds.PandasData(
+        dataname=df,
+        datetime=None,
+        # TODO(fixme)adjust the open/high/low
+        open=0,
+        high=0,
+        low=0,
+        close=0,
+        volume=None,
         openinterest=None,
         plot=False
     )

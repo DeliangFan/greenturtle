@@ -15,37 +15,15 @@
 
 """utils for yahoo finance"""
 
-import yfinance as yf
 
-from greenturtle.util import time_util
+def rename_yf_column(df):
+    """rename yahoo finance column"""
 
-
-def download_with_max_period(yahoo_code):
-    """download the data with max period"""
-    df = yf.download(yahoo_code, period="max")
-    return df
-
-
-def transform(df, yahoo_code):
-    """
-    transform the pandas structure
-    - removing the multi-index column
-    - renaming column name
-    - add datetime as a column
-    """
-
-    df = df.xs(key=yahoo_code, axis=1, level="Ticker")
-
-    # rename the columns
     df.rename(columns={"Open": "open"}, inplace=True)
     df.rename(columns={"Adj Close": "adj_close"}, inplace=True)
     df.rename(columns={"Close": "close"}, inplace=True)
     df.rename(columns={"High": "high"}, inplace=True)
     df.rename(columns={"Low": "low"}, inplace=True)
     df.rename(columns={"Volume": "volume"}, inplace=True)
-
-    # add datetime index as a column
-    df.index = df.index.map(lambda x: x.strftime(time_util.DEFAULT_FORMAT))
-    df["datetime"] = df.index
 
     return df

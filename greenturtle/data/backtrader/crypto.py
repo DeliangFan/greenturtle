@@ -13,39 +13,35 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""some common functions for us future experiments"""
+"""some common functions for crypto experiments"""
 
 import backtrader as bt
+import backtrader.feeds as btfeeds
 
-from greenturtle.data.backtrader import future
 
-
-def get_us_future_data_from_csv_file(
+def get_feed_from_csv_file(
         name,
-        filename,
-        timeframe=bt.TimeFrame.Minutes,
+        dataname,
+        timeframe=bt.TimeFrame.Days,
         fromdate=None,
         todate=None):
 
-    """get the us future data from local csv file."""
-
+    """get the crypto data from local csv file."""
     # pylint: disable=R0801
-    data = future.FutureCSV(
+    data = btfeeds.GenericCSVData(
         name=name,
-        dataname=filename,
+        dataname=dataname,
         timeframe=timeframe,
         datatime=0,
-        open=5,
-        high=3,
-        low=4,
-        close=2,
-        volume=6,
-        contract_unit=10,
-        margin_requirement_ratio=11,
-        openinterest=None,
-        plot=False,
+        open=1,
+        high=2,
+        low=3,
+        close=4,
+        volume=5,
         fromdate=fromdate,
         todate=todate,
+        openinterest=None,
+        plot=False
     )
 
     return data

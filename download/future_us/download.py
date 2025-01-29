@@ -18,7 +18,7 @@
 import os
 
 import greenturtle.constants.future as future_const
-from greenturtle.util import yf_util
+import greenturtle.data.backtrader.future as future_data
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,18 +37,18 @@ if __name__ == '__main__':
             os.makedirs(category_dir)
 
         for name, future in category_value.items():
-
             # pylint: disable=invalid-name
             yahoo_code = future[future_const.YAHOO_CODE]
 
-            df = yf_util.download_with_max_period(yahoo_code)
-            df = yf_util.transform(df, yahoo_code)
-
-            # add the future name and category
-            df["name"] = name
-            df["category"] = category_name
-            df[future_const.CONTRACT_UNIT] = future[future_const.CONTRACT_UNIT]
-            df[future_const.MARGIN_REQUIREMENT_RATIO] = \
+            margin_requirement_ratio = \
                 future[future_const.MARGIN_REQUIREMENT_RATIO]
+
+            df = future_data.get_data_frame_from_yahoo_finance(
+                yahoo_code=yahoo_code,
+                name=name,
+                category=category_name,
+                contract_unit=future[future_const.CONTRACT_UNIT],
+                margin_requirement_ratio=margin_requirement_ratio,
+            )
 
             df.to_csv(os.path.join(category_dir, f"{name}.csv"))

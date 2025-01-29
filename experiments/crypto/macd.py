@@ -15,11 +15,10 @@
 
 """Experiment to benchmark the MACD performance on cryptocurrencies."""
 
-import backtrader as bt
-
+import greenturtle.data.backtrader.crypto as crypto_data
 from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import macd
-from experiments.crypto import common
+
 
 # pylint: disable=R0801
 DATA_NAME = "../../download/crypto/csv/btc_1d.csv"
@@ -27,12 +26,14 @@ CRYPTO_NAME = "btc"
 
 
 if __name__ == '__main__':
-    data = common.get_crypto_data_from_csv_file(
-        CRYPTO_NAME,
-        DATA_NAME,
-        bt.TimeFrame.Days)
 
     s = simulator.Simulator()
+
+    # add data
+    data = crypto_data.get_feed_from_csv_file(CRYPTO_NAME, DATA_NAME)
     s.add_data(data, CRYPTO_NAME)
+
+    # add strategy
     s.add_strategy(macd.MACDWithATRStrategy)
+
     s.do_simulate()

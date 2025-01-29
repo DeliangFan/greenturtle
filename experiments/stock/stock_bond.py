@@ -16,9 +16,9 @@
 """Analysis the profit by combining stock and bond."""
 
 import greenturtle.constants.stock as stock_const
+import greenturtle.data.backtrader.stock as stock_data
 from greenturtle.stragety.backtrader import stock_bond
 from greenturtle.simulator.backtrader import simulator
-from experiments.stock import common
 
 
 if __name__ == '__main__':
@@ -26,16 +26,11 @@ if __name__ == '__main__':
     s = simulator.Simulator()
 
     # add the bond and stock data.
-    s.add_data(
-        common.get_backtrader_data_from_yahoo_finance(
-            stock_const.VFIAX,
-        ),
-        stock_const.STOCK)
-    s.add_data(
-        common.get_backtrader_data_from_yahoo_finance(
-            stock_const.TLT,
-        ),
-        stock_const.BOND)
+    data = stock_data.get_feed_from_yahoo_finance(stock_const.VFIAX)
+    s.add_data(data, stock_const.STOCK)
+
+    data = stock_data.get_feed_from_yahoo_finance(stock_const.TLT)
+    s.add_data(data, stock_const.BOND)
 
     # add strategy
     s.add_strategy(stock_bond.BalancedStockAndBondStrategy)
