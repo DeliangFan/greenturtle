@@ -21,9 +21,9 @@ import os
 import backtrader as bt
 
 import greenturtle.constants.future as future_const
+import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import ema
-from experiments.future import common
 
 
 # pylint: disable=R0801
@@ -35,26 +35,29 @@ SKIP_LIST = (
 
 if __name__ == '__main__':
 
-    datas = []
-    fromdate = datetime.datetime(2004, 1, 1)
-    todate = datetime.datetime(2024, 12, 31)
-
     s = simulator.Simulator()
     s.add_strategy(ema.EMA)
 
+    fromdate = datetime.datetime(2004, 1, 1)
+    todate = datetime.datetime(2024, 12, 31)
+
+    # add all data to simulator
     for category_name, category_value in future_const.FUTURE.items():
         category_dir = os.path.join(DATA_DIR, category_name)
         for name, future in category_value.items():
             if name in SKIP_LIST:
                 continue
+
             # get the data
             filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")
-            data = common.get_us_future_data_from_csv_file(
+            data = future_data.get_feed_from_csv_file(
                 name,
                 filename,
                 bt.TimeFrame.Days,
                 fromdate=fromdate,
                 todate=todate)
+
+            # add the data to simulator
             s.add_data(data, name)
 
     # do simulate

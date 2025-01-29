@@ -18,11 +18,10 @@
 import datetime
 import os
 
-import backtrader as bt
-
+import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import ema
-from experiments.future import common
+
 
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output"
@@ -32,19 +31,16 @@ CATEGORY_NAME = "metal"
 
 if __name__ == '__main__':
 
-    todate = x = datetime.datetime(2024, 12, 31)
-    category_dir = os.path.join(DATA_DIR, CATEGORY_NAME)
-    filename = os.path.join(DATA_DIR, f"{CATEGORY_NAME}/{NAME}.csv")
+    s = simulator.Simulator()
 
     # get the data
-    data = common.get_us_future_data_from_csv_file(
-        NAME,
-        filename,
-        bt.TimeFrame.Days,
-        todate=todate)
+    todate = datetime.datetime(2024, 12, 31)
+    filename = os.path.join(DATA_DIR, f"{CATEGORY_NAME}/{NAME}.csv")
+    data = future_data.get_feed_from_csv_file(NAME, filename, todate=todate)
+    s.add_data(data, NAME)
+
+    # add strategy
+    s.add_strategy(ema.EMA)
 
     # do simulate
-    s = simulator.Simulator()
-    s.add_data(data, NAME)
-    s.add_strategy(ema.EMA)
     s.do_simulate()

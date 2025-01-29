@@ -15,9 +15,15 @@
 
 """Analysis the profit about CN ETF."""
 
-
+from greenturtle.analyzers import correlation
 import greenturtle.constants.stock as stock_const
-from experiments.stock import common
+import greenturtle.data.backtrader.stock as stock_data
+from greenturtle.stragety.backtrader import buyhold
+from greenturtle.simulator.backtrader import simulator
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
 
 
 TICKERS = (
@@ -30,5 +36,23 @@ TICKERS = (
 )
 
 
+# pylint: disable=R0801
 if __name__ == "__main__":
-    common.do_analysis(TICKERS)
+
+    c = correlation.Correlation()
+
+    for name in TICKERS:
+        s = simulator.Simulator()
+        # add the data.
+        s.add_data(stock_data.get_feed_from_yahoo_finance(name), name)
+        # add strategy
+        s.add_strategy(buyhold.BuyHoldStrategy)
+        # do simulate
+        s.do_simulate()
+
+        # construct daily return dataframe to compute the correlation.
+        if s.summary.return_summary is not None:
+            c.add_return_summary(name, s.summary.return_summary)
+
+    cc = c.compute_correlation()
+    logger.info("\n%s", cc)

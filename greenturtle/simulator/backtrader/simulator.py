@@ -50,7 +50,12 @@ class Simulator():
             _name="AnnualReturn")
         self.cerebro.addanalyzer(
             analyzers.TimeReturn,
-            _name="TimeReturn")
+            timeframe=bt.TimeFrame.Years,
+            _name="YearsTimeReturn")
+        self.cerebro.addanalyzer(
+            analyzers.TimeReturn,
+            timeframe=bt.TimeFrame.Days,
+            _name="DaysTimeReturn")
         self.cerebro.addanalyzer(
             analyzers.Returns,
             _name="Returns",
@@ -143,15 +148,21 @@ class Simulator():
         total_return = (math.exp(analysis["rtot"]) - 1) * 100
         annual_return = analysis["rnorm"] * 100
 
-        analysis = result[0].analyzers.AnnualReturn.get_analysis()
-        year_return = {}
+        analysis = result[0].analyzers.YearsTimeReturn.get_analysis()
+        years_return = {}
         for year in analysis:
-            year_return[year] = analysis[year] * 100
+            years_return[year] = analysis[year] * 100
+
+        analysis = result[0].analyzers.DaysTimeReturn.get_analysis()
+        days_return = {}
+        for day in analysis:
+            days_return[day] = analysis[day] * 100
 
         return_summary = summary.ReturnSummary(
             total_return=total_return,
             annual_return=annual_return,
-            year_return=year_return)
+            years_return=years_return,
+            days_return=days_return)
 
         self.summary.return_summary = return_summary
 

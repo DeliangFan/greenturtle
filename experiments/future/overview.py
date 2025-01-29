@@ -22,10 +22,10 @@ import backtrader as bt
 import pandas as pd
 
 import greenturtle.constants.future as future_const
+import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import ema
 from greenturtle.util.logging import logging
-from experiments.future import common
 
 
 logger = logging.get_logger()
@@ -38,19 +38,22 @@ SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT", "ZR")
 if __name__ == '__main__':
 
     df = pd.DataFrame()
+
     fromdate = datetime.datetime(2004, 1, 1)
     todate = x = datetime.datetime(2024, 12, 31)
+
     for category_name, category_value in future_const.FUTURE.items():
         category_dir = os.path.join(DATA_DIR, category_name)
         for name, future in category_value.items():
             if name in SKIP_LIST:
                 continue
+
             # get the data
             filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")
-            data = common.get_us_future_data_from_csv_file(
+            data = future_data.get_feed_from_csv_file(
                 name,
                 filename,
-                bt.TimeFrame.Days,
+                timeframe=bt.TimeFrame.Days,
                 fromdate=fromdate,
                 todate=todate)
 

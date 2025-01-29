@@ -40,16 +40,22 @@ class ReturnSummary(BaseSummary):
     def __init__(self,
                  total_return=None,
                  annual_return=None,
-                 year_return=None):
+                 years_return=None,
+                 days_return=None):
         super().__init__()
 
         self.total_return = total_return
         self.annual_return = annual_return
 
-        if year_return:
-            self.year_return = year_return
+        if years_return is not None:
+            self.years_return = years_return
         else:
-            self.year_return = None
+            self.years_return = None
+
+        if days_return is not None:
+            self.days_return = days_return
+        else:
+            self.days_return = None
 
     def to_string(self):
         """string of the return summary"""
@@ -61,9 +67,9 @@ class ReturnSummary(BaseSummary):
         if self.annual_return is not None:
             message += f"annual Return: {self.annual_return:.2f}%\n"
 
-        if self.year_return is not None:
-            for year in self.year_return:
-                message += f"{year}: {self.year_return[year]:.2f}%\n"
+        if self.years_return is not None:
+            for year in self.years_return:
+                message += f"{year}: {self.years_return[year]:.2f}%\n"
 
         if message != "":
             # add the head of return summary

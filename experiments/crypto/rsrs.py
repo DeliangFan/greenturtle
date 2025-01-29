@@ -15,15 +15,14 @@
 
 """Experiment to benchmark the RSRS performance on cryptocurrencies."""
 
-import backtrader as bt
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
+import greenturtle.data.backtrader.crypto as crypto_data
 from greenturtle.simulator.backtrader import simulator
 from greenturtle.stragety.backtrader import rsrs
 from greenturtle.util.logging import logging
-from experiments.crypto import common
 
 
 logger = logging.get_logger()
@@ -72,17 +71,18 @@ def show_rsrs_distribution(series, plot=True):
 # pylint: disable=R0801
 if __name__ == '__main__':
 
-    data = common.get_crypto_data_from_csv_file(
-        CRYPTO_NAME,
-        DATA_NAME,
-        bt.TimeFrame.Days)
-
     rsrs_series = get_rsrs_series(18)
     show_rsrs_distribution(rsrs_series, plot=False)
     lower = rsrs_series.mean() - 1 * rsrs_series.std()
     upper = rsrs_series.mean() + 1.3 * rsrs_series.std()
 
     s = simulator.Simulator()
+
+    # add data
+    data = crypto_data.get_feed_from_csv_file(CRYPTO_NAME, DATA_NAME)
     s.add_data(data, CRYPTO_NAME)
+
+    # add strategy
     s.add_strategy(rsrs.RSRSStrategy, lower=lower, upper=upper)
+
     s.do_simulate()
