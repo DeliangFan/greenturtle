@@ -174,7 +174,8 @@ def do_analysis(
         tickers,
         analysis_single=False,
         fromdate=None,
-        todate=None):
+        todate=None,
+        plot=False):
 
     """Analyze a number of tickers."""
 
@@ -189,8 +190,9 @@ def do_analysis(
         return_columns.append(return_with_name(name))
         change_columns.append(change_with_name(name))
 
-    fig = px.line(df[return_columns], title="ticker overview")
-    fig.show()
+    if plot:
+        fig = px.line(df[return_columns], title="ticker overview")
+        fig.show()
 
     df_change = df[change_columns]
     cc = df_change.corr(method="spearman")

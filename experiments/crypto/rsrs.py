@@ -53,26 +53,27 @@ def get_rsrs_series(period=18):
     return series
 
 
-def show_rsrs_distribution(series):
+def show_rsrs_distribution(series, plot=True):
     """describe and show the rsrs series."""
 
     describe = series.describe()
     logger.info("\n%s", describe)
 
     # plot
-    series.plot.hist(
-        bins=50,
-        title="rsrs distribution",
-        xlabel="beta",
-        ylabel="count")
-    plt.show()
+    if plot:
+        series.plot.hist(
+            bins=50,
+            title="rsrs distribution",
+            xlabel="beta",
+            ylabel="count")
+        plt.show()
 
 
 # pylint: disable=R0801
 if __name__ == '__main__':
 
     rsrs_series = get_rsrs_series(18)
-    show_rsrs_distribution(rsrs_series)
+    show_rsrs_distribution(rsrs_series, plot=False)
 
     data = common.get_crypto_data_from_csv_file(
         CRYPTO_NAME,

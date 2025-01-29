@@ -5,4 +5,23 @@ fmt:
 test:
 	python -m unittest
 
+# TODO(wsfdl), rafactor experiments to e2e test
+crypto_experiment:
+	cd experiments/crypto && python mim.py
+	cd experiments/crypto && python rsi.py
+	cd experiments/crypto && python rsrs.py
+	cd experiments/crypto && python macd.py
+
+stock_experiment:
+	cd experiments/stock && python index_etf_overview_cn.py
+	cd experiments/stock && python index_etf_overview_us.py
+	cd experiments/stock && python stock_bond.py
+
+future_experiment:
+	cd experiments/future && python single.py
+	cd experiments/future && python overview.py
+	cd experiments/future && python multi_values.py
+
+experiment: crypto_experiment stock_experiment
+
 all: fmt test
