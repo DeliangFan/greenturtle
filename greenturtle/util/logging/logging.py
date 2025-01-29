@@ -65,3 +65,9 @@ def get_logger():
     """get the greenturtle logger."""
     logger = logging.getLogger(LOGGER_NAME)
     return logger
+
+
+def set_log_error_level():
+    """set error level for the log"""
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.setLevel(logging.ERROR)
