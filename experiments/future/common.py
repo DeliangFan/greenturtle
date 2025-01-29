@@ -41,7 +41,7 @@ def get_us_future_data_from_csv_file(
         close=2,
         volume=6,
         contract_unit=10,
-        margin_requirement_percent=11,
+        margin_requirement_ratio=11,
         openinterest=None,
         plot=False,
         fromdate=fromdate,

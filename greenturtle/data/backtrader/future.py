@@ -25,10 +25,10 @@ class FutureCSV(GenericCSVData):
     """Future CSV data feed
 
     contract_unit: the number of units for a future contract.
-    margin_requirement_percent: the percent for margin requirement.
+    margin_requirement_ratio: the ratio for margin requirement.
     """
 
-    # Add "contract_unit" and "margin_requirement_percent" line to the
+    # Add "contract_unit" and "margin_requirement_ratio" line to the
     # inherited ones from the base class
     lines = (
         constants_future.CONTRACT_UNIT,

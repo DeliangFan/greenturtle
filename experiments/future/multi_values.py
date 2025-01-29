@@ -61,4 +61,4 @@ if __name__ == '__main__':
         allow_short=False,
         commission=0.001,
         slippage=0.000,
-        plot=True)
+        plot=False)

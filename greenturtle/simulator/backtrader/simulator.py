@@ -31,7 +31,7 @@ logger = logging.get_logger()
 def do_simulate(datas,
                 strategy,
                 *strategy_args,
-                plot=True,
+                plot=False,
                 commission=0.001,
                 slippage=0.001,
                 **strategy_kwargs):

@@ -45,4 +45,4 @@ if __name__ == '__main__':
     datas = [(NAME, data)]
 
     # do analysis
-    simulator.do_simulate(datas, ema.EMA, allow_short=True, plot=True)
+    simulator.do_simulate(datas, ema.EMA, allow_short=True)
