@@ -75,11 +75,13 @@ if __name__ == '__main__':
                     s.summary.leverage_ratio_summary.leverage_ratio],
                 "max_draw_down": [
                     s.summary.max_draw_down_summary.max_draw_down],
-                "trader_number": [
-                    s.summary.trade_summary.trader_number],
-                "win_trader_number": [
-                    s.summary.trade_summary.win_trader_number],
             }
+
+            if s.summary.trade_summary is not None:
+                row["trader_number"] = [
+                    s.summary.trade_summary.trader_number]
+                row["win_trader_number"] = [
+                    s.summary.trade_summary.win_trader_number]
 
             new_df = pd.DataFrame(row)
             df = pd.concat([df, new_df])
