@@ -20,7 +20,7 @@ import math
 
 import backtrader as bt
 
-from greenturtle.util.constants import constants_future
+import greenturtle.constants.future as future_const
 from greenturtle.util.logging import logging
 from greenturtle import exception
 
@@ -236,7 +236,7 @@ class BaseStrategy(bt.Strategy):
             close = data.close[0]
 
             contract_unit = 1
-            if hasattr(data, constants_future.CONTRACT_UNIT):
+            if hasattr(data, future_const.CONTRACT_UNIT):
                 contract_unit = data.contract_unit
 
             contract_number = int(single_value / close / contract_unit)

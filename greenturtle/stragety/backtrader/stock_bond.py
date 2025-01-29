@@ -15,8 +15,8 @@
 
 """ Balanced stock and bond class strategy for backtrader"""
 
+import greenturtle.constants.stock as stock_const
 from greenturtle.stragety.backtrader import base
-from greenturtle.util.constants import constants_stock
 
 
 class BalancedStockAndBondStrategy(base.BaseStrategy):
@@ -34,25 +34,25 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
 
         # Keep a reference to the "close" for different data series.
         for data in self.datas:
-            if data._name == constants_stock.STOCK:
+            if data._name == stock_const.STOCK:
                 self.stock_close = data.close
-            if data._name == constants_stock.BOND:
+            if data._name == stock_const.BOND:
                 self.bond_close = data.close
 
     def next(self):
 
         # Initiate the stock.
-        stock_position = self.getpositionbyname(constants_stock.STOCK)
+        stock_position = self.getpositionbyname(stock_const.STOCK)
         if stock_position.size == 0:
             self.order_target_percent_with_log(
-                data=constants_stock.STOCK,
+                data=stock_const.STOCK,
                 target=self.stock_ratio)
 
         # Initiate the stock.
-        bond_position = self.getpositionbyname(constants_stock.BOND)
+        bond_position = self.getpositionbyname(stock_const.BOND)
         if bond_position.size == 0:
             self.order_target_percent_with_log(
-                data=constants_stock.BOND,
+                data=stock_const.BOND,
                 target=self.bond_ratio)
 
         # Calculate the values of stock and bond.
@@ -65,20 +65,20 @@ class BalancedStockAndBondStrategy(base.BaseStrategy):
         # Re-balance between stock and bond
         if stock_value_ratio >= (self.stock_ratio + self.diff_ratio):
             self.order_target_percent_with_log(
-                data=constants_stock.STOCK,
+                data=stock_const.STOCK,
                 target=self.stock_ratio)
 
             self.order_target_percent_with_log(
-                data=constants_stock.BOND,
+                data=stock_const.BOND,
                 target=self.bond_ratio)
 
         if bond_value_ratio >= (self.bond_ratio + self.diff_ratio):
             self.order_target_percent_with_log(
-                data=constants_stock.BOND,
+                data=stock_const.BOND,
                 target=self.bond_ratio)
 
             self.order_target_percent_with_log(
-                data=constants_stock.STOCK,
+                data=stock_const.STOCK,
                 target=self.stock_ratio)
 
     def is_buy_to_open(self, name):

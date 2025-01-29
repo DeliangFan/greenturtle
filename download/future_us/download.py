@@ -17,7 +17,7 @@
 
 import os
 
-from greenturtle.util.constants import constants_future as const
+import greenturtle.constants.future as future_const
 from greenturtle.util import yf_util
 
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    for category_name, category_value in const.FUTURE.items():
+    for category_name, category_value in future_const.FUTURE.items():
 
         category_dir = os.path.join(OUTPUT_DIR, category_name)
         if not os.path.exists(category_dir):
@@ -39,7 +39,7 @@ if __name__ == '__main__':
         for name, future in category_value.items():
 
             # pylint: disable=invalid-name
-            yahoo_code = future[const.YAHOO_CODE]
+            yahoo_code = future[future_const.YAHOO_CODE]
 
             df = yf_util.download_with_max_period(yahoo_code)
             df = yf_util.transform(df, yahoo_code)
@@ -47,8 +47,8 @@ if __name__ == '__main__':
             # add the future name and category
             df["name"] = name
             df["category"] = category_name
-            df[const.CONTRACT_UNIT] = future[const.CONTRACT_UNIT]
-            df[const.MARGIN_REQUIREMENT_RATIO] = \
-                future[const.MARGIN_REQUIREMENT_RATIO]
+            df[future_const.CONTRACT_UNIT] = future[future_const.CONTRACT_UNIT]
+            df[future_const.MARGIN_REQUIREMENT_RATIO] = \
+                future[future_const.MARGIN_REQUIREMENT_RATIO]
 
             df.to_csv(os.path.join(category_dir, f"{name}.csv"))

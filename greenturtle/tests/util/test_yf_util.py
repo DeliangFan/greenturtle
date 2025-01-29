@@ -17,8 +17,8 @@
 
 import unittest
 
+import greenturtle.constants.stock as stock_const
 from greenturtle.util import yf_util
-from greenturtle.util.constants import constants_stock
 
 
 class TestYFUtil(unittest.TestCase):
@@ -26,11 +26,11 @@ class TestYFUtil(unittest.TestCase):
 
     def test_download_with_max_period(self):
         """test download_with_max_period"""
-        df = yf_util.download_with_max_period(constants_stock.TLT)
+        df = yf_util.download_with_max_period(stock_const.TLT)
         self.assertEqual(round(df.iat[0, 0], 3), 38.279)
 
     def test_transform(self):
         """test transform"""
-        df = yf_util.download_with_max_period(constants_stock.TLT)
-        df = yf_util.transform(df, constants_stock.TLT)
+        df = yf_util.download_with_max_period(stock_const.TLT)
+        df = yf_util.transform(df, stock_const.TLT)
         self.assertEqual(round(df["adj_close"].iloc[0], 3), 38.279)

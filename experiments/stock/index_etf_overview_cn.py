@@ -16,16 +16,16 @@
 """Analysis the profit about us ETF."""
 
 
-from greenturtle.util.constants import constants_stock
+import greenturtle.constants.stock as stock_const
 from experiments.stock import common
 
 
 TICKERS = (
-    constants_stock.SH50_510050_SS,
-    constants_stock.CSI300_510300_SS,
-    constants_stock.CSI500_510500_SS,
-    constants_stock.Y5_511010_SS,
-    constants_stock.Y10_511260_SS
+    stock_const.SH50_510050_SS,
+    stock_const.CSI300_510300_SS,
+    stock_const.CSI500_510500_SS,
+    stock_const.Y5_511010_SS,
+    stock_const.Y10_511260_SS
 )
 
 
