@@ -18,8 +18,8 @@ crypto_experiment:
 	cd experiments/crypto && python macd.py
 
 stock_experiment:
-	cd experiments/stock && python index_etf_overview_cn.py
-	cd experiments/stock && python index_etf_overview_us.py
+	cd experiments/stock && python overview.py
+	cd experiments/stock && python single.py
 	cd experiments/stock && python stock_bond.py
 
 future_experiment:
