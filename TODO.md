@@ -20,7 +20,6 @@
 
 ## TODO
 
-- [P0] add more test for crypto like strategy
 - [P0] Dealing with future data, currently i use the main contract, what's the problem.
 - [P0] Portfolio management for single symbol
 - [P0] Portfolio management across different sectors
