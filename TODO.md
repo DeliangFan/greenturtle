@@ -15,10 +15,10 @@
 - [P0][Done] Refactor, add e2e test
 - [P2][Done] Refactor, process the data directory
 - [P0][Done] add buy and hold strategy
+- [P0][Done] add more test for stock like strategy
 
 ## TODO
 
-- [P0] add more test for stock like strategy
 - [P0] add more test for future like strategy
 - [P0] add more test for crypto like strategy
 - [P0] Dealing with future data, currently i use the main contract, what's the problem.

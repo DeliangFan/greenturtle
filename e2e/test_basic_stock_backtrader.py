@@ -26,6 +26,8 @@ from greenturtle.stragety.backtrader import channel
 from greenturtle.stragety.backtrader import ema
 from greenturtle.stragety.backtrader import macd
 from greenturtle.stragety.backtrader import mim
+from greenturtle.stragety.backtrader import rsi
+from greenturtle.stragety.backtrader import stock_bond
 
 
 class TestBasicStockBacktrader(unittest.TestCase):
@@ -34,14 +36,14 @@ class TestBasicStockBacktrader(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        fromdate = datetime(2000, 1, 1)
-        todate = datetime(2024, 1, 1)
+        self.fromdate = datetime(2000, 1, 1)
+        self.todate = datetime(2024, 1, 1)
 
         self.name = stock_const.QQQ
         self.data = stock_data.get_feed_from_yahoo_finance(
             self.name,
-            fromdate=fromdate,
-            todate=todate)
+            fromdate=self.fromdate,
+            todate=self.todate)
 
     def setUp(self):
         self.s = simulator.Simulator(commission=0, slippage=0)
@@ -251,3 +253,88 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.assertEqual(int(position_pnl["gross"] / 1000), -28)
         self.assertEqual(int(position_pnl["lost"] / 1000), -754)
         self.assertEqual(position_pnl["trade_number"], 116)
+
+    def test_stock_with_rsi(self):
+        """test trade stock with rsi strategy."""
+
+        self.s.add_data(self.data, self.name)
+        self.s.add_strategy(rsi.RSIStrategy)
+        self.s.do_simulate()
+
+        # test the return summary
+        return_summary = self.s.summary.return_summary
+        self.assertEqual(int(return_summary.total_return), 46)
+        self.assertEqual(round(return_summary.annual_return, 1), 1.6)
+
+        # test the sharpe ratio summary
+        sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
+        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.16)
+
+        # test the max draw down summary
+        max_draw_down_summary = self.s.summary.max_draw_down_summary
+        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 17.8)
+
+        # test the leverage ratio summary
+        leverage_ratio_summary = self.s.summary.leverage_ratio_summary
+        self.assertEqual(
+            round(leverage_ratio_summary.leverage_ratio, 2),
+            0.01)
+
+        # test the trade summary
+        trade_summary = self.s.summary.trade_summary
+        self.assertEqual(int(trade_summary.net / 1000), 463)
+        self.assertEqual(int(trade_summary.gross / 1000), 463)
+        self.assertEqual(int(trade_summary.won / 1000), 921)
+        self.assertEqual(int(trade_summary.lost / 1000), -458)
+        self.assertEqual(trade_summary.trader_number, 45)
+        self.assertEqual(trade_summary.win_trader_number, 29)
+
+        # test the position profit and lost summary
+        positions_pnl_summary = self.s.summary.positions_pnl_summary
+        positions_pnl = positions_pnl_summary.positions_pnl
+        self.assertIn(self.name, positions_pnl)
+
+        position_pnl = positions_pnl[self.name]
+        self.assertEqual(int(position_pnl["net"] / 1000), 463)
+        self.assertEqual(int(position_pnl["gross"] / 1000), 463)
+        self.assertEqual(int(position_pnl["lost"] / 1000), -458)
+        self.assertEqual(position_pnl["trade_number"], 45)
+
+    def test_stock_bond_balanced(self):
+        """test trade stock and bond balanced strategy."""
+
+        # add stock data
+        data = stock_data.get_feed_from_yahoo_finance(
+            stock_const.VFIAX,
+            fromdate=self.fromdate,
+            todate=self.todate)
+        self.s.add_data(data, stock_const.STOCK)
+
+        # add tlt bond
+        data = stock_data.get_feed_from_yahoo_finance(
+            stock_const.TLT,
+            fromdate=self.fromdate,
+            todate=self.todate)
+        self.s.add_data(data, stock_const.BOND)
+
+        self.s.add_strategy(stock_bond.BalancedStockAndBondStrategy)
+        self.s.do_simulate()
+
+        # test the return summary
+        return_summary = self.s.summary.return_summary
+        self.assertEqual(int(return_summary.total_return), 526)
+        self.assertEqual(round(return_summary.annual_return, 1), 8.3)
+
+        # test the sharpe ratio summary
+        sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
+        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.66)
+
+        # test the max draw down summary
+        max_draw_down_summary = self.s.summary.max_draw_down_summary
+        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 36.8)
+
+        # test the leverage ratio summary
+        leverage_ratio_summary = self.s.summary.leverage_ratio_summary
+        self.assertEqual(
+            round(leverage_ratio_summary.leverage_ratio, 2),
+            0.92)
