@@ -56,19 +56,19 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.s.do_simulate()
 
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), 392)
-        self.assertEqual(round(return_summary.annual_return, 1), 6.9)
+        self.assertEqual(392, int(return_summary.total_return))
+        self.assertEqual(6.9, round(return_summary.annual_return, 1))
 
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.36)
+        self.assertEqual(0.36, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 75.6)
+        self.assertEqual(75.6, round(max_draw_down_summary.max_draw_down, 1))
 
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.86)
+            0.86,
+            round(leverage_ratio_summary.leverage_ratio, 2))
 
     def test_stock_with_ema(self):
         """test trade stock with ema strategy."""
@@ -79,31 +79,31 @@ class TestBasicStockBacktrader(unittest.TestCase):
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), 377)
-        self.assertEqual(round(return_summary.annual_return, 1), 6.7)
+        self.assertEqual(377, int(return_summary.total_return))
+        self.assertEqual(6.7, round(return_summary.annual_return, 1))
 
         # test the sharpe ratio summary
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.4)
+        self.assertEqual(0.4, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         # test the max draw down summary
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 34.5)
+        self.assertEqual(34.5, round(max_draw_down_summary.max_draw_down, 1))
 
         # test the leverage ratio summary
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.66)
+            0.66,
+            round(leverage_ratio_summary.leverage_ratio, 2))
 
         # test the trade summary
         trade_summary = self.s.summary.trade_summary
-        self.assertEqual(int(trade_summary.net / 1000), 3354)
-        self.assertEqual(int(trade_summary.gross / 1000), 3354)
-        self.assertEqual(int(trade_summary.won / 1000), 4773)
-        self.assertEqual(int(trade_summary.lost / 1000), -1418)
-        self.assertEqual(trade_summary.trader_number, 46)
-        self.assertEqual(trade_summary.win_trader_number, 19)
+        self.assertEqual(3354, int(trade_summary.net / 1000))
+        self.assertEqual(3354, int(trade_summary.gross / 1000))
+        self.assertEqual(4773, int(trade_summary.won / 1000))
+        self.assertEqual(-1418, int(trade_summary.lost / 1000))
+        self.assertEqual(46, trade_summary.trader_number)
+        self.assertEqual(19, trade_summary.win_trader_number)
 
         # test the position profit and lost summary
         positions_pnl_summary = self.s.summary.positions_pnl_summary
@@ -111,10 +111,10 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.assertIn(self.name, positions_pnl)
 
         position_pnl = positions_pnl[self.name]
-        self.assertEqual(int(position_pnl["net"] / 1000), 3354)
-        self.assertEqual(int(position_pnl["gross"] / 1000), 3354)
-        self.assertEqual(int(position_pnl["lost"] / 1000), -1418)
-        self.assertEqual(position_pnl["trade_number"], 45)
+        self.assertEqual(3354, int(position_pnl["net"] / 1000))
+        self.assertEqual(3354, int(position_pnl["gross"] / 1000))
+        self.assertEqual(-1418, int(position_pnl["lost"] / 1000))
+        self.assertEqual(45, position_pnl["trade_number"])
 
     def test_stock_with_mim(self):
         """test trade stock with mim strategy."""
@@ -125,31 +125,31 @@ class TestBasicStockBacktrader(unittest.TestCase):
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), 501)
-        self.assertEqual(round(return_summary.annual_return, 1), 7.8)
+        self.assertEqual(501, int(return_summary.total_return))
+        self.assertEqual(7.8, round(return_summary.annual_return, 1))
 
         # test the sharpe ratio summary
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.45)
+        self.assertEqual(0.45, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         # test the max draw down summary
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 34.2)
+        self.assertEqual(34.2, round(max_draw_down_summary.max_draw_down, 1))
 
         # test the leverage ratio summary
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.65)
+            0.65,
+            round(leverage_ratio_summary.leverage_ratio, 2))
 
         # test the trade summary
         trade_summary = self.s.summary.trade_summary
-        self.assertEqual(int(trade_summary.net / 1000), 4413)
-        self.assertEqual(int(trade_summary.gross / 1000), 4413)
-        self.assertEqual(int(trade_summary.won / 1000), 7163)
-        self.assertEqual(int(trade_summary.lost / 1000), -2749)
-        self.assertEqual(trade_summary.trader_number, 148)
-        self.assertEqual(trade_summary.win_trader_number, 65)
+        self.assertEqual(4413, int(trade_summary.net / 1000))
+        self.assertEqual(4413, int(trade_summary.gross / 1000))
+        self.assertEqual(7163, int(trade_summary.won / 1000))
+        self.assertEqual(-2749, int(trade_summary.lost / 1000))
+        self.assertEqual(148, trade_summary.trader_number)
+        self.assertEqual(65, trade_summary.win_trader_number)
 
         # test the position profit and lost summary
         positions_pnl_summary = self.s.summary.positions_pnl_summary
@@ -157,10 +157,10 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.assertIn(self.name, positions_pnl)
 
         position_pnl = positions_pnl[self.name]
-        self.assertEqual(int(position_pnl["net"] / 1000), 4413)
-        self.assertEqual(int(position_pnl["gross"] / 1000), 4413)
-        self.assertEqual(int(position_pnl["lost"] / 1000), -2749)
-        self.assertEqual(position_pnl["trade_number"], 147)
+        self.assertEqual(4413, int(position_pnl["net"] / 1000))
+        self.assertEqual(4413, int(position_pnl["gross"] / 1000))
+        self.assertEqual(-2749, int(position_pnl["lost"] / 1000))
+        self.assertEqual(147, position_pnl["trade_number"])
 
     def test_stock_with_channel(self):
         """test trade stock with channel strategy."""
@@ -171,31 +171,31 @@ class TestBasicStockBacktrader(unittest.TestCase):
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), -7)
-        self.assertEqual(round(return_summary.annual_return, 1), -0.3)
+        self.assertEqual(-7, int(return_summary.total_return))
+        self.assertEqual(-0.3, round(return_summary.annual_return, 1))
 
         # test the sharpe ratio summary
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), -0.26)
+        self.assertEqual(-0.26, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         # test the max draw down summary
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 34.1)
+        self.assertEqual(34.1, round(max_draw_down_summary.max_draw_down, 1))
 
         # test the leverage ratio summary
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.15)
+            0.15,
+            round(leverage_ratio_summary.leverage_ratio, 2))
 
         # test the trade summary
         trade_summary = self.s.summary.trade_summary
-        self.assertEqual(int(trade_summary.net / 1000), -74)
-        self.assertEqual(int(trade_summary.gross / 1000), -74)
-        self.assertEqual(int(trade_summary.won / 1000), 1632)
-        self.assertEqual(int(trade_summary.lost / 1000), -1707)
-        self.assertEqual(trade_summary.trader_number, 411)
-        self.assertEqual(trade_summary.win_trader_number, 218)
+        self.assertEqual(-74, int(trade_summary.net / 1000))
+        self.assertEqual(-74, int(trade_summary.gross / 1000))
+        self.assertEqual(1632, int(trade_summary.won / 1000))
+        self.assertEqual(-1707, int(trade_summary.lost / 1000))
+        self.assertEqual(411, trade_summary.trader_number)
+        self.assertEqual(218, trade_summary.win_trader_number)
 
         # test the position profit and lost summary
         positions_pnl_summary = self.s.summary.positions_pnl_summary
@@ -203,10 +203,10 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.assertIn(self.name, positions_pnl)
 
         position_pnl = positions_pnl[self.name]
-        self.assertEqual(int(position_pnl["net"] / 1000), -74)
-        self.assertEqual(int(position_pnl["gross"] / 1000), -74)
-        self.assertEqual(int(position_pnl["lost"] / 1000), -1707)
-        self.assertEqual(position_pnl["trade_number"], 411)
+        self.assertEqual(-74, int(position_pnl["net"] / 1000))
+        self.assertEqual(-74, int(position_pnl["gross"] / 1000))
+        self.assertEqual(-1707, int(position_pnl["lost"] / 1000))
+        self.assertEqual(411, position_pnl["trade_number"])
 
     def test_stock_with_macd(self):
         """test trade stock with macd strategy."""
@@ -217,31 +217,31 @@ class TestBasicStockBacktrader(unittest.TestCase):
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), -2)
-        self.assertEqual(round(return_summary.annual_return, 1), -0.1)
+        self.assertEqual(-2, int(return_summary.total_return))
+        self.assertEqual(-0.1, round(return_summary.annual_return, 1))
 
         # test the sharpe ratio summary
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), -0.35)
+        self.assertEqual(-0.35, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         # test the max draw down summary
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 20.1)
+        self.assertEqual(20.1, round(max_draw_down_summary.max_draw_down, 1))
 
         # test the leverage ratio summary
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.02)
+            0.02,
+            round(leverage_ratio_summary.leverage_ratio, 2))
 
         # test the trade summary
         trade_summary = self.s.summary.trade_summary
-        self.assertEqual(int(trade_summary.net / 1000), -28)
-        self.assertEqual(int(trade_summary.gross / 1000), -28)
-        self.assertEqual(int(trade_summary.won / 1000), 726)
-        self.assertEqual(int(trade_summary.lost / 1000), -754)
-        self.assertEqual(trade_summary.trader_number, 116)
-        self.assertEqual(trade_summary.win_trader_number, 67)
+        self.assertEqual(-28, int(trade_summary.net / 1000))
+        self.assertEqual(-28, int(trade_summary.gross / 1000))
+        self.assertEqual(726, int(trade_summary.won / 1000))
+        self.assertEqual(-754, int(trade_summary.lost / 1000))
+        self.assertEqual(116, trade_summary.trader_number)
+        self.assertEqual(67, trade_summary.win_trader_number)
 
         # test the position profit and lost summary
         positions_pnl_summary = self.s.summary.positions_pnl_summary
@@ -249,10 +249,10 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.assertIn(self.name, positions_pnl)
 
         position_pnl = positions_pnl[self.name]
-        self.assertEqual(int(position_pnl["net"] / 1000), -28)
-        self.assertEqual(int(position_pnl["gross"] / 1000), -28)
-        self.assertEqual(int(position_pnl["lost"] / 1000), -754)
-        self.assertEqual(position_pnl["trade_number"], 116)
+        self.assertEqual(-28, int(position_pnl["net"] / 1000))
+        self.assertEqual(-28, int(position_pnl["gross"] / 1000))
+        self.assertEqual(-754, int(position_pnl["lost"] / 1000))
+        self.assertEqual(116, position_pnl["trade_number"])
 
     def test_stock_with_rsi(self):
         """test trade stock with rsi strategy."""
@@ -263,31 +263,31 @@ class TestBasicStockBacktrader(unittest.TestCase):
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), 46)
-        self.assertEqual(round(return_summary.annual_return, 1), 1.6)
+        self.assertEqual(46, int(return_summary.total_return))
+        self.assertEqual(1.6, round(return_summary.annual_return, 1))
 
         # test the sharpe ratio summary
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.16)
+        self.assertEqual(0.16, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         # test the max draw down summary
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 17.8)
+        self.assertEqual(17.8, round(max_draw_down_summary.max_draw_down, 1))
 
         # test the leverage ratio summary
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.01)
+            0.01,
+            round(leverage_ratio_summary.leverage_ratio, 2))
 
         # test the trade summary
         trade_summary = self.s.summary.trade_summary
-        self.assertEqual(int(trade_summary.net / 1000), 463)
-        self.assertEqual(int(trade_summary.gross / 1000), 463)
-        self.assertEqual(int(trade_summary.won / 1000), 921)
-        self.assertEqual(int(trade_summary.lost / 1000), -458)
-        self.assertEqual(trade_summary.trader_number, 45)
-        self.assertEqual(trade_summary.win_trader_number, 29)
+        self.assertEqual(463, int(trade_summary.net / 1000))
+        self.assertEqual(463, int(trade_summary.gross / 1000))
+        self.assertEqual(921, int(trade_summary.won / 1000))
+        self.assertEqual(-458, int(trade_summary.lost / 1000))
+        self.assertEqual(45, trade_summary.trader_number)
+        self.assertEqual(29, trade_summary.win_trader_number)
 
         # test the position profit and lost summary
         positions_pnl_summary = self.s.summary.positions_pnl_summary
@@ -295,10 +295,10 @@ class TestBasicStockBacktrader(unittest.TestCase):
         self.assertIn(self.name, positions_pnl)
 
         position_pnl = positions_pnl[self.name]
-        self.assertEqual(int(position_pnl["net"] / 1000), 463)
-        self.assertEqual(int(position_pnl["gross"] / 1000), 463)
-        self.assertEqual(int(position_pnl["lost"] / 1000), -458)
-        self.assertEqual(position_pnl["trade_number"], 45)
+        self.assertEqual(463, int(position_pnl["net"] / 1000))
+        self.assertEqual(463, int(position_pnl["gross"] / 1000))
+        self.assertEqual(-458, int(position_pnl["lost"] / 1000))
+        self.assertEqual(45, position_pnl["trade_number"])
 
     def test_stock_bond_balanced(self):
         """test trade stock and bond balanced strategy."""
@@ -322,19 +322,19 @@ class TestBasicStockBacktrader(unittest.TestCase):
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(int(return_summary.total_return), 526)
-        self.assertEqual(round(return_summary.annual_return, 1), 8.3)
+        self.assertEqual(526, int(return_summary.total_return))
+        self.assertEqual(8.3, round(return_summary.annual_return, 1))
 
         # test the sharpe ratio summary
         sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(round(sharpe_ratio_summary.sharpe_ratio, 2), 0.66)
+        self.assertEqual(0.66, round(sharpe_ratio_summary.sharpe_ratio, 2))
 
         # test the max draw down summary
         max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(round(max_draw_down_summary.max_draw_down, 1), 36.8)
+        self.assertEqual(36.8, round(max_draw_down_summary.max_draw_down, 1))
 
         # test the leverage ratio summary
         leverage_ratio_summary = self.s.summary.leverage_ratio_summary
         self.assertEqual(
-            round(leverage_ratio_summary.leverage_ratio, 2),
-            0.92)
+            0.92,
+            round(leverage_ratio_summary.leverage_ratio, 2))

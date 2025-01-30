@@ -57,7 +57,7 @@ class TestStockDataWithBackTrader(unittest.TestCase):
 
         # pylint: disable=no-member
         length = len(data.p.dataname)
-        self.assertEqual(length, 252)
+        self.assertEqual(252, length)
 
 
 class TestFutureDataWithBackTrader(unittest.TestCase):
@@ -83,11 +83,11 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
             category=self.category)
 
         self.assertTrue(len(df) > 0)
-        self.assertEqual(int(df.iloc[2000]["adj_close"]), 797)
-        self.assertEqual(int(df.iloc[2000]["close"]), 797)
-        self.assertEqual(int(df.iloc[2000]["high"]), 809)
-        self.assertEqual(int(df.iloc[2000]["low"]), 794)
-        self.assertEqual(int(df.iloc[2000]["open"]), 801)
+        self.assertEqual(797, int(df.iloc[2000]["adj_close"]))
+        self.assertEqual(797, int(df.iloc[2000]["close"]))
+        self.assertEqual(809, int(df.iloc[2000]["high"]))
+        self.assertEqual(794, int(df.iloc[2000]["low"]))
+        self.assertEqual(801, int(df.iloc[2000]["open"]))
 
     def test_get_data_frame_from_yahoo_finance_with_period(self):
         """test get_data_frame_from_yahoo_finance with period"""
@@ -101,7 +101,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
             fromdate=fromdate,
             todate=todate)
 
-        self.assertEqual(len(df), 249)
+        self.assertEqual(249, len(df))
 
     def test_get_feed_from_yahoo_finance(self):
         """test get_feed_from_yahoo_finance"""
