@@ -30,6 +30,7 @@ from greenturtle.stragety.backtrader import rsi
 from greenturtle.stragety.backtrader import stock_bond
 
 
+# pylint: disable=R0801
 class TestBasicStockBacktrader(unittest.TestCase):
     """e2e test for stock within backtrader."""
 
