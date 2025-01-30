@@ -45,6 +45,26 @@ class FutureCSV(GenericCSVData):
     )
 
 
+class FuturePandasData(bt.feeds.PandasData):
+    """Future panda data feed
+
+    contract_unit: the number of units for a future contract.
+    margin_requirement_ratio: the ratio for margin requirement.
+    """
+
+    # Add "contract_unit" and "margin_requirement_ratio" line to the
+    # inherited ones from the base class
+    lines = (
+        future_const.CONTRACT_UNIT,
+        future_const.MARGIN_REQUIREMENT_RATIO
+    )
+
+    params = (
+        (future_const.CONTRACT_UNIT, 7),
+        (future_const.MARGIN_REQUIREMENT_RATIO, 8),
+    )
+
+
 # pylint: disable=too-many-positional-arguments,too-many-arguments
 def get_data_frame_from_yahoo_finance(
         yahoo_code,
@@ -53,7 +73,8 @@ def get_data_frame_from_yahoo_finance(
         contract_unit=None,
         margin_requirement_ratio=None,
         fromdate=None,
-        todate=None):
+        todate=None,
+        to_csv=True):
     """
     Get the data frame from yahoo finance and convert it to the format
     expected by backtrader.
@@ -67,8 +88,9 @@ def get_data_frame_from_yahoo_finance(
     # rename the columns
     df = yf_util.rename_yf_column(df)
 
-    # datetime index as a column
-    df.index = df.index.map(lambda x: x.strftime(time_util.DEFAULT_FORMAT))
+    if to_csv:
+        # format the datetime index for csv
+        df.index = df.index.map(lambda x: x.strftime(time_util.DEFAULT_FORMAT))
 
     # add the yahoo code as a column
     df[future_const.YAHOO_CODE] = yahoo_code
@@ -114,6 +136,51 @@ def get_feed_from_csv_file(
         volume=6,
         contract_unit=10,
         margin_requirement_ratio=11,
+        openinterest=None,
+        plot=False,
+        fromdate=fromdate,
+        todate=todate,
+    )
+
+    return data
+
+
+# pylint: disable=too-many-positional-arguments,too-many-arguments
+def get_feed_from_yahoo_finance(
+        yahoo_code,
+        name=None,
+        category=None,
+        contract_unit=None,
+        margin_requirement_ratio=None,
+        fromdate=None,
+        todate=None):
+    """
+    Get the data feed from yahoo finance and convert it to the format
+    expected by backtrader.
+    """
+
+    df = get_data_frame_from_yahoo_finance(
+        yahoo_code,
+        name=name,
+        category=category,
+        contract_unit=contract_unit,
+        margin_requirement_ratio=margin_requirement_ratio,
+        fromdate=fromdate,
+        todate=todate,
+        to_csv=False)
+
+    # pylint: disable=too-many-function-args,unexpected-keyword-arg
+    data = FuturePandasData(
+        name=name,
+        dataname=df,
+        timeframe=bt.TimeFrame.Days,
+        open=4,
+        high=2,
+        low=3,
+        close=1,
+        volume=5,
+        contract_unit=9,
+        margin_requirement_ratio=10,
         openinterest=None,
         plot=False,
         fromdate=fromdate,
