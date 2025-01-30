@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""Experiment to benchmark the MACD performance on cryptocurrencies."""
+"""Experiment to benchmark the RSI performance on cryptocurrencies."""
 
 import greenturtle.data.backtrader.crypto as crypto_data
 from greenturtle.simulator.backtrader import simulator
-from greenturtle.stragety.backtrader import macd
+from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
@@ -34,6 +34,6 @@ if __name__ == '__main__':
     s.add_data(data, CRYPTO_NAME)
 
     # add strategy
-    s.add_strategy(macd.MACDWithATRStrategy)
+    s.add_strategy(ema.EMA)
 
     s.do_simulate()
