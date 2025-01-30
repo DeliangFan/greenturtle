@@ -26,7 +26,19 @@ from greenturtle.util.logging import logging
 logger = logging.get_logger()
 
 
-TICKERS = (
+"""
+cn tickers.
+SYMBOLS = (
+    stock_const.SH50_510050_SS,
+    stock_const.CSI300_510300_SS,
+    stock_const.CSI500_510500_SS,
+    stock_const.Y5_511010_SS,
+    stock_const.Y10_511260_SS
+)
+"""
+
+# us tickers
+SYMBOLS = (
     stock_const.VFIAX,
     stock_const.QQQ,
     stock_const.DIA,
@@ -41,7 +53,7 @@ if __name__ == "__main__":
 
     c = correlation.Correlation()
 
-    for name in TICKERS:
+    for name in SYMBOLS:
         s = simulator.Simulator()
         # add the data.
         s.add_data(stock_data.get_feed_from_yahoo_finance(name), name)
