@@ -12,10 +12,8 @@ test: unittest e2etest
 
 # TODO(wsfdl), rafactor experiments to e2e test
 crypto_experiment:
-	cd experiments/crypto && python mim.py
-	cd experiments/crypto && python rsi.py
+	cd experiments/crypto && python single.py
 	cd experiments/crypto && python rsrs.py
-	cd experiments/crypto && python macd.py
 
 stock_experiment:
 	cd experiments/stock && python overview.py
