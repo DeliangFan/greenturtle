@@ -46,8 +46,8 @@ class TestBasicFutureBacktrader(unittest.TestCase):
                 # pylint: disable=invalid-name
                 yahoo_code = future[future_const.YAHOO_CODE]
                 multiplier = future[future_const.MULTIPLIER]
-                margin_requirement_ratio = \
-                    future[future_const.MARGIN_REQUIREMENT_RATIO]
+                margin_ratio = \
+                    future[future_const.MARGIN_RATIO]
 
                 # get feed data from yahoo finance
                 data = future_data.get_feed_from_yahoo_finance(
@@ -55,7 +55,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
                     name=name,
                     category=category_name,
                     multiplier=multiplier,
-                    margin_requirement_ratio=margin_requirement_ratio,
+                    margin_ratio=margin_ratio,
                     fromdate=self.fromdate,
                     todate=self.todate)
 

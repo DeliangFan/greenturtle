@@ -29,19 +29,19 @@ class FutureCSV(GenericCSVData):
     """Future CSV data feed
 
     multiplier: the number of units for a future contract.
-    margin_requirement_ratio: the ratio for margin requirement.
+    margin_ratio: the ratio for margin requirement.
     """
 
-    # Add "multiplier" and "margin_requirement_ratio" line to the
+    # Add "multiplier" and "margin_ratio" line to the
     # inherited ones from the base class
     lines = (
         future_const.MULTIPLIER,
-        future_const.MARGIN_REQUIREMENT_RATIO
+        future_const.MARGIN_RATIO
     )
 
     params = (
         (future_const.MULTIPLIER, 7),
-        (future_const.MARGIN_REQUIREMENT_RATIO, 8),
+        (future_const.MARGIN_RATIO, 8),
     )
 
 
@@ -49,19 +49,19 @@ class FuturePandasData(bt.feeds.PandasData):
     """Future panda data feed
 
     multiplier: the number of units for a future contract.
-    margin_requirement_ratio: the ratio for margin requirement.
+    margin_ratio: the ratio for margin requirement.
     """
 
-    # Add "multiplier" and "margin_requirement_ratio" line to the
+    # Add "multiplier" and "margin_ratio" line to the
     # inherited ones from the base class
     lines = (
         future_const.MULTIPLIER,
-        future_const.MARGIN_REQUIREMENT_RATIO
+        future_const.MARGIN_RATIO
     )
 
     params = (
         (future_const.MULTIPLIER, 7),
-        (future_const.MARGIN_REQUIREMENT_RATIO, 8),
+        (future_const.MARGIN_RATIO, 8),
     )
 
 
@@ -71,7 +71,7 @@ def get_data_frame_from_yahoo_finance(
         name=None,
         category=None,
         multiplier=None,
-        margin_requirement_ratio=None,
+        margin_ratio=None,
         fromdate=None,
         todate=None,
         to_csv=True):
@@ -104,8 +104,8 @@ def get_data_frame_from_yahoo_finance(
     # add contract unit and margin requirement ratio as columns
     if multiplier is not None:
         df[future_const.MULTIPLIER] = multiplier
-    if margin_requirement_ratio is not None:
-        df[future_const.MARGIN_REQUIREMENT_RATIO] = margin_requirement_ratio
+    if margin_ratio is not None:
+        df[future_const.MARGIN_RATIO] = margin_ratio
 
     return df
 
@@ -135,7 +135,7 @@ def get_feed_from_csv_file(
         close=2,
         volume=6,
         multiplier=10,
-        margin_requirement_ratio=11,
+        margin_ratio=11,
         openinterest=None,
         plot=False,
         fromdate=fromdate,
@@ -151,7 +151,7 @@ def get_feed_from_yahoo_finance(
         name=None,
         category=None,
         multiplier=None,
-        margin_requirement_ratio=None,
+        margin_ratio=None,
         fromdate=None,
         todate=None):
     """
@@ -164,7 +164,7 @@ def get_feed_from_yahoo_finance(
         name=name,
         category=category,
         multiplier=multiplier,
-        margin_requirement_ratio=margin_requirement_ratio,
+        margin_ratio=margin_ratio,
         fromdate=fromdate,
         todate=todate,
         to_csv=False)
@@ -180,7 +180,7 @@ def get_feed_from_yahoo_finance(
         close=1,
         volume=5,
         multiplier=9,
-        margin_requirement_ratio=10,
+        margin_ratio=10,
         openinterest=None,
         plot=False,
         fromdate=fromdate,
