@@ -304,8 +304,8 @@ class Process2AdjustPrice:
             category = future_const.FUTURE[self.category]
             if self.name in category:
                 future = category[self.name]
-                adjust_df[future_const.CONTRACT_UNIT] = \
-                    future[future_const.CONTRACT_UNIT]
+                adjust_df[future_const.MULTIPLIER] = \
+                    future[future_const.MULTIPLIER]
                 adjust_df[future_const.MARGIN_REQUIREMENT_RATIO] = \
                     future[future_const.MARGIN_REQUIREMENT_RATIO]
 

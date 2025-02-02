@@ -109,7 +109,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
             self.yahoo_code,
             name=self.name,
             category=self.category,
-            contract_unit=100,
+            multiplier=100,
             margin_requirement_ratio=0.1)
 
         df.to_csv(self.filename)

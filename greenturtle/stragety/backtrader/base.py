@@ -235,12 +235,12 @@ class BaseStrategy(bt.Strategy):
             data = self.symbols_data[name]
             close = data.close[0]
 
-            contract_unit = 1
-            if hasattr(data, future_const.CONTRACT_UNIT):
-                contract_unit = data.contract_unit
+            multiplier = 1
+            if hasattr(data, future_const.MULTIPLIER):
+                multiplier = data.multiplier
 
-            contract_number = int(single_value / close / contract_unit)
-            size = contract_number * contract_unit
+            contract_number = int(single_value / close / multiplier)
+            size = contract_number * multiplier
 
             if name in long_desired:
                 portfolios[name] = size
