@@ -24,7 +24,7 @@ from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output"
+DATA_DIR = "../../download/future_us/output/main"
 NAME = "HG"
 CATEGORY_NAME = "metal"
 

@@ -31,7 +31,7 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output"
+DATA_DIR = "../../download/future_us/output/main"
 # NOTE(fixme) ZR data in yahoo finance looks bad
 SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT", "ZR")
 
