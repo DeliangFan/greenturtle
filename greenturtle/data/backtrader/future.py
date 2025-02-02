@@ -28,19 +28,19 @@ import greenturtle.constants.future as future_const
 class FutureCSV(GenericCSVData):
     """Future CSV data feed
 
-    contract_unit: the number of units for a future contract.
+    multiplier: the number of units for a future contract.
     margin_requirement_ratio: the ratio for margin requirement.
     """
 
-    # Add "contract_unit" and "margin_requirement_ratio" line to the
+    # Add "multiplier" and "margin_requirement_ratio" line to the
     # inherited ones from the base class
     lines = (
-        future_const.CONTRACT_UNIT,
+        future_const.MULTIPLIER,
         future_const.MARGIN_REQUIREMENT_RATIO
     )
 
     params = (
-        (future_const.CONTRACT_UNIT, 7),
+        (future_const.MULTIPLIER, 7),
         (future_const.MARGIN_REQUIREMENT_RATIO, 8),
     )
 
@@ -48,19 +48,19 @@ class FutureCSV(GenericCSVData):
 class FuturePandasData(bt.feeds.PandasData):
     """Future panda data feed
 
-    contract_unit: the number of units for a future contract.
+    multiplier: the number of units for a future contract.
     margin_requirement_ratio: the ratio for margin requirement.
     """
 
-    # Add "contract_unit" and "margin_requirement_ratio" line to the
+    # Add "multiplier" and "margin_requirement_ratio" line to the
     # inherited ones from the base class
     lines = (
-        future_const.CONTRACT_UNIT,
+        future_const.MULTIPLIER,
         future_const.MARGIN_REQUIREMENT_RATIO
     )
 
     params = (
-        (future_const.CONTRACT_UNIT, 7),
+        (future_const.MULTIPLIER, 7),
         (future_const.MARGIN_REQUIREMENT_RATIO, 8),
     )
 
@@ -70,7 +70,7 @@ def get_data_frame_from_yahoo_finance(
         yahoo_code,
         name=None,
         category=None,
-        contract_unit=None,
+        multiplier=None,
         margin_requirement_ratio=None,
         fromdate=None,
         todate=None,
@@ -102,8 +102,8 @@ def get_data_frame_from_yahoo_finance(
         df["category"] = category
 
     # add contract unit and margin requirement ratio as columns
-    if contract_unit is not None:
-        df[future_const.CONTRACT_UNIT] = contract_unit
+    if multiplier is not None:
+        df[future_const.MULTIPLIER] = multiplier
     if margin_requirement_ratio is not None:
         df[future_const.MARGIN_REQUIREMENT_RATIO] = margin_requirement_ratio
 
@@ -134,7 +134,7 @@ def get_feed_from_csv_file(
         low=4,
         close=2,
         volume=6,
-        contract_unit=10,
+        multiplier=10,
         margin_requirement_ratio=11,
         openinterest=None,
         plot=False,
@@ -150,7 +150,7 @@ def get_feed_from_yahoo_finance(
         yahoo_code,
         name=None,
         category=None,
-        contract_unit=None,
+        multiplier=None,
         margin_requirement_ratio=None,
         fromdate=None,
         todate=None):
@@ -163,7 +163,7 @@ def get_feed_from_yahoo_finance(
         yahoo_code,
         name=name,
         category=category,
-        contract_unit=contract_unit,
+        multiplier=multiplier,
         margin_requirement_ratio=margin_requirement_ratio,
         fromdate=fromdate,
         todate=todate,
@@ -179,7 +179,7 @@ def get_feed_from_yahoo_finance(
         low=3,
         close=1,
         volume=5,
-        contract_unit=9,
+        multiplier=9,
         margin_requirement_ratio=10,
         openinterest=None,
         plot=False,

@@ -45,7 +45,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
 
                 # pylint: disable=invalid-name
                 yahoo_code = future[future_const.YAHOO_CODE]
-                contract_unit = future[future_const.CONTRACT_UNIT]
+                multiplier = future[future_const.MULTIPLIER]
                 margin_requirement_ratio = \
                     future[future_const.MARGIN_REQUIREMENT_RATIO]
 
@@ -54,7 +54,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
                     yahoo_code,
                     name=name,
                     category=category_name,
-                    contract_unit=contract_unit,
+                    multiplier=multiplier,
                     margin_requirement_ratio=margin_requirement_ratio,
                     fromdate=self.fromdate,
                     todate=self.todate)

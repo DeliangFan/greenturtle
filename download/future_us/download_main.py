@@ -47,7 +47,7 @@ if __name__ == '__main__':
                 yahoo_code=yahoo_code,
                 name=name,
                 category=category_name,
-                contract_unit=future[future_const.CONTRACT_UNIT],
+                multiplier=future[future_const.MULTIPLIER],
                 margin_requirement_ratio=margin_requirement_ratio,
             )
 
