@@ -306,8 +306,8 @@ class Process2AdjustPrice:
                 future = category[self.name]
                 adjust_df[future_const.MULTIPLIER] = \
                     future[future_const.MULTIPLIER]
-                adjust_df[future_const.MARGIN_REQUIREMENT_RATIO] = \
-                    future[future_const.MARGIN_REQUIREMENT_RATIO]
+                adjust_df[future_const.MARGIN_RATIO] = \
+                    future[future_const.MARGIN_RATIO]
 
         if not os.path.exists(self.dst_dir):
             os.makedirs(self.dst_dir)
