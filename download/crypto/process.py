@@ -23,6 +23,7 @@ from greenturtle.util import time_util
 
 
 # columns of the file.
+# pylint: disable=R0801
 cols = [
     # open time is the Greenwich Mean Time, which is similiar to UTC
     "open_time",

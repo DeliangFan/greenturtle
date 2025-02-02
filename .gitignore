@@ -37,6 +37,7 @@ coverage.xml
 download/crypto/spot/
 download/*/csv/
 download/*/output/
+download/future_us/data/
 
 # Others, like tmp notes
 experiments/future/FIXME.MD

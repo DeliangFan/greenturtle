@@ -22,7 +22,7 @@ import greenturtle.data.backtrader.future as future_data
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+OUTPUT_DIR = os.path.join(BASE_DIR, "output/main")
 
 
 if __name__ == '__main__':

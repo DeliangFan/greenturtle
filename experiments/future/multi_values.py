@@ -27,7 +27,7 @@ from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output"
+DATA_DIR = "../../download/future_us/output/main"
 SKIP_LIST = (
     "6B", "6J", "DX", "6E", "ZN", "ZT", "DC", "BTC", "ETH", "NKD", "CL", "ZR"
 )

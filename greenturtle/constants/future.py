@@ -15,6 +15,7 @@
 """some constants for future"""
 
 YAHOO_CODE = "yahoo_code"
+CONTRACT_NAME = "contract_name"
 CONTRACT_UNIT = "contract_unit"
 DESCRIPTION = "description"
 MARGIN_REQUIREMENT_RATIO = "margin_requirement_ratio"
@@ -270,4 +271,36 @@ FUTURE = {
     "currency": CURRENCY,
     "stock_indices": STOCK_INDICES,
     "interest_rates": INTEREST_RATES,
+}
+
+# month codes alphabets to number
+MONTH_CODES_A2N = {
+    "F": "01",
+    "G": "02",
+    "H": "03",
+    "J": "04",
+    "K": "05",
+    "M": "06",
+    "N": "07",
+    "Q": "08",
+    "U": "09",
+    "V": "10",
+    "X": "11",
+    "Z": "12",
+}
+
+# month codes number to alphabets
+MONTH_CODES_N2A = {
+    "01": "F",
+    "02": "G",
+    "03": "H",
+    "04": "J",
+    "05": "K",
+    "06": "M",
+    "07": "N",
+    "08": "Q",
+    "09": "U",
+    "10": "V",
+    "11": "X",
+    "12": "Z",
 }

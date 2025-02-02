@@ -47,3 +47,8 @@ class GreenTurtleBaseException(Exception):
 class SymbolUnexpectedIntersectionError(GreenTurtleBaseException):
     """symbol unexpected intersection error."""
     msg_fmt = "symbol unexpected intersection error."
+
+
+class ContractNameNotFound(GreenTurtleBaseException):
+    """contract name not found error."""
+    msg_fmt = "contract name not found error."
