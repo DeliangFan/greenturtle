@@ -16,11 +16,9 @@
 """ Base strategy class for backtrader which implements some basic interface"""
 
 import abc
-import math
 
 import backtrader as bt
 
-import greenturtle.constants.future as future_const
 from greenturtle.util.logging import logging
 from greenturtle import exception
 
@@ -38,6 +36,7 @@ class BaseStrategy(bt.Strategy):
         self.leverage_limit = leverage_limit
         self.order = None
         self._init_others()
+        self.bankruptcy = False
 
     def _init_others(self):
         self.symbols_data = {}
@@ -60,8 +59,12 @@ class BaseStrategy(bt.Strategy):
 
     def next(self):
         """next function in strategy."""
-        if self.order:
+        if self.order or self.bankruptcy:
             return
+
+        if self._check_bankruptcy():
+            return
+
         # 1. get the long and short hold position
         long_hold, short_hold = self.symbols_within_hold()
 
@@ -86,6 +89,18 @@ class BaseStrategy(bt.Strategy):
 
             # 6. execute the orders.
             self.execute(current_portfolios, desired_portfolios)
+
+    def _check_bankruptcy(self):
+        """check if account is bankrupt"""
+        total_value = self.broker.get_value()
+        cash = self.broker.get_cash()
+
+        if total_value <= 0 or cash <= 0:
+
+            logger.error("bankruptcy, stop backtest!!!")
+            self.bankruptcy = True
+
+        return self.bankruptcy
 
     def symbols_within_hold(self):
         """symbols in hold."""
@@ -174,16 +189,18 @@ class BaseStrategy(bt.Strategy):
         buy_to_closes = self.symbols_buy_to_close()
 
         # validate the operations for symbols
-        self.validate(buy_to_opens, sell_to_closes, sell_to_opens,
-                      buy_to_closes)
+        self._validate(buy_to_opens,
+                       sell_to_closes,
+                       sell_to_opens,
+                       buy_to_closes)
 
         return buy_to_opens, sell_to_opens
 
-    def validate(self,
-                 buy_to_opens,
-                 sell_to_closes,
-                 sell_to_opens=None,
-                 buy_to_closes=None):
+    def _validate(self,
+                  buy_to_opens,
+                  sell_to_closes,
+                  sell_to_opens=None,
+                  buy_to_closes=None):
         """validate the symbols."""
 
         if sell_to_opens is None:
@@ -234,13 +251,9 @@ class BaseStrategy(bt.Strategy):
         for name in self.names:
             data = self.symbols_data[name]
             close = data.close[0]
-
-            multiplier = 1
-            if hasattr(data, future_const.MULTIPLIER):
-                multiplier = data.multiplier
-
-            contract_number = int(single_value / close / multiplier)
-            size = contract_number * multiplier
+            # compute the size
+            commissioninfo = self.broker.getcommissioninfo(data)
+            size = commissioninfo.getsize(close, single_value)
 
             if name in long_desired:
                 portfolios[name] = size
@@ -319,9 +332,11 @@ class BaseStrategy(bt.Strategy):
         # pylint: disable=protected-access
         name = data._name
         close = data.close[0]
-        value = close * size
-        self.log(f"try to order {name} size: {size}" +
-                 f" with price {close:.3f}, value {value:.0f}")
+        position = self.getpositionbyname(name)
+        original_size = 0 if position is None else position.size
+
+        self.log(f"try to adjust {name} size from {original_size} to" +
+                 f" {size} with price {close:.3f}")
 
         self.order_target_size(data=data, target=size)
 
@@ -335,34 +350,43 @@ class BaseStrategy(bt.Strategy):
             return
 
         if order.status in [order.Completed]:
+
+            # order information
             # pylint: disable=protected-access
             name, price = order.data._name, order.executed.price
             size, comm = order.executed.size, order.executed.comm
-            value = math.fabs(size) * price
+            value = order.executed.value
+
+            # additional information for future
+            commissioninfo = self.broker.getcommissioninfo(order.data)
+            multiplier = commissioninfo.p.mult
+            nominal_value = size * price * multiplier
+            stock_like = commissioninfo.stocklike
+
+            # logging the order
+            msg = f"name: {name}, price: {price:.3f}, " + \
+                  f"size: {size:.0f}, comm: {comm:.2f}"
 
             if order.isbuy():
-                self.log(
-                    f"BUY EXECUTED, name: {name}, price: {price:.3f}, " +
-                    f"size: {size:.0f}, value: {value:.2f}, comm: {comm:.2f}"
-                )
+                msg = "BUY EXECUTED, " + msg
             elif order.issell():
-                self.log(
-                    f"SELL EXECUTED, name: {name}, price: {price:.3f}, " +
-                    f"size: {size:.0f}, value: {value:.2f}, comm: {comm:.2f}"
-                )
+                msg = "SELL EXECUTED, " + msg
 
+            if stock_like:
+                msg = msg + f", value: {value}"
+            else:
+                msg = msg + f", margin: {value}"
+                msg = msg + f", nominal value: {nominal_value:.2f}"
+
+            # logging the order
+            self.log(msg)
+
+            # logging the total value and order after executed
             total_value = self.broker.get_value()
-            position = self.getpositionbyname(name)
-            position_size = position.size
-            position_price = position.price
-            position_value = position_price * position_size
             cash = self.broker.getcash()
-            self.log(
-                f"total value: {total_value:.0f}, " +
-                f"cash value {cash:.0f}, " +
-                f"position value {position_value:.2f}, " +
-                f"size: {position_size} " +
-                f"price: {position_price:.3f}")
+            msg = f"after execute total value: {total_value:.0f}, " + \
+                  f"cash: {cash:.0f}"
+            self.log(msg)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log('Order Canceled/Margin/Rejected')

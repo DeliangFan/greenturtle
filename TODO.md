@@ -17,13 +17,13 @@
 - [P0][Done] add buy and hold strategy
 - [P0][Done] add more test for stock like strategy
 - [P0][Done] add more test for future like strategy
+- [P0][Done] Dealing with future data, currently i use the main contract, what's the problem.
+- [P0][Done] Simulate the margin trading.
 
 ## TODO
 
-- [P0] Dealing with future data, currently i use the main contract, what's the problem.
 - [P0] Portfolio management for single symbol
 - [P0] Portfolio management across different sectors
-- [P0] Simulate the margin trading.
 - [P0] Refactor, abstract the balance for stock and bond with buy one.
 - [P1] Risk management
 - [P2] Deal with the data limited to the lasted start date.

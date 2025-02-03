@@ -20,7 +20,7 @@ import unittest
 
 import greenturtle.constants.stock as stock_const
 import greenturtle.data.backtrader.stock as stock_data
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator.backtrader import stock_simulator
 from greenturtle.stragety.backtrader import buyhold
 from greenturtle.stragety.backtrader import channel
 from greenturtle.stragety.backtrader import ema
@@ -47,7 +47,8 @@ class TestBasicStockBacktrader(unittest.TestCase):
             todate=self.todate)
 
     def setUp(self):
-        self.s = simulator.Simulator(commission=0, slippage=0)
+        self.s = stock_simulator.StockSimulator()
+        self.s.set_commission(commission=0.0)
 
     def test_stock_with_buy_and_hold(self):
         """test buy and hold stock."""

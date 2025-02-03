@@ -20,7 +20,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 import greenturtle.data.backtrader.crypto as crypto_data
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator.backtrader import stock_simulator
 from greenturtle.stragety.backtrader import rsrs
 from greenturtle.util.logging import logging
 
@@ -76,7 +76,8 @@ if __name__ == '__main__':
     lower = rsrs_series.mean() - 1 * rsrs_series.std()
     upper = rsrs_series.mean() + 1.3 * rsrs_series.std()
 
-    s = simulator.Simulator()
+    s = stock_simulator.StockSimulator()
+    s.set_commission()
 
     # add data
     data = crypto_data.get_feed_from_csv_file(CRYPTO_NAME, DATA_NAME)

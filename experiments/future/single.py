@@ -19,28 +19,35 @@ import datetime
 import os
 
 import greenturtle.data.backtrader.future as future_data
-from greenturtle.simulator.backtrader import simulator
-from greenturtle.stragety.backtrader import ema
+from greenturtle.simulator.backtrader import future_simulator
+from greenturtle.stragety.backtrader import rsi
 
 
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output/main"
-NAME = "HG"
+NAME = "GC"
 CATEGORY_NAME = "metal"
 
 
 if __name__ == '__main__':
 
-    s = simulator.Simulator()
+    s = future_simulator.FutureSimulator()
+    s.set_default_commission_by_name(NAME)
 
     # get the data
+    fromdate = datetime.datetime(2001, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
     filename = os.path.join(DATA_DIR, f"{CATEGORY_NAME}/{NAME}.csv")
-    data = future_data.get_feed_from_csv_file(NAME, filename, todate=todate)
+
+    data = future_data.get_feed_from_csv_file(
+        NAME,
+        filename,
+        fromdate=fromdate,
+        todate=todate)
     s.add_data(data, NAME)
 
     # add strategy
-    s.add_strategy(ema.EMA)
+    s.add_strategy(rsi.RSIStrategy, leverage_limit=0.2)
 
     # do simulate
     s.do_simulate()

@@ -15,6 +15,7 @@
 
 """Experiment to benchmark the MACD performance on cryptocurrencies."""
 
+import abc
 import math
 
 import backtrader as bt
@@ -33,15 +34,10 @@ class Simulator():
 
     """Basic analysis class for backtrader."""
 
-    def __init__(self,
-                 cash=1000000,
-                 commission=0.001,
-                 slippage=0.001,
-                 plot=False):
+    def __init__(self, cash=1000000, slippage=0, plot=False):
 
         self.plot = plot
         self.summary = summary.Summary()
-
         self.cerebro = bt.Cerebro()
 
         # add analyzer
@@ -76,8 +72,7 @@ class Simulator():
             position_pnl.PositionPNL,
             _name="PositionPNL")
 
-        # Set the commission
-        self.cerebro.broker.setcommission(commission=commission)
+        # set slippage
         self.cerebro.broker.set_slippage_perc(perc=slippage)
 
         # Set our desired cash start
@@ -91,6 +86,11 @@ class Simulator():
 
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
+
+    @abc.abstractmethod
+    def set_commission(self, commission=0, margin=None, mult=1.0, name=None):
+        """set commission."""
+        raise NotImplementedError
 
     def add_strategy(self, strategy, *args, **kwargs):
         """add strategy to cerebro."""

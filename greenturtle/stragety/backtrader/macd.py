@@ -54,15 +54,17 @@ class MACDWithATRStrategy(base.BaseStrategy):
 
     # pylint: disable=too-many-positional-arguments,too-many-arguments
     def __init__(self,
+                 *args,
                  period_me1=12,
                  period_me2=26,
                  period_signal=9,
                  atr_period=14,
                  atr_dist=3.0,
                  sma_period=30,
-                 dir_period=10):
+                 dir_period=10,
+                 **kwargs):
 
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
         self.atr_dist = atr_dist
         self.pstops = {}

@@ -108,9 +108,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         df = future_data.get_data_frame_from_yahoo_finance(
             self.yahoo_code,
             name=self.name,
-            category=self.category,
-            multiplier=100,
-            margin_ratio=0.1)
+            category=self.category)
 
         df.to_csv(self.filename)
 
