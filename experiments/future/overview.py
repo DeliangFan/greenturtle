@@ -24,7 +24,7 @@ import pandas as pd
 from greenturtle.analyzers import correlation
 import greenturtle.constants.future as future_const
 import greenturtle.data.backtrader.future as future_data
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator.backtrader import future_simulator
 from greenturtle.stragety.backtrader import ema
 from greenturtle.util.logging import logging
 
@@ -33,7 +33,7 @@ logger = logging.get_logger()
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output/main"
 # NOTE(fixme) ZR data in yahoo finance looks bad
-SKIP_LIST = ("6B", "6J", "DX", "6E", "ZN", "ZT", "ZR")
+SKIP_LIST = ("ZR",)
 
 
 if __name__ == '__main__':
@@ -50,8 +50,9 @@ if __name__ == '__main__':
             if name in SKIP_LIST:
                 continue
 
-            s = simulator.Simulator()
-            s.add_strategy(ema.EMA)
+            s = future_simulator.FutureSimulator()
+            s.set_default_commission_by_name(name)
+            s.add_strategy(ema.EMA, leverage_limit=0.1)
 
             # get the data
             filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")

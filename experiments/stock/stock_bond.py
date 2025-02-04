@@ -18,12 +18,13 @@
 import greenturtle.constants.stock as stock_const
 import greenturtle.data.backtrader.stock as stock_data
 from greenturtle.stragety.backtrader import stock_bond
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator.backtrader import stock_simulator
 
 
 if __name__ == '__main__':
 
-    s = simulator.Simulator()
+    s = stock_simulator.StockSimulator()
+    s.set_commission()
 
     # add the bond and stock data.
     data = stock_data.get_feed_from_yahoo_finance(stock_const.VFIAX)

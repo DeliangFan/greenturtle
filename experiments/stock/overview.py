@@ -19,7 +19,7 @@ from greenturtle.analyzers import correlation
 import greenturtle.constants.stock as stock_const
 import greenturtle.data.backtrader.stock as stock_data
 from greenturtle.stragety.backtrader import buyhold
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator.backtrader import stock_simulator
 from greenturtle.util.logging import logging
 
 
@@ -54,7 +54,9 @@ if __name__ == "__main__":
     c = correlation.Correlation()
 
     for name in SYMBOLS:
-        s = simulator.Simulator()
+        s = stock_simulator.StockSimulator()
+        s.set_commission()
+
         # add the data.
         s.add_data(stock_data.get_feed_from_yahoo_finance(name), name)
         # add strategy

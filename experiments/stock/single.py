@@ -19,13 +19,14 @@ from datetime import datetime
 
 import greenturtle.constants.stock as stock_constants
 import greenturtle.data.backtrader.stock as stock_data
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator.backtrader import stock_simulator
 from greenturtle.stragety.backtrader import mim
 
 
 if __name__ == '__main__':
 
-    s = simulator.Simulator()
+    s = stock_simulator.StockSimulator()
+    s.set_commission()
 
     fromdate = datetime(2000, 1, 1)
     todate = datetime(2024, 1, 1)

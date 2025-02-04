@@ -52,3 +52,18 @@ class SymbolUnexpectedIntersectionError(GreenTurtleBaseException):
 class ContractNameNotFound(GreenTurtleBaseException):
     """contract name not found error."""
     msg_fmt = "contract name not found error."
+
+
+class AutoMarginNotFound(GreenTurtleBaseException):
+    """auto margin not found error."""
+    msg_fmt = "auto margin not found error."
+
+
+class MultiplierNotFound(GreenTurtleBaseException):
+    """multiplier not found error."""
+    msg_fmt = "multiplier not found error."
+
+
+class AccountBankruptcy(GreenTurtleBaseException):
+    """account bankruptcy error."""
+    msg_fmt = "account bankruptcy error."

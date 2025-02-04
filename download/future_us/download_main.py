@@ -40,15 +40,10 @@ if __name__ == '__main__':
             # pylint: disable=invalid-name
             yahoo_code = future[future_const.YAHOO_CODE]
 
-            margin_ratio = \
-                future[future_const.MARGIN_RATIO]
-
             df = future_data.get_data_frame_from_yahoo_finance(
                 yahoo_code=yahoo_code,
                 name=name,
                 category=category_name,
-                multiplier=future[future_const.MULTIPLIER],
-                margin_ratio=margin_ratio,
             )
 
             df.to_csv(os.path.join(category_dir, f"{name}.csv"))

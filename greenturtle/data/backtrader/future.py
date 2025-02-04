@@ -26,43 +26,11 @@ import greenturtle.constants.future as future_const
 
 
 class FutureCSV(GenericCSVData):
-    """Future CSV data feed
-
-    multiplier: the number of units for a future contract.
-    margin_ratio: the ratio for margin requirement.
-    """
-
-    # Add "multiplier" and "margin_ratio" line to the
-    # inherited ones from the base class
-    lines = (
-        future_const.MULTIPLIER,
-        future_const.MARGIN_RATIO
-    )
-
-    params = (
-        (future_const.MULTIPLIER, 7),
-        (future_const.MARGIN_RATIO, 8),
-    )
+    """Future CSV data feed"""
 
 
 class FuturePandasData(bt.feeds.PandasData):
-    """Future panda data feed
-
-    multiplier: the number of units for a future contract.
-    margin_ratio: the ratio for margin requirement.
-    """
-
-    # Add "multiplier" and "margin_ratio" line to the
-    # inherited ones from the base class
-    lines = (
-        future_const.MULTIPLIER,
-        future_const.MARGIN_RATIO
-    )
-
-    params = (
-        (future_const.MULTIPLIER, 7),
-        (future_const.MARGIN_RATIO, 8),
-    )
+    """Future panda data feed"""
 
 
 # pylint: disable=too-many-positional-arguments,too-many-arguments
@@ -70,8 +38,6 @@ def get_data_frame_from_yahoo_finance(
         yahoo_code,
         name=None,
         category=None,
-        multiplier=None,
-        margin_ratio=None,
         fromdate=None,
         todate=None,
         to_csv=True):
@@ -101,12 +67,6 @@ def get_data_frame_from_yahoo_finance(
     if category is not None:
         df["category"] = category
 
-    # add contract unit and margin requirement ratio as columns
-    if multiplier is not None:
-        df[future_const.MULTIPLIER] = multiplier
-    if margin_ratio is not None:
-        df[future_const.MARGIN_RATIO] = margin_ratio
-
     return df
 
 
@@ -134,8 +94,6 @@ def get_feed_from_csv_file(
         low=4,
         close=2,
         volume=6,
-        multiplier=10,
-        margin_ratio=11,
         openinterest=None,
         plot=False,
         fromdate=fromdate,
@@ -150,8 +108,6 @@ def get_feed_from_yahoo_finance(
         yahoo_code,
         name=None,
         category=None,
-        multiplier=None,
-        margin_ratio=None,
         fromdate=None,
         todate=None):
     """
@@ -163,8 +119,6 @@ def get_feed_from_yahoo_finance(
         yahoo_code,
         name=name,
         category=category,
-        multiplier=multiplier,
-        margin_ratio=margin_ratio,
         fromdate=fromdate,
         todate=todate,
         to_csv=False)
@@ -179,8 +133,6 @@ def get_feed_from_yahoo_finance(
         low=3,
         close=1,
         volume=5,
-        multiplier=9,
-        margin_ratio=10,
         openinterest=None,
         plot=False,
         fromdate=fromdate,
