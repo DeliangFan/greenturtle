@@ -19,13 +19,16 @@
 - [P0][Done] add more test for future like strategy
 - [P0][Done] Dealing with future data, currently i use the main contract, what's the problem.
 - [P0][Done] Simulate the margin trading.
+- [P0][Done] Portfolio management for single symbol
+- [P1][Done] Risk management
 
 ## TODO
 
-- [P0] Portfolio management for single symbol
+- [P0] Add stop lost
+- [P0] Abstract the progress for generating order. Need take the already hold position into consideration
 - [P0] Portfolio management across different sectors
+- [P1] Fix e2e test
 - [P0] Refactor, abstract the balance for stock and bond with buy one.
-- [P1] Risk management
 - [P2] Deal with the data limited to the lasted start date.
 
 
