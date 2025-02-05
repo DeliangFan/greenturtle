@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
             s = future_simulator.FutureSimulator()
             s.set_default_commission_by_name(name)
-            s.add_strategy(ema.EMA, leverage_limit=0.1)
+            s.add_strategy(ema.EMA)
 
             # get the data
             filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")

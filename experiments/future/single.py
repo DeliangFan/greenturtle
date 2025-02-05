@@ -20,7 +20,7 @@ import os
 
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import future_simulator
-from greenturtle.stragety.backtrader import rsi
+from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     s.add_data(data, NAME)
 
     # add strategy
-    s.add_strategy(rsi.RSIStrategy, leverage_limit=0.2)
+    s.add_strategy(ema.EMA)
 
     # do simulate
     s.do_simulate()

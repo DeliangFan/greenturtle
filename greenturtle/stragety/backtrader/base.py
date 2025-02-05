@@ -19,6 +19,7 @@ import abc
 
 import backtrader as bt
 
+from greenturtle import constants
 from greenturtle.util.logging import logging
 from greenturtle import exception
 
@@ -30,20 +31,33 @@ class BaseStrategy(bt.Strategy):
 
     """ base strategy for backtrader framework."""
 
-    def __init__(self, allow_short=False, leverage_limit=0.95):
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    def __init__(self,
+                 allow_short=False,
+                 risk_factor=0.002,
+                 atr_period=100,
+                 leverage_limit=0.95,
+                 portfolio_type=None):
+
         super().__init__()
         self.allow_short = allow_short
+        self.risk_factor = risk_factor
         self.leverage_limit = leverage_limit
+        self.portfolio_type = portfolio_type
         self.order = None
-        self._init_others()
         self.bankruptcy = False
+        self._init_others(atr_period)
 
-    def _init_others(self):
+    def _init_others(self, atr_period):
+        """init others attributes."""
         self.symbols_data = {}
+        self.atrs = {}
         self.names = self.getdatanames()
         for name in self.names:
             data = self.getdatabyname(name)
             self.symbols_data[name] = data
+            self.atrs[name] = bt.indicators.ATR(data, period=atr_period)
 
     def _clear_order(self):
         self.order = None
@@ -235,25 +249,72 @@ class BaseStrategy(bt.Strategy):
 
         return portfolios
 
+    def _compute_portfolio_by_atr(self, name, commissioninfo):
+        """compute portfolio by atr.
+
+        formula: size = risk_factor * value / atr / mult
+        """
+
+        # prepare the parameter
+        atr = self.atrs[name]
+        mult = commissioninfo.p.mult
+        total_value = self.broker.get_value()
+
+        # compute the size
+        size = int(self.risk_factor * total_value / (atr[0] * mult))
+
+        return size
+
+    def _compute_portfolio_by_average(self, number, data, commissioninfo):
+        """this is the simple portfolios with average divided."""
+
+        # prepare the parameter
+        total_value = self.broker.get_value() * self.leverage_limit
+        single_value = total_value / number
+        close = data.close[0]
+
+        # compute teh size
+        size = commissioninfo.getsize(close, single_value)
+
+        return size
+
+    def _compute_portfolio(self, name, number):
+        """compute single portfolio."""
+
+        data = self.symbols_data[name]
+        commissioninfo = self.broker.getcommissioninfo(data)
+
+        if self.portfolio_type == constants.PORTFOLIO_TYPE_ATR:
+            return self._compute_portfolio_by_atr(name, commissioninfo)
+
+        if self.portfolio_type == constants.PORTFOLIO_TYPE_AVERAGE:
+            return self._compute_portfolio_by_average(
+                number,
+                data,
+                commissioninfo)
+
+        # if portfolio_type is None, it depends on the type of the symbol
+        if commissioninfo.stocklike:
+            size = self._compute_portfolio_by_average(
+                number,
+                data,
+                commissioninfo)
+        else:
+            size = self._compute_portfolio_by_atr(name, commissioninfo)
+
+        return size
+
     def compute_desired_portfolios(self, long_desired, short_desired):
         """compute the desired portfolio."""
 
-        # this is the simple portfolios with average divided.
         portfolios = {}
 
         number = len(long_desired) + len(short_desired)
         if number == 0:
             return portfolios
 
-        total_value = self.broker.get_value() * self.leverage_limit
-        single_value = total_value / number
-
         for name in self.names:
-            data = self.symbols_data[name]
-            close = data.close[0]
-            # compute the size
-            commissioninfo = self.broker.getcommissioninfo(data)
-            size = commissioninfo.getsize(close, single_value)
+            size = self._compute_portfolio(name, number)
 
             if name in long_desired:
                 portfolios[name] = size

@@ -36,7 +36,7 @@ SKIP_LIST = (
 if __name__ == '__main__':
 
     s = future_simulator.FutureSimulator()
-    s.add_strategy(ema.EMA, leverage_limit=0.1)
+    s.add_strategy(ema.EMA)
 
     fromdate = datetime.datetime(2004, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
