@@ -35,7 +35,7 @@ if __name__ == '__main__':
     s.set_default_commission_by_name(NAME)
 
     # get the data
-    fromdate = datetime.datetime(2001, 1, 1)
+    fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
     filename = os.path.join(DATA_DIR, f"{CATEGORY_NAME}/{NAME}.csv")
 
