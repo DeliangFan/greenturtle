@@ -35,10 +35,15 @@ SKIP_LIST = (
 
 if __name__ == '__main__':
 
-    s = future_simulator.FutureSimulator()
-    s.add_strategy(ema.EMA)
+    s = future_simulator.FutureSimulator(plot=True)
+    s.add_strategy(
+        ema.EMAEnhanced,
+        fast_period=3,
+        slow_period=20,
+        channel_period=5,
+        atr_period=25)
 
-    fromdate = datetime.datetime(2004, 1, 1)
+    fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
 
     # add all data to simulator

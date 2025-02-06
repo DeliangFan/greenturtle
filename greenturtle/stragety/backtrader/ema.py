@@ -15,7 +15,7 @@
 
 """Collection of EMA strategies for backtrader"""
 
-from backtrader.indicators import MovAv
+from backtrader.indicators import MovAv, Highest, Lowest
 from greenturtle.stragety.backtrader import base
 
 
@@ -61,3 +61,60 @@ class EMA(base.BaseStrategy):
         fast_ema = self.fast_emas[name]
         slow_ema = self.slow_emas[name]
         return fast_ema[0] > slow_ema[0]
+
+
+class EMAEnhanced(EMA):
+
+    """EMAEnhanced with channel class strategy for backtrader."""
+
+    def __init__(self,
+                 *args,
+                 fast_period=10,
+                 slow_period=100,
+                 channel_period=25,
+                 **kwargs):
+
+        super().__init__(*args,
+                         fast_period=fast_period,
+                         slow_period=slow_period,
+                         **kwargs)
+
+        self.lowest = {}
+        self.highest = {}
+        for name in self.names:
+            data = self.getdatabyname(name)
+            self.highest[name] = Highest(data.close, period=channel_period)
+            self.lowest[name] = Lowest(data.close, period=channel_period)
+
+    def is_buy_to_open(self, name):
+        """determine whether a position should buy to open or not."""
+        data = self.getdatabyname(name)
+        data_close = data.close[0]
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+        highest = self.highest[name]
+        return fast_ema[0] > slow_ema[0] and data_close >= highest[0]
+
+    def is_sell_to_close(self, name):
+        """determine whether a position should sell to close or not."""
+        # condition a, compare the fast and slow line
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+
+        # condition b, check the stop condition by atr
+        data = self.getdatabyname(name)
+        data_close = data.close[0]
+        highest = self.highest[name]
+        atr = self.atrs[name]
+        stop = highest[0] >= data_close + 1.5 * atr[0]
+
+        return fast_ema[0] < slow_ema[0] or stop
+
+    def is_sell_to_open(self, name):
+        """determine whether a position should sell to close or not."""
+        data = self.getdatabyname(name)
+        data_close = data.close[0]
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+        lowest = self.lowest[name]
+        return fast_ema[0] < slow_ema[0] and data_close <= lowest[0]

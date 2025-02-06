@@ -72,7 +72,16 @@ class BaseStrategy(bt.Strategy):
         self._clear_order()
 
     def next(self):
-        """next function in strategy."""
+        """
+        next function in strategy.
+               +--buy_to_open----+  +---sell_to_open--+
+               V                 |  |                 V
+        + ----------+         +-------+          +------------+
+        | long hold |         | Empty |          | short hold |
+        +----------+          +-------+          +------------+
+              |                ^   ^                  |
+              +--sell_to_close-+   +-- buy_to_close ---
+        """
         if self.order or self.bankruptcy:
             return
 
@@ -80,98 +89,125 @@ class BaseStrategy(bt.Strategy):
             return
 
         # 1. get the long and short hold position
-        long_hold, short_hold = self.symbols_within_hold()
+        hold = self.get_hold_symbols()
+        hold_long = self.get_long_symbols_within_hold()
+        hold_short = self.get_short_symbols_within_hold()
 
         # 2. compute the long and short desired position
-        long_desired, short_desired = self.compute_desired_symbols()
+        desired_long = self.compute_desired_long_symbols(hold_long, hold)
+        desired_short = self.compute_desired_short_symbols(hold_short, hold)
+        self._validate(desired_long, desired_short)
 
         # 3. determine if whether need trade or not
-        if long_hold != long_desired or short_hold != short_desired:
-            self.log("symbols" +
-                     f"\nlong hold: {sorted(list(long_hold))}" +
-                     f"\nshort hold: {sorted(list(short_hold))}" +
-                     f"\nlong desired: {sorted(list(long_desired))}" +
-                     f"\nshort desired: {sorted(list(short_desired))}")
+        if hold_long == desired_long and hold_short == desired_short:
+            return
 
-            # 4. get the current portfolios
-            current_portfolios = self.get_current_portfolios()
+        self.log("symbols" +
+                 f"\nhold long: {sorted(list(hold_long))}" +
+                 f"\nhold short: {sorted(list(hold_short))}" +
+                 f"\ndesired long: {sorted(list(desired_long))}" +
+                 f"\ndesired short: {sorted(list(desired_short))}")
 
-            # 5. compute the desired portfolios with detailed size
-            desired_portfolios = self.compute_desired_portfolios(
-                long_desired,
-                short_desired)
+        # 4. get the current portfolios
+        current_portfolios = self.get_current_portfolios()
 
-            # 6. execute the orders.
-            self.execute(current_portfolios, desired_portfolios)
+        # 5. compute the desired portfolios with detailed size
+        desired_portfolios = self.compute_desired_portfolios(
+            desired_long,
+            desired_short)
+
+        # 6. execute the orders.
+        self.execute(current_portfolios, desired_portfolios)
 
     def _check_bankruptcy(self):
         """check if account is bankrupt"""
         total_value = self.broker.get_value()
         cash = self.broker.get_cash()
 
-        if total_value <= 0 or cash <= 0:
+        if total_value <= 0 and cash <= 0:
 
             logger.error("bankruptcy, stop backtest!!!")
             self.bankruptcy = True
 
         return self.bankruptcy
 
-    def symbols_within_hold(self):
-        """symbols in hold."""
-        long_symbols, short_symbols = set(), set()
-
+    def get_hold_symbols(self):
+        """get symbols in hold."""
+        symbols = set()
         positions = self.getpositions()
+
+        for k in positions:
+            # pylint: disable=protected-access
+            name = k._name
+            position = positions[k]
+            if position.size > 0 or position.size < 0:
+                symbols.add(name)
+
+        return symbols
+
+    def get_long_symbols_within_hold(self):
+        """get long symbols in hold."""
+        symbols = set()
+        positions = self.getpositions()
+
         for k in positions:
             # pylint: disable=protected-access
             name = k._name
             position = positions[k]
             if position.size > 0:
-                long_symbols.add(name)
-            elif position.size < 0:
-                short_symbols.add(name)
-
-        return long_symbols, short_symbols
-
-    def symbols_buy_to_open(self):
-        """symbols need to buy to open"""
-        symbols = set()
-        for name in self.names:
-            if self.is_buy_to_open(name):
                 symbols.add(name)
 
         return symbols
 
-    def symbols_sell_to_close(self):
-        """symbols need sell to close."""
-
+    def get_short_symbols_within_hold(self):
+        """get short symbols in hold."""
         symbols = set()
-        for name in self.names:
-            if self.is_sell_to_close(name):
+        positions = self.getpositions()
+
+        for k in positions:
+            # pylint: disable=protected-access
+            name = k._name
+            position = positions[k]
+            if position.size > 0:
                 symbols.add(name)
 
         return symbols
 
-    def symbols_sell_to_open(self):
-        """symbols need sell to open, only used in short size."""
+    def compute_desired_long_symbols(self, long_hold, hold):
+        """compute the desired long symbols"""
+        symbols = set()
+
+        for name in self.names:
+            # 1. for symbol already in position, hold it unless it meet
+            # the condition for selling to close.
+            if name in long_hold:
+                if not self.is_sell_to_close(name):
+                    symbols.add(name)
+            # 2. for symbol not in position, buy it if it meets the condition
+            # for buying to open.
+            if name not in hold:
+                if self.is_buy_to_open(name):
+                    symbols.add(name)
+
+        return symbols
+
+    def compute_desired_short_symbols(self, short_hold, hold):
+        """compute the desired short symbols"""
         symbols = set()
         if not self.allow_short:
             return symbols
 
         for name in self.names:
-            if self.is_sell_to_open(name):
-                symbols.add(name)
-
-        return symbols
-
-    def symbols_buy_to_close(self):
-        """symbols need buy to close, only used in short size."""
-        symbols = set()
-        if not self.allow_short:
-            return symbols
-
-        for name in self.names:
-            if self.is_buy_to_close(name):
-                symbols.add(name)
+            # 1. for symbol already in position, hold it unless it meet
+            # the condition for buying to close.
+            if name in short_hold:
+                if not self.is_buy_to_close(name):
+                    symbols.add(name)
+            # 2. for symbol not in position, buy it if it meets the condition
+            # for selling to open.
+            if name not in hold:
+                if self.is_sell_to_open(name):
+                    symbols.add(name)
 
         return symbols
 
@@ -195,44 +231,19 @@ class BaseStrategy(bt.Strategy):
         """determine whether a position should buy to close or not."""
         raise NotImplementedError
 
-    def compute_desired_symbols(self):
-        """compute the desired symbols"""
-        buy_to_opens = self.symbols_buy_to_open()
-        sell_to_closes = self.symbols_sell_to_close()
-        sell_to_opens = self.symbols_sell_to_open()
-        buy_to_closes = self.symbols_buy_to_close()
-
-        # validate the operations for symbols
-        self._validate(buy_to_opens,
-                       sell_to_closes,
-                       sell_to_opens,
-                       buy_to_closes)
-
-        return buy_to_opens, sell_to_opens
-
-    def _validate(self,
-                  buy_to_opens,
-                  sell_to_closes,
-                  sell_to_opens=None,
-                  buy_to_closes=None):
+    def _validate(self, desired_long, desired_short):
         """validate the symbols."""
 
-        if sell_to_opens is None:
-            sell_to_opens = set()
+        if desired_short is None:
+            desired_short = set()
 
-        if buy_to_closes is None:
-            buy_to_closes = set()
+        if desired_long is None:
+            desired_long = set()
 
-        if buy_to_opens.intersection(sell_to_closes):
+        if desired_short.intersection(desired_long):
             raise exception.SymbolUnexpectedIntersectionError()
 
-        if buy_to_opens.intersection(sell_to_opens):
-            raise exception.SymbolUnexpectedIntersectionError()
-
-        if sell_to_closes.intersection(buy_to_closes):
-            raise exception.SymbolUnexpectedIntersectionError()
-
-        if sell_to_opens.intersection(buy_to_closes):
+        if not self.allow_short and len(desired_short) > 0:
             raise exception.SymbolUnexpectedIntersectionError()
 
     def get_current_portfolios(self):
