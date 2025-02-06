@@ -72,7 +72,16 @@ class BaseStrategy(bt.Strategy):
         self._clear_order()
 
     def next(self):
-        """next function in strategy."""
+        """
+        next function in strategy.
+               +--buy_to_open----+  +---sell_to_open--+
+               V                 |  |                 V
+        + ----------+         +-------+          +------------+
+        | long hold |         | Empty |          | short hold |
+        +----------+          +-------+          +------------+
+              |                ^   ^                  |
+              +--sell_to_close-+   +-- buy_to_close ---
+        """
         if self.order or self.bankruptcy:
             return
 
