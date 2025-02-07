@@ -118,3 +118,18 @@ class EMAEnhanced(EMA):
         slow_ema = self.slow_emas[name]
         lowest = self.lowest[name]
         return fast_ema[0] < slow_ema[0] and data_close <= lowest[0]
+
+    def is_buy_to_close(self, name):
+        """determine whether a position should buy to close or not."""
+        # condition a, compare the fast and slow line
+        fast_ema = self.fast_emas[name]
+        slow_ema = self.slow_emas[name]
+
+        # condition b, check the stop condition by atr
+        data = self.getdatabyname(name)
+        data_close = data.close[0]
+        lowest = self.lowest[name]
+        atr = self.atrs[name]
+        stop = data_close >= lowest[0] + 1.5 * atr[0]
+
+        return fast_ema[0] > slow_ema[0] or stop
