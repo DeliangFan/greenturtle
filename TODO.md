@@ -23,10 +23,10 @@
 - [P1][Done] Risk management
 - [P0][Done] Add stop lost
 - [P0][Done] Abstract the progress for generating order. Need take the already hold position into consideration
+- [P0][Done] Portfolio management across different sectors
 
 ## TODO
 
-- [P0] Portfolio management across different sectors
 - [P0] Fix e2e test
 - [P0] Better high quality data
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
@@ -43,3 +43,6 @@ take GC for example, some data in 2000 looks not good
 
 take the ZR for example
 - the price of ZR look abnormal
+
+take the PA for example
+- some date's data are missing, for example,  2007 Aug
