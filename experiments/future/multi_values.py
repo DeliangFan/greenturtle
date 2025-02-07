@@ -39,9 +39,11 @@ if __name__ == '__main__':
     s.add_strategy(
         ema.EMAEnhanced,
         fast_period=3,
-        slow_period=20,
+        slow_period=12,
         channel_period=5,
-        atr_period=25)
+        atr_period=25,
+        category_risk_factors=future_const.DEFAULT_CATEGORY_RISK_FACTORS,
+    )
 
     fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)

@@ -54,6 +54,11 @@ class ContractNameNotFound(GreenTurtleBaseException):
     msg_fmt = "contract name not found error."
 
 
+class CategoryNameNotFound(GreenTurtleBaseException):
+    """category name not found error."""
+    msg_fmt = "category name not found error."
+
+
 class AutoMarginNotFound(GreenTurtleBaseException):
     """auto margin not found error."""
     msg_fmt = "auto margin not found error."

@@ -305,3 +305,15 @@ MONTH_CODES_N2A = {
     "11": "X",
     "12": "Z",
 }
+
+DEFAULT_RISK_FACTOR = 0.002
+DEFAULT_CATEGORY_RISK_FACTORS = {
+    "agriculture": 0.01,
+    "soft": 0.01,
+    "metal": 0.01,
+    "energy": 0.01,
+    "crypto": 0.01,
+    "currency": 0.01,
+    "stock_indices": 0.01,
+    "interest_rates": 0.01,
+}
