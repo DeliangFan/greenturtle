@@ -50,12 +50,15 @@ if __name__ == '__main__':
             if name in SKIP_LIST:
                 continue
 
+            # get the data
+            filename = os.path.join(DATA_DIR, f"{group_name}/{name}.csv")
+            if not os.path.exists(filename):
+                continue
+
             s = future_simulator.FutureSimulator()
             s.set_default_commission_by_name(name)
             s.add_strategy(ema.EMA)
 
-            # get the data
-            filename = os.path.join(DATA_DIR, f"{group_name}/{name}.csv")
             data = future_data.get_feed_from_csv_file(
                 name,
                 filename,
