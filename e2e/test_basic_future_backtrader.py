@@ -40,8 +40,8 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.fromdate = datetime(2001, 1, 1)
         self.todate = datetime(2024, 12, 31)
 
-        for category_name, category_value in future_const.FUTURE.items():
-            for name, future in category_value.items():
+        for group_name, group_value in future_const.FUTURE.items():
+            for name, future in group_value.items():
 
                 # pylint: disable=invalid-name
                 yahoo_code = future[future_const.YAHOO_CODE]
@@ -50,7 +50,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
                 data = future_data.get_feed_from_yahoo_finance(
                     yahoo_code,
                     name=name,
-                    category=category_name,
+                    group=group_name,
                     fromdate=self.fromdate,
                     todate=self.todate)
 

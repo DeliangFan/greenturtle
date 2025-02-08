@@ -30,20 +30,20 @@ if __name__ == '__main__':
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    for category_name, category_value in future_const.FUTURE.items():
+    for group_name, group_value in future_const.FUTURE.items():
 
-        category_dir = os.path.join(OUTPUT_DIR, category_name)
-        if not os.path.exists(category_dir):
-            os.makedirs(category_dir)
+        group_dir = os.path.join(OUTPUT_DIR, group_name)
+        if not os.path.exists(group_dir):
+            os.makedirs(group_dir)
 
-        for name, future in category_value.items():
+        for name, future in group_value.items():
             # pylint: disable=invalid-name
             yahoo_code = future[future_const.YAHOO_CODE]
 
             df = future_data.get_data_frame_from_yahoo_finance(
                 yahoo_code=yahoo_code,
                 name=name,
-                category=category_name,
+                group=group_name,
             )
 
-            df.to_csv(os.path.join(category_dir, f"{name}.csv"))
+            df.to_csv(os.path.join(group_dir, f"{name}.csv"))

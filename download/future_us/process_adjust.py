@@ -70,14 +70,14 @@ class Process2AdjustPrice:
     # pylint: disable=too-many-positional-arguments,too-many-arguments
     def __init__(self,
                  name,
-                 category,
+                 group,
                  fromdate=None,
                  todate=None,
                  src_dir=None,
                  dst_dir=None):
 
         self.name = name
-        self.category = category
+        self.group = group
         self.fromdate = fromdate
         self.todate = todate
         self.src_dir = src_dir
@@ -309,10 +309,10 @@ class Process2AdjustPrice:
 
 if __name__ == "__main__":
     NAME = "GC"
-    CATEGORY = "metal"
+    GROUP = "metal"
     p = Process2AdjustPrice(
         NAME,
-        CATEGORY,
+        GROUP,
         fromdate=datetime.datetime(2008, 1, 1),
         todate=datetime.datetime(2024, 12, 31),
         src_dir=os.path.join(SOURCE_DIR, NAME),

@@ -20,10 +20,10 @@
 import greenturtle.constants.future as future_const
 
 
-def get_category_by_name(name):
-    """get category name by future name"""
-    for category_name, category_value in future_const.FUTURE.items():
-        for future_name in category_value:
+def get_group_by_name(name):
+    """get group name by future name"""
+    for group_name, group_value in future_const.FUTURE.items():
+        for future_name in group_value:
             if future_name == name:
-                return category_name
+                return group_name
     return None
