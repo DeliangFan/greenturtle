@@ -55,11 +55,11 @@ if __name__ == '__main__':
             if name in SKIP_LIST:
                 continue
 
-            # set the commission according to name
-            s.set_default_commission_by_name(name)
-
             # get the data
             filename = os.path.join(DATA_DIR, f"{group_name}/{name}.csv")
+            if not os.path.exists(filename):
+                continue
+
             data = future_data.get_feed_from_csv_file(
                 name,
                 filename,
@@ -69,6 +69,9 @@ if __name__ == '__main__':
 
             # add the data to simulator
             s.add_data(data, name)
+
+            # set the commission according to name
+            s.set_default_commission_by_name(name)
 
     # do simulate
     s.do_simulate()

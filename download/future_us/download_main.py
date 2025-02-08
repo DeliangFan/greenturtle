@@ -38,8 +38,10 @@ if __name__ == '__main__':
 
         for name, future in group_value.items():
             # pylint: disable=invalid-name
-            yahoo_code = future[future_const.YAHOO_CODE]
+            if future_const.YAHOO_CODE not in future:
+                continue
 
+            yahoo_code = future[future_const.YAHOO_CODE]
             df = future_data.get_data_frame_from_yahoo_finance(
                 yahoo_code=yahoo_code,
                 name=name,
