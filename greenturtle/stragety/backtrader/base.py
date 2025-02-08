@@ -171,7 +171,7 @@ class BaseStrategy(bt.Strategy):
             # pylint: disable=protected-access
             name = k._name
             position = positions[k]
-            if position.size > 0:
+            if position.size < 0:
                 symbols.add(name)
 
         return symbols
