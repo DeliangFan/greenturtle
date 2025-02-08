@@ -66,6 +66,11 @@ AGRICULTURE = {
         AUTO_MARGIN: 40,
         DESCRIPTION: "Live Cattle",
     },  # 活牛
+    "LC": {
+        MULTIPLIER: 400,
+        AUTO_MARGIN: 40,
+        DESCRIPTION: "Live Cattle",
+    },  # 活牛, same as LE
     "ZR": {  # seems problem with the yahoo finance data
         YAHOO_CODE: "ZR=F",
         MULTIPLIER: 2000,
@@ -78,12 +83,22 @@ AGRICULTURE = {
         AUTO_MARGIN: 200,
         DESCRIPTION: "Milk",
     },
+    "DA": {
+        MULTIPLIER: 2000,
+        AUTO_MARGIN: 200,
+        DESCRIPTION: "Milk",
+    },
     "HE": {
         YAHOO_CODE: "HE=F",
         MULTIPLIER: 400,
         AUTO_MARGIN: 40,
         DESCRIPTION: "Lean Hog",
     },  # 瘦肉
+    "LH": {
+        MULTIPLIER: 400,
+        AUTO_MARGIN: 40,
+        DESCRIPTION: "Lean Hog",
+    },  # 瘦肉, same as HE
     "ZO": {
         YAHOO_CODE: "ZO=F",
         MULTIPLIER: 50,
@@ -111,6 +126,12 @@ SOFTS = {
         AUTO_MARGIN: 38,
         DESCRIPTION: "Coffee",
     },
+    "OJ": {
+        YAHOO_CODE: "OJ=F",
+        MULTIPLIER: 150,
+        AUTO_MARGIN: 15,
+        DESCRIPTION: "ICE Orange Juice",
+    }
 }
 
 METALS = {
@@ -201,6 +222,16 @@ CURRENCY = {
         AUTO_MARGIN: 600000,
         DESCRIPTION: "Japanese Yen",
     },
+    "BP": {
+        MULTIPLIER: 62500,
+        AUTO_MARGIN: 2000,
+        DESCRIPTION: "British Pound Futures",
+    },
+    "JY": {
+        MULTIPLIER: 12500000,
+        AUTO_MARGIN: 600000,
+        DESCRIPTION: "Japanese Yen",
+    },
     "DX": {
         YAHOO_CODE: "DX=F",
         MULTIPLIER: 1000,
@@ -212,6 +243,62 @@ CURRENCY = {
         MULTIPLIER: 125000,
         AUTO_MARGIN: 3000,
         DESCRIPTION: "Euro FX",
+    },
+    "6A": {
+        YAHOO_CODE: "6A=F",
+        MULTIPLIER: 100000,
+        AUTO_MARGIN: 3000,
+        DESCRIPTION: "Australian Dollar",
+    },
+    "AD": {
+        MULTIPLIER: 100000,
+        AUTO_MARGIN: 3000,
+        DESCRIPTION: "Australian Dollar",
+    },
+    "6C": {
+        YAHOO_CODE: "6C=F",
+        MULTIPLIER: 100000,
+        AUTO_MARGIN: 3000,
+        DESCRIPTION: "Canada Dollar",
+    },
+    "CD": {
+        MULTIPLIER: 100000,
+        AUTO_MARGIN: 3000,
+        DESCRIPTION: "Canada Dollar",
+    },
+    "6S": {
+        YAHOO_CODE: "6S=F",
+        MULTIPLIER: 125000,
+        AUTO_MARGIN: 4000,
+        DESCRIPTION: "Swiss France",
+    },
+    "SF": {
+        MULTIPLIER: 125000,
+        AUTO_MARGIN: 4000,
+        DESCRIPTION: "Swiss France",
+    },
+    "6N": {
+        YAHOO_CODE: "6N=F",
+        MULTIPLIER: 100000,
+        AUTO_MARGIN: 3000,
+        DESCRIPTION: "NewZealand Dollar",
+    },
+    "NE": {
+        MULTIPLIER: 100000,
+        AUTO_MARGIN: 3000,
+        DESCRIPTION: "NewZealand Dollar",
+    },
+    "RP": {
+        YAHOO_CODE: "RP=F",
+        MULTIPLIER: 125000,
+        AUTO_MARGIN: 4000,
+        DESCRIPTION: "Euro/British Pound",
+    },
+    "RY": {
+        YAHOO_CODE: "RY=F",
+        MULTIPLIER: 1250,
+        AUTO_MARGIN: 40,
+        DESCRIPTION: "Euro/Japanese Yen",
     },
 }
 
@@ -253,6 +340,12 @@ INTEREST_RATES = {
         YAHOO_CODE: "ZN=F",
         MULTIPLIER: 1000,
         AUTO_MARGIN: 30,
+        DESCRIPTION: "10-Year T-Note Futures",
+    },
+    "ZF": {
+        YAHOO_CODE: "ZF=F",
+        MULTIPLIER: 1000,
+        AUTO_MARGIN: 25,
         DESCRIPTION: "10-Year T-Note Futures",
     },
     "ZT": {
