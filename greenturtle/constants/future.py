@@ -400,7 +400,7 @@ MONTH_CODES_N2A = {
 }
 
 DEFAULT_RISK_FACTOR = 0.002
-DEFAULT_CATEGORY_RISK_FACTORS = {
+DEFAULT_GROUP_RISK_FACTORS = {
     "agriculture": 0.01,
     "soft": 0.01,
     "metal": 0.01,

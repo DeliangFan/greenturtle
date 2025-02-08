@@ -40,14 +40,14 @@ class BaseStrategy(bt.Strategy):
                  atr_period=100,
                  leverage_limit=0.95,
                  portfolio_type=None,
-                 category_risk_factors=None):
+                 group_risk_factors=None):
 
         super().__init__()
         self.allow_short = allow_short
         self.risk_factor = risk_factor
         self.leverage_limit = leverage_limit
         self.portfolio_type = portfolio_type
-        self.category_risk_factors = category_risk_factors
+        self.group_risk_factors = group_risk_factors
         self.order = None
         self.bankruptcy = False
         self._init_others(atr_period)
@@ -318,31 +318,31 @@ class BaseStrategy(bt.Strategy):
 
         return size
 
-    def adjust_portfolio_by_category(self, portfolios):
-        """refine portfolio by category."""
-        if self.category_risk_factors is None:
+    def adjust_portfolio_by_group(self, portfolios):
+        """refine portfolio by group."""
+        if self.group_risk_factors is None:
             return portfolios
 
-        # 1. calculate the category risk
-        category_risk = {}
-        # calculate the category risk
+        # 1. calculate the group risk
+        group_risk = {}
+        # calculate the group risk
         for name in portfolios:
-            category_name = future_util.get_category_by_name(name)
-            # raise exception if category not found.
-            if category_name is None:
-                raise exception.CategoryNameNotFound
-            # accumulate the category risk
-            if category_name in category_risk:
-                category_risk[category_name] += self.risk_factor
+            group_name = future_util.get_group_by_name(name)
+            # raise exception if group not found.
+            if group_name is None:
+                raise exception.GroupNameNotFound
+            # accumulate the group risk
+            if group_name in group_risk:
+                group_risk[group_name] += self.risk_factor
             else:
-                category_risk[category_name] = self.risk_factor
+                group_risk[group_name] = self.risk_factor
 
-        # 2. adjust the size according to current category risk and the
-        # limitation of the category risk.
+        # 2. adjust the size according to current group risk and the
+        # limitation of the group risk.
         for name in portfolios:
-            category_name = future_util.get_category_by_name(name)
-            risk = category_risk[category_name]
-            limit = self.category_risk_factors[category_name]
+            group_name = future_util.get_group_by_name(name)
+            risk = group_risk[group_name]
+            limit = self.group_risk_factors[group_name]
             if risk > limit:
                 size = portfolios[name]
                 # adjust
@@ -367,7 +367,7 @@ class BaseStrategy(bt.Strategy):
             if name in short_desired:
                 portfolios[name] = -size
 
-        portfolios = self.adjust_portfolio_by_category(portfolios)
+        portfolios = self.adjust_portfolio_by_group(portfolios)
 
         return portfolios
 

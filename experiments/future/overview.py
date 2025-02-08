@@ -44,9 +44,9 @@ if __name__ == '__main__':
     fromdate = datetime.datetime(2004, 1, 1)
     todate = x = datetime.datetime(2024, 12, 31)
 
-    for category_name, category_value in future_const.FUTURE.items():
-        category_dir = os.path.join(DATA_DIR, category_name)
-        for name, future in category_value.items():
+    for group_name, group_value in future_const.FUTURE.items():
+        group_dir = os.path.join(DATA_DIR, group_name)
+        for name, future in group_value.items():
             if name in SKIP_LIST:
                 continue
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             s.add_strategy(ema.EMA)
 
             # get the data
-            filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")
+            filename = os.path.join(DATA_DIR, f"{group_name}/{name}.csv")
             data = future_data.get_feed_from_csv_file(
                 name,
                 filename,
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             # construct the result and append it to the dataframe
             row = {
                 "name": [name],
-                "category": [category_name],
+                "group": [group_name],
                 "total_return": [
                     s.summary.return_summary.total_return],
                 "annual_return": [

@@ -41,8 +41,8 @@ class FutureSimulator(simulator.Simulator):
     @staticmethod
     def get_auto_margin(name):
         """get auto margin for future by name."""
-        for category in future_const.FUTURE.values():
-            for future_name, future in category.items():
+        for group in future_const.FUTURE.values():
+            for future_name, future in group.items():
                 if future_name == name:
                     return future[future_const.AUTO_MARGIN]
 
@@ -52,8 +52,8 @@ class FutureSimulator(simulator.Simulator):
     @staticmethod
     def get_multiplier(name):
         """get multiplier for future by name."""
-        for category in future_const.FUTURE.values():
-            for future_name, future in category.items():
+        for group in future_const.FUTURE.values():
+            for future_name, future in group.items():
                 if future_name == name:
                     return future[future_const.MULTIPLIER]
 

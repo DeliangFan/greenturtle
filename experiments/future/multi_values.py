@@ -42,16 +42,16 @@ if __name__ == '__main__':
         slow_period=12,
         channel_period=5,
         atr_period=25,
-        category_risk_factors=future_const.DEFAULT_CATEGORY_RISK_FACTORS,
+        group_risk_factors=future_const.DEFAULT_GROUP_RISK_FACTORS,
     )
 
     fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
 
     # add all data to simulator
-    for category_name, category_value in future_const.FUTURE.items():
-        category_dir = os.path.join(DATA_DIR, category_name)
-        for name, future in category_value.items():
+    for group_name, group_value in future_const.FUTURE.items():
+        group_dir = os.path.join(DATA_DIR, group_name)
+        for name, future in group_value.items():
             if name in SKIP_LIST:
                 continue
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             s.set_default_commission_by_name(name)
 
             # get the data
-            filename = os.path.join(DATA_DIR, f"{category_name}/{name}.csv")
+            filename = os.path.join(DATA_DIR, f"{group_name}/{name}.csv")
             data = future_data.get_feed_from_csv_file(
                 name,
                 filename,
