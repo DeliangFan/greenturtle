@@ -16,6 +16,16 @@
 
 """some common constants"""
 
-
+# portfolio constants
 PORTFOLIO_TYPE_ATR = "atr"
 PORTFOLIO_TYPE_AVERAGE = "average"
+
+# price constants
+OPEN = "open"
+HIGH = "high"
+LOW = "low"
+CLOSE = "close"
+ORI_OPEN = "ori_open"
+ORI_HIGH = "ori_high"
+ORI_LOW = "ori_low"
+ORI_CLOSE = "ori_close"
