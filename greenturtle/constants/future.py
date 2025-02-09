@@ -71,12 +71,6 @@ AGRICULTURE = {
         AUTO_MARGIN: 40,
         DESCRIPTION: "Live Cattle",
     },  # 活牛, same as LE
-    "ZR": {  # seems problem with the yahoo finance data
-        YAHOO_CODE: "ZR=F",
-        MULTIPLIER: 2000,
-        AUTO_MARGIN: 200,
-        DESCRIPTION: "Rough Rice",
-    },  # 稻谷
     "DC": {
         YAHOO_CODE: "DC=F",
         MULTIPLIER: 2000,
