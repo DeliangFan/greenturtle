@@ -13,16 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""script to generate continuous dataframe from many contract file."""
+"""
+Script to generate continuous dataframe from many contract file with
+adjusted prices.
+
+This script should be used for the CSI data(https://www.csidata.com/).
+"""
 
 
 import copy
 import datetime
 import os
+import re
 
 import pandas as pd
 
+import greenturtle.constants as const
 import greenturtle.constants.future as future_const
+import greenturtle.data.backtrader.future as future_data
 from greenturtle import exception
 from greenturtle.util.logging import logging
 
@@ -32,25 +40,35 @@ logger = logging.get_logger()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SOURCE_DIR = os.path.join(BASE_DIR, "output/source")
 ADJUST_DIR = os.path.join(BASE_DIR, "output/adjust")
+
 # pylint: disable=R0801
-COLUMNS = (
-    "id",
+CSI_DATA_COLUMNS = (
     "datetime",
-    "open",
-    "high",
-    "low",
-    "close",
-    "volume",
-    "open_interest",
+    future_const.CONTRACT,
+    future_const.EXPIRE,
+    const.OPEN,
+    const.HIGH,
+    const.LOW,
+    const.CLOSE,
+    future_const.VOLUME,
+    future_const.OPEN_INTEREST,
+    future_const.TOTAL_VOLUME,
+    future_const.TOTAL_OPEN_INTEREST,
 )
+
 # pylint: disable=R0801
-DTYPE = {
-    "open": float,
-    "high": float,
-    "low": float,
-    "close": float,
-    "volume": float,
-    "open_interest": float,
+CSI_DATA_DTYPE = {
+    "datetime": str,
+    future_const.CONTRACT: str,
+    future_const.EXPIRE: str,
+    const.OPEN: float,
+    const.HIGH: float,
+    const.LOW: float,
+    const.CLOSE: float,
+    future_const.VOLUME: int,
+    future_const.OPEN_INTEREST: int,
+    future_const.TOTAL_VOLUME: int,
+    future_const.TOTAL_OPEN_INTEREST: int,
 }
 
 
@@ -70,21 +88,18 @@ class Process2AdjustPrice:
     # pylint: disable=too-many-positional-arguments,too-many-arguments
     def __init__(self,
                  name,
-                 group,
                  fromdate=None,
                  todate=None,
                  src_dir=None,
                  dst_dir=None):
 
         self.name = name
-        self.group = group
         self.fromdate = fromdate
         self.todate = todate
         self.src_dir = src_dir
         self.dst_dir = dst_dir
         self.dfs_dict = {}
 
-    # TODO(wsfdl)
     @staticmethod
     def load_dataframe_from_csv_file(file_path):
         """load dataframe from a single csv file."""
@@ -92,20 +107,15 @@ class Process2AdjustPrice:
         df = pd.read_csv(
             file_path,
             index_col="datetime",
-            names=COLUMNS,
-            dtype=DTYPE,
-            header=0)
-
-        # remove some abnormal data since it always occur in the
-        # first or last line.
-        df = df.iloc[1:-1]
-
-        # remove unwanted id column
-        df.drop("id", axis=1, inplace=True)
+            names=CSI_DATA_COLUMNS,
+            dtype=CSI_DATA_DTYPE)
 
         # convert the datetime from string type to datetime type.
         df.index = df.index.map(
-            lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
+            lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+
+        df.expire = df.expire.map(
+            lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
 
         # sort and drop the duplicated index row.
         df.sort_index(inplace=True)
@@ -118,10 +128,13 @@ class Process2AdjustPrice:
     def load_dataframes_from_csv_files(self):
         """load dataframes from csv files"""
 
+        # csi data file name pattern format
+        pattern = r"^" + self.name + r"_20[0-9][0-9][FGHJKMNQUVXZ]\.csv$"
+
         files = os.listdir(self.src_dir)
         for file in files:
-            # skip non csv data file.
-            if not file.endswith(".csv"):
+            # skip file with unexpected name.
+            if not re.match(pattern, file):
                 continue
 
             # load single data frame from csv file.
@@ -129,9 +142,9 @@ class Process2AdjustPrice:
             df = self.load_dataframe_from_csv_file(file_path)
 
             # add the contract name column.
-            contract_name = file.split(".")[0]
-            df[future_const.CONTRACT_NAME] = contract_name
-            self.dfs_dict[contract_name] = df
+            contract = file.split(".")[0]
+            df[future_const.CONTRACT] = contract
+            self.dfs_dict[contract] = df
 
     def init_adjust_dataframe(self, fromdate=None, todate=None):
         """init the adjusted dataframe with index."""
@@ -150,13 +163,13 @@ class Process2AdjustPrice:
 
         return df
 
-    def get_contract_name_by_open_interest(self, date):
+    def get_contract_by_open_interest(self, date):
         """get contract name according to the largest open interest"""
 
         largest = 0
-        largest_contract_name = None
+        largest_contract = None
 
-        for contract_name, df in self.dfs_dict.items():
+        for contract, df in self.dfs_dict.items():
             # skip unwanted date
             if date not in df.index:
                 continue
@@ -165,11 +178,11 @@ class Process2AdjustPrice:
             # set the contract name according to the largest open interest
             if row.open_interest > largest:
                 largest = row.open_interest
-                largest_contract_name = contract_name
+                largest_contract = contract
 
-        return largest_contract_name
+        return largest_contract
 
-    def add_contract_name_column(self, adjust_df):
+    def add_contract_column(self, adjust_df):
         """add contract name column to adjust dataframe."""
 
         # 1. deepcopy the datetime index and sort descend.
@@ -179,51 +192,59 @@ class Process2AdjustPrice:
         # 2. for every date, choose the contract with the largest amount of
         # open interest as main contract name for adjust dataframe.
         for date in sorted_dates:
-            contract_name = self.get_contract_name_by_open_interest(date)
+            contract = self.get_contract_by_open_interest(date)
             # if contract name not found, raise exception
-            if contract_name is None:
-                raise exception.ContractNameNotFound(contract_name)
-            adjust_df.loc[date, future_const.CONTRACT_NAME] = contract_name
+            if contract is None:
+                raise exception.ContractNotFound(contract)
+            adjust_df.loc[date, future_const.CONTRACT] = contract
 
         # 3. do a backward check to make sure the contract name is always
         # continuous by time order.
-        newer_contract_name = adjust_df.iloc[-1][future_const.CONTRACT_NAME]
+        newer_contract = adjust_df.iloc[-1][future_const.CONTRACT]
 
         for date in sorted_dates:
             row = adjust_df.loc[date]
-            contract_name = row[future_const.CONTRACT_NAME]
+            contract = row[future_const.CONTRACT]
 
-            if self.compare_contract_name_order(
-                    older=contract_name,
-                    newer=newer_contract_name):
-                newer_contract_name = contract_name
+            if self.compare_contract_order(
+                    older=contract,
+                    newer=newer_contract):
+                newer_contract = contract
             else:
-                msg = f"a newer contract {contract_name} for " + \
+                msg = f"a newer contract {contract} for " + \
                       f"future {self.name} at date {date} occurs, " + \
-                      f"which should not newer than {newer_contract_name}"
+                      f"which should not newer than {newer_contract}"
                 logger.warning(msg)
                 # correct the abnormal contract name.
-                adjust_df.loc[date, future_const.CONTRACT_NAME] = \
-                    newer_contract_name
+                adjust_df.loc[date, future_const.CONTRACT] = \
+                    newer_contract
 
         return adjust_df
 
     def add_prices_column(self, adjusted_df):
         """add source prices column to adjust dataframe."""
         for date in adjusted_df.index:
-            contract_name = adjusted_df.loc[date, "contract_name"]
-            source_df = self.dfs_dict[contract_name]
+            contract = adjusted_df.loc[date, future_const.CONTRACT]
+            source_df = self.dfs_dict[contract]
+
             # prices columns
-            adjusted_df.loc[date, "open"] = source_df.loc[date, "open"]
-            adjusted_df.loc[date, "high"] = source_df.loc[date, "high"]
-            adjusted_df.loc[date, "low"] = source_df.loc[date, "low"]
-            adjusted_df.loc[date, "close"] = source_df.loc[date, "close"]
+            adjusted_df.loc[date, const.ORI_OPEN] = \
+                source_df.loc[date, const.OPEN]
+            adjusted_df.loc[date, const.ORI_HIGH] = \
+                source_df.loc[date, const.HIGH]
+            adjusted_df.loc[date, const.ORI_LOW] = \
+                source_df.loc[date, const.LOW]
+            adjusted_df.loc[date, const.ORI_CLOSE] = \
+                source_df.loc[date, const.CLOSE]
+
             # volume
-            volume = int(source_df.loc[date, "volume"])
-            adjusted_df.loc[date, "volume"] = volume
+            volume = int(source_df.loc[date, future_const.VOLUME])
+            adjusted_df.loc[date, future_const.VOLUME] = volume
+
             # open interest
-            open_interest = int(source_df.loc[date, "open_interest"])
-            adjusted_df.loc[date, "open_interest"] = open_interest
+            open_interest = \
+                int(source_df.loc[date, future_const.OPEN_INTEREST])
+            adjusted_df.loc[date, future_const.OPEN_INTEREST] = open_interest
 
         return adjusted_df
 
@@ -235,48 +256,71 @@ class Process2AdjustPrice:
         sorted_dates = sorted(dates, reverse=True)
 
         # 2. initiate the factor and newer close price
-        newer_contact_name = adjusted_df.iloc[-1][future_const.CONTRACT_NAME]
+        newer_contact = adjusted_df.iloc[-1][future_const.CONTRACT]
         factor = 1.0
 
         # 3. backward compute the factors
         for date in sorted_dates:
-            contract_name = adjusted_df.loc[date, future_const.CONTRACT_NAME]
+            contract = adjusted_df.loc[date, future_const.CONTRACT]
             # multiply the factors when meeting a switch of the contract
-            if contract_name != newer_contact_name:
-                newer_df = self.dfs_dict[newer_contact_name]
-                newer_close_price = newer_df.loc[date, "close"]
-                close_price = adjusted_df.loc[date, "close"]
+            if contract != newer_contact:
+                newer_df = self.dfs_dict[newer_contact]
+                newer_close_price = newer_df.loc[date, const.CLOSE]
+                close_price = adjusted_df.loc[date, const.ORI_CLOSE]
                 # compute the factor
                 factor = factor * newer_close_price / close_price
                 msg = f"compute factor at {date} as contract rolling."
                 logger.info(msg)
 
-            newer_contact_name = contract_name
+            newer_contact = contract
             adjusted_df.loc[date, "factor"] = factor
 
         return adjusted_df
 
-    def add_adjust_prices_column(self, adjusted_df):
+    @staticmethod
+    def add_adjust_prices_column(adjusted_df):
         """add adjusted prices column to adjust dataframe."""
         for date in adjusted_df.index:
             factor = adjusted_df.loc[date, "factor"]
             # adjust open
-            adj_open = round(factor * adjusted_df.loc[date, "open"], 6)
-            adjusted_df.loc[date, "adj_open"] = adj_open
+            adjusted_df.loc[date, const.OPEN] = \
+                round(factor * adjusted_df.loc[date, const.ORI_OPEN], 6)
             # adjust high
-            adj_high = round(factor * adjusted_df.loc[date, "high"], 6)
-            adjusted_df.loc[date, "adj_high"] = adj_high
+            adjusted_df.loc[date, const.HIGH] = \
+                round(factor * adjusted_df.loc[date, const.ORI_HIGH], 6)
             # adjust low
-            adj_low = round(factor * adjusted_df.loc[date, "low"], 6)
-            adjusted_df.loc[date, "adj_low"] = adj_low
+            adjusted_df.loc[date, const.LOW] = \
+                round(factor * adjusted_df.loc[date, const.ORI_LOW], 6)
             # adjust close
-            adj_close = round(factor * adjusted_df.loc[date, "close"], 6)
-            adjusted_df.loc[date, "adj_close"] = adj_close
+            adjusted_df.loc[date, const.CLOSE] = \
+                round(factor * adjusted_df.loc[date, const.ORI_CLOSE], 6)
+
         return adjusted_df
 
-    def compare_contract_name_order(self, older, newer):
+    def add_others_column(self, adjusted_df):
+        """add others column like volumne to adjust dataframe."""
+        for date in adjusted_df.index:
+            contract = adjusted_df.loc[date, future_const.CONTRACT]
+            source_df = self.dfs_dict[contract]
+
+            # add volume, open interest columns etc
+            adjusted_df.loc[date, future_const.EXPIRE] = \
+                source_df.loc[date, future_const.EXPIRE]
+            adjusted_df.loc[date, future_const.VOLUME] = \
+                source_df.loc[date, future_const.VOLUME]
+            adjusted_df.loc[date, future_const.TOTAL_VOLUME] = \
+                source_df.loc[date, future_const.TOTAL_VOLUME]
+            adjusted_df.loc[date, future_const.OPEN_INTEREST] = \
+                source_df.loc[date, future_const.OPEN_INTEREST]
+            adjusted_df.loc[date, future_const.TOTAL_OPEN_INTEREST] = \
+                source_df.loc[date, future_const.TOTAL_OPEN_INTEREST]
+
+        return adjusted_df
+
+    @staticmethod
+    def compare_contract_order(older, newer):
         """
-        compare contract name order according to the string.
+        compare contract order according to the string.
 
         the parameter is string type with {year}_{month_code} format.
         both the year and month are increasing since 2000.
@@ -292,13 +336,19 @@ class Process2AdjustPrice:
         """
 
         self.load_dataframes_from_csv_files()
+
         adjust_df = self.init_adjust_dataframe(
             fromdate=self.fromdate,
             todate=self.todate)
-        adjust_df = self.add_contract_name_column(adjust_df)
+
+        adjust_df = self.add_contract_column(adjust_df)
         adjust_df = self.add_prices_column(adjust_df)
         adjust_df = self.add_adjust_factor_column(adjust_df)
         adjust_df = self.add_adjust_prices_column(adjust_df)
+        adjust_df = self.add_others_column(adjust_df)
+
+        # set the order for columns
+        adjust_df = adjust_df[future_data.COLUMN_ORDER]
 
         if not os.path.exists(self.dst_dir):
             os.makedirs(self.dst_dir)
@@ -308,13 +358,19 @@ class Process2AdjustPrice:
 
 
 if __name__ == "__main__":
-    NAME = "GC"
-    GROUP = "metal"
-    p = Process2AdjustPrice(
-        NAME,
-        GROUP,
-        fromdate=datetime.datetime(2008, 1, 1),
-        todate=datetime.datetime(2024, 12, 31),
-        src_dir=os.path.join(SOURCE_DIR, NAME),
-        dst_dir=ADJUST_DIR)
-    p.process()
+
+    for group in future_const.FUTURE.values():
+        for future_name, future in group.items():
+            src_directory = os.path.join(SOURCE_DIR, future_name)
+            if not os.path.exists(src_directory):
+                continue
+
+            # initiate the process
+            p = Process2AdjustPrice(
+                future_name,
+                fromdate=datetime.datetime(2005, 2, 1),
+                todate=datetime.datetime(2025, 2, 6),
+                src_dir=src_directory,
+                dst_dir=ADJUST_DIR)
+
+            p.process()
