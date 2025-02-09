@@ -31,7 +31,6 @@ MULTIPLIER = "multiplier"
 AUTO_MARGIN = "auto_margin"
 DESCRIPTION = "description"
 
-
 # Some data is copy from
 # https://www.schwab.com.sg/investment-products/us-futures-market
 AGRICULTURE = {

@@ -21,6 +21,7 @@ import unittest
 
 import pandas as pd
 
+import greenturtle.constants as const
 import greenturtle.data.backtrader.stock as stock_data
 import greenturtle.data.backtrader.future as future_data
 import greenturtle.data.backtrader.crypto as crypto_data
@@ -79,11 +80,11 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         df = future_data.get_data_frame_from_yahoo_finance(self.yahoo_code)
 
         self.assertTrue(len(df) > 0)
-        self.assertEqual(797, int(df.iloc[2000]["adj_close"]))
-        self.assertEqual(797, int(df.iloc[2000]["close"]))
-        self.assertEqual(809, int(df.iloc[2000]["high"]))
-        self.assertEqual(794, int(df.iloc[2000]["low"]))
-        self.assertEqual(801, int(df.iloc[2000]["open"]))
+        self.assertEqual(797, int(df.iloc[2000][const.CLOSE]))
+        self.assertEqual(797, int(df.iloc[2000][const.ORI_CLOSE]))
+        self.assertEqual(809, int(df.iloc[2000][const.ORI_HIGH]))
+        self.assertEqual(794, int(df.iloc[2000][const.ORI_LOW]))
+        self.assertEqual(801, int(df.iloc[2000][const.ORI_OPEN]))
 
     def test_get_data_frame_from_yahoo_finance_with_period(self):
         """test get_data_frame_from_yahoo_finance with period"""
