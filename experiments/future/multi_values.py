@@ -49,14 +49,13 @@ if __name__ == '__main__':
     todate = datetime.datetime(2024, 12, 31)
 
     # add all data to simulator
-    for group_name, group_value in future_const.FUTURE.items():
-        group_dir = os.path.join(DATA_DIR, group_name)
-        for name, future in group_value.items():
+    for group in future_const.FUTURE.values():
+        for name, future in group.items():
+            # skip if in SKIP_LIST or filename not exists.
             if name in SKIP_LIST:
                 continue
 
-            # get the data
-            filename = os.path.join(DATA_DIR, f"{group_name}/{name}.csv")
+            filename = os.path.join(DATA_DIR, f"{name}.csv")
             if not os.path.exists(filename):
                 continue
 

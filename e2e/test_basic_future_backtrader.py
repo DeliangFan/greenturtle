@@ -40,17 +40,20 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.fromdate = datetime(2001, 1, 1)
         self.todate = datetime(2024, 12, 31)
 
-        for group_name, group_value in future_const.FUTURE.items():
-            for name, future in group_value.items():
+        for group in future_const.FUTURE.values():
+            for name, future in group.items():
 
+                # skip if not downloadable from yahoo.
                 # pylint: disable=invalid-name
+                if future_const.YAHOO_CODE not in future:
+                    continue
+
                 yahoo_code = future[future_const.YAHOO_CODE]
 
                 # get feed data from yahoo finance
                 data = future_data.get_feed_from_yahoo_finance(
                     yahoo_code,
                     name=name,
-                    group=group_name,
                     fromdate=self.fromdate,
                     todate=self.todate)
 
