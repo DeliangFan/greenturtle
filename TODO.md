@@ -27,10 +27,18 @@
 
 ## TODO
 
-- [P0] Fix e2e test
 - [P0] Better high quality data
+- [P0] Validate the high quality data
+- [P0] Generate the concat file from quality data
+- [P0] Benchmark with the generated concat data file
+
+- [P1] Deal with the data limited to the lasted start date.
+
+- [P0] Get the CSI concat data
+- [P0] Benchmark with the CSI concat date
+
+- [P0] Fix e2e test
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
-- [P2] Deal with the data limited to the lasted start date.
 
 
 # Issues

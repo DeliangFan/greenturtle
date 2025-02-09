@@ -26,7 +26,6 @@ from greenturtle.stragety.backtrader import ema
 # pylint: disable=R0801
 DATA_DIR = "../../download/future_us/output/main"
 NAME = "GC"
-GROUP_NAME = "metal"
 
 
 if __name__ == '__main__':
@@ -37,7 +36,7 @@ if __name__ == '__main__':
     # get the data
     fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
-    filename = os.path.join(DATA_DIR, f"{GROUP_NAME}/{NAME}.csv")
+    filename = os.path.join(DATA_DIR, f"{NAME}.csv")
 
     data = future_data.get_feed_from_csv_file(
         NAME,

@@ -67,7 +67,6 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         """set up for each test case."""
         self.yahoo_code = "GC=F"
         self.name = "GC"
-        self.group = "metal"
         self.filename = f"{self.name}.csv"
 
     def tearDown(self):
@@ -79,8 +78,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         """test get_data_frame_from_yahoo_finance"""
         df = future_data.get_data_frame_from_yahoo_finance(
             self.yahoo_code,
-            name=self.name,
-            group=self.group)
+            name=self.name)
 
         self.assertTrue(len(df) > 0)
         self.assertEqual(797, int(df.iloc[2000]["adj_close"]))
@@ -97,7 +95,6 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         df = future_data.get_data_frame_from_yahoo_finance(
             self.yahoo_code,
             name=self.name,
-            group=self.group,
             fromdate=fromdate,
             todate=todate)
 
@@ -107,8 +104,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         """test get_feed_from_yahoo_finance"""
         df = future_data.get_data_frame_from_yahoo_finance(
             self.yahoo_code,
-            name=self.name,
-            group=self.group)
+            name=self.name)
 
         df.to_csv(self.filename)
 

@@ -37,7 +37,6 @@ class FuturePandasData(bt.feeds.PandasData):
 def get_data_frame_from_yahoo_finance(
         yahoo_code,
         name=None,
-        group=None,
         fromdate=None,
         todate=None,
         to_csv=True):
@@ -61,11 +60,9 @@ def get_data_frame_from_yahoo_finance(
     # add the yahoo code as a column
     df[future_const.YAHOO_CODE] = yahoo_code
 
-    # add name and group as columns
+    # add name to column
     if name is not None:
         df["name"] = name
-    if group is not None:
-        df["group"] = group
 
     return df
 
@@ -107,7 +104,6 @@ def get_feed_from_csv_file(
 def get_feed_from_yahoo_finance(
         yahoo_code,
         name=None,
-        group=None,
         fromdate=None,
         todate=None):
     """
@@ -118,7 +114,6 @@ def get_feed_from_yahoo_finance(
     df = get_data_frame_from_yahoo_finance(
         yahoo_code,
         name=name,
-        group=group,
         fromdate=fromdate,
         todate=todate,
         to_csv=False)
