@@ -76,9 +76,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
 
     def test_get_data_frame_from_yahoo_finance(self):
         """test get_data_frame_from_yahoo_finance"""
-        df = future_data.get_data_frame_from_yahoo_finance(
-            self.yahoo_code,
-            name=self.name)
+        df = future_data.get_data_frame_from_yahoo_finance(self.yahoo_code)
 
         self.assertTrue(len(df) > 0)
         self.assertEqual(797, int(df.iloc[2000]["adj_close"]))
@@ -94,7 +92,6 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
 
         df = future_data.get_data_frame_from_yahoo_finance(
             self.yahoo_code,
-            name=self.name,
             fromdate=fromdate,
             todate=todate)
 
@@ -103,8 +100,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
     def test_get_feed_from_yahoo_finance(self):
         """test get_feed_from_yahoo_finance"""
         df = future_data.get_data_frame_from_yahoo_finance(
-            self.yahoo_code,
-            name=self.name)
+            self.yahoo_code)
 
         df.to_csv(self.filename)
 

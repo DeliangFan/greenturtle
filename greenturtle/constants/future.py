@@ -14,8 +14,19 @@
 
 """some constants for future"""
 
+# yahoo dedicated code constant
 YAHOO_CODE = "yahoo_code"
-CONTRACT_NAME = "contract_name"
+
+# for column name constants
+CONTRACT = "contract"
+EXPIRE = "expire"
+VOLUME = "volume"
+TOTAL_VOLUME = "total_volume"
+OPEN_INTEREST = "open_interest"
+TOTAL_OPEN_INTEREST = "total_open_interest"
+
+# others future constants
+UNKNOWN = "unknown"
 MULTIPLIER = "multiplier"
 AUTO_MARGIN = "auto_margin"
 DESCRIPTION = "description"

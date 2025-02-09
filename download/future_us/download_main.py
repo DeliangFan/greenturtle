@@ -40,7 +40,6 @@ if __name__ == '__main__':
             yahoo_code = future[future_const.YAHOO_CODE]
             df = future_data.get_data_frame_from_yahoo_finance(
                 yahoo_code=yahoo_code,
-                name=name,
             )
 
             df.to_csv(os.path.join(OUTPUT_DIR, f"{name}.csv"))
