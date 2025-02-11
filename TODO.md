@@ -25,18 +25,18 @@
 - [P0][Done] Abstract the progress for generating order. Need take the already hold position into consideration
 - [P0][Done] Portfolio management across different sectors
 - [P0][Done] Figure out why adjust data fails for BTC/ETH/RB/ZB/ZN/ZT
+- [P0][Done] Better high quality data
+- [P0][Done] Generate the concat file from quality data
+- [P0][Done] Benchmark with the generated concat data file
 
 ## TODO
 
-- [P0] Better high quality data
 - [P0] Validate the high quality data
-- [P0] Generate the concat file from quality data
-- [P0] Benchmark with the generated concat data file
 - [P1] Deal with the data limited to the lasted start date.
 - [P0] Get the CSI concat data
 - [P0] Benchmark with the CSI concat date
-
 - [P0] Fix e2e test
+- [P1] Add pyfolio
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
 
 

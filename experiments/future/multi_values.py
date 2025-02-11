@@ -27,9 +27,9 @@ from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output/main"
+DATA_DIR = "../../download/future_us/output/adjust"
 SKIP_LIST = (
-    "BTC", "ETH", "ZR", "PA",
+    "BTC", "ETH",
 )
 
 
@@ -42,6 +42,7 @@ if __name__ == '__main__':
         slow_period=12,
         channel_period=5,
         atr_period=25,
+        risk_factor=0.002,
         group_risk_factors=future_const.DEFAULT_GROUP_RISK_FACTORS,
     )
 
