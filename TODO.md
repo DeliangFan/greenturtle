@@ -24,6 +24,7 @@
 - [P0][Done] Add stop lost
 - [P0][Done] Abstract the progress for generating order. Need take the already hold position into consideration
 - [P0][Done] Portfolio management across different sectors
+- [P0][Done] Figure out why adjust data fails for BTC/ETH/RB/ZB/ZN/ZT
 
 ## TODO
 
@@ -31,9 +32,7 @@
 - [P0] Validate the high quality data
 - [P0] Generate the concat file from quality data
 - [P0] Benchmark with the generated concat data file
-
 - [P1] Deal with the data limited to the lasted start date.
-
 - [P0] Get the CSI concat data
 - [P0] Benchmark with the CSI concat date
 

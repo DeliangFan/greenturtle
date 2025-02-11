@@ -176,7 +176,7 @@ class Process2AdjustPrice:
 
             row = df.loc[date]
             # set the contract name according to the largest open interest
-            if row.open_interest > largest:
+            if row.open_interest >= largest:
                 largest = row.open_interest
                 largest_contract = contract
 
