@@ -130,6 +130,8 @@ class Process2AdjustPrice:
 
         # csi data file name pattern format
         pattern = r"^" + self.name + r"_20[0-9][0-9][FGHJKMNQUVXZ]\.csv$"
+        if self.name in ("BTC", "ETH"):
+            pattern = r"^" + self.name + r"20[0-9][0-9][FGHJKMNQUVXZ]\.csv$"
 
         files = os.listdir(self.src_dir)
         for file in files:
