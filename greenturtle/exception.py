@@ -72,3 +72,18 @@ class MultiplierNotFound(GreenTurtleBaseException):
 class AccountBankruptcy(GreenTurtleBaseException):
     """account bankruptcy error."""
     msg_fmt = "account bankruptcy error."
+
+
+class DataHighPriceAbnormalError(GreenTurtleBaseException):
+    """Data high abnormal error."""
+    msg_fmt = "Data high price abnormal error."
+
+
+class DataLowPriceAbnormalError(GreenTurtleBaseException):
+    """Data low abnormal error."""
+    msg_fmt = "Data low price abnormal error."
+
+
+class DataPriceNegativeError(GreenTurtleBaseException):
+    """Data price negative error."""
+    msg_fmt = "Data price negative error."

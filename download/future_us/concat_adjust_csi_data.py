@@ -31,6 +31,7 @@ import pandas as pd
 import greenturtle.constants as const
 import greenturtle.constants.future as future_const
 import greenturtle.data.backtrader.future as future_data
+from greenturtle.data import validation
 from greenturtle import exception
 from greenturtle.util.logging import logging
 
@@ -100,8 +101,7 @@ class Process2AdjustPrice:
         self.dst_dir = dst_dir
         self.dfs_dict = {}
 
-    @staticmethod
-    def load_dataframe_from_csv_file(file_path):
+    def load_dataframe_from_csv_file(self, file_path):
         """load dataframe from a single csv file."""
 
         df = pd.read_csv(
@@ -123,7 +123,40 @@ class Process2AdjustPrice:
             subset="datetime",
             keep="first").set_index("datetime")
 
+        self._validate_and_fix(df, file_path)
+
         return df
+
+    @staticmethod
+    def _validate_and_fix(df, file_path):
+        # validate the price before assign the value
+        for date in df.index:
+            try:
+                validation.validate_price(
+                    df.loc[date, const.OPEN],
+                    df.loc[date, const.HIGH],
+                    df.loc[date, const.LOW],
+                    df.loc[date, const.CLOSE],
+                )
+            except (
+                    exception.DataLowPriceAbnormalError,
+                    exception.DataHighPriceAbnormalError):
+
+                msg = f"validate {file_path} at {date} failed, try to fix"
+                logger.warning(msg)
+
+                df.loc[date, const.LOW] = min(
+                    df.loc[date, const.OPEN],
+                    df.loc[date, const.HIGH],
+                    df.loc[date, const.LOW],
+                    df.loc[date, const.CLOSE],
+                )
+                df.loc[date, const.HIGH] = max(
+                    df.loc[date, const.OPEN],
+                    df.loc[date, const.HIGH],
+                    df.loc[date, const.LOW],
+                    df.loc[date, const.CLOSE],
+                )
 
     def load_dataframes_from_csv_files(self):
         """load dataframes from csv files"""
@@ -218,8 +251,7 @@ class Process2AdjustPrice:
                       f"which should not newer than {newer_contract}"
                 logger.warning(msg)
                 # correct the abnormal contract name.
-                adjust_df.loc[date, future_const.CONTRACT] = \
-                    newer_contract
+                adjust_df.loc[date, future_const.CONTRACT] = newer_contract
 
         return adjust_df
 

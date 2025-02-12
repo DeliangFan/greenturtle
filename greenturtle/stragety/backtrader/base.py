@@ -20,6 +20,7 @@ import abc
 import backtrader as bt
 
 from greenturtle import constants
+from greenturtle.data import validation
 from greenturtle.util import future_util
 from greenturtle.util.logging import logging
 from greenturtle import exception
@@ -85,6 +86,8 @@ class BaseStrategy(bt.Strategy):
               |                ^   ^                  |
               +--sell_to_close-+   +-- buy_to_close ---
         """
+        self._validate_all_data()
+
         if self.order or self.bankruptcy:
             return
 
@@ -99,7 +102,7 @@ class BaseStrategy(bt.Strategy):
         # 2. compute the long and short desired position
         desired_long = self.compute_desired_long_symbols(hold_long, hold)
         desired_short = self.compute_desired_short_symbols(hold_short, hold)
-        self._validate(desired_long, desired_short)
+        self._validate_portfolios(desired_long, desired_short)
 
         # 3. determine if whether need trade or not
         if hold_long == desired_long and hold_short == desired_short:
@@ -121,6 +124,17 @@ class BaseStrategy(bt.Strategy):
 
         # 6. execute the orders.
         self.execute(current_portfolios, desired_portfolios)
+
+    def _validate_all_data(self):
+        """validate all the data in data feed."""
+        for name in self.names:
+            data = self.getdatabyname(name)
+            self._do_validate_data(data)
+
+    @staticmethod
+    def _do_validate_data(data):
+        """valid the single data."""
+        validation.validate_price(data.open, data.high, data.low, data.close)
 
     def _check_bankruptcy(self):
         """check if account is bankrupt"""
@@ -234,8 +248,8 @@ class BaseStrategy(bt.Strategy):
         """determine whether a position should buy to close or not."""
         raise NotImplementedError
 
-    def _validate(self, desired_long, desired_short):
-        """validate the symbols."""
+    def _validate_portfolios(self, desired_long, desired_short):
+        """validate the portfolio symbols."""
 
         if desired_short is None:
             desired_short = set()
