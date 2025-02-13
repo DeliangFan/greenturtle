@@ -25,72 +25,295 @@
 """
 
 import calendar
+import datetime
 import os
 
 import akshare as ak
 import pandas as pd
 
+import greenturtle.constants.future as future_const
+import greenturtle.constants as const
+from greenturtle import exception
 from greenturtle.util.logging import logging
 
 
 logger = logging.get_logger()
-CN_MARKETS = ("CFFEX", "SHFE", "INE", "CZCE", "DCE", "GFEX")
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 
+MARKETS_CN = {
+    "CFFEX": {
+        "start_year": 2010,
+        "end_year": 2024,
+    },
+    "DCE": {
+        "start_year": 2001,
+        "end_year": 2024,
+    },
+    "SHFE": {
+        "start_year": 1992,
+        "end_year": 2024,
+    },
+    "INE": {
+        "start_year": 1990,
+        "end_year": 2024,
+    },
+    "CZCE": {
+        "start_year": 1990,
+        "end_year": 2024,
+    },
+    "GFEX": {
+        "start_year": 1990,
+        "end_year": 2024,
+    },
+}
 
-def get_month_list():
-    """get the month list with start date and end date."""
+# pylint: disable=R0801
+AKSHARE_DATA_COLUMNS = (
+    const.ID,
+    future_const.CONTRACT,
+    const.DATETIME,
+    const.OPEN,
+    const.HIGH,
+    const.LOW,
+    const.CLOSE,
+    future_const.VOLUME,
+    future_const.OPEN_INTEREST,
+    const.TURN_OVER,
+    future_const.SETTLE,
+    future_const.PRE_SETTLE,
+    future_const.VARIETY,
+)
 
-    month_list = []
+# pylint: disable=R0801
+AKSHARE_DATA_DTYPE = {
+    const.ID: int,
+    future_const.CONTRACT: str,
+    const.DATETIME: str,
+    const.OPEN: float,
+    const.HIGH: float,
+    const.LOW: float,
+    const.CLOSE: float,
+    future_const.VOLUME: int,
+    future_const.OPEN_INTEREST: float,
+    const.TURN_OVER: float,
+    future_const.SETTLE: float,
+    future_const.PRE_SETTLE: float,
+    future_const.VARIETY: str,
+}
 
-    for year in range(1990, 2025):
-        for month in range(1, 13):
-            # use calendar.mongthrange to get month last day
-            monthrange = calendar.monthrange(year, month)
-            start_day = f"{year}{month:02d}01"
-            end_day = f"{year}{month:02d}{monthrange[1]:02d}"
 
-            month_list.append((start_day, end_day))
+class FutureCNDownload:
+    """
+    FutureCNDownload used for downloading the cn future data from
+    exchanges.
+    """
 
-    return month_list
+    def __init__(self):
+        pass
 
+    def get_months(self, start_year, end_year):
+        """get the month list with start date and end date."""
+        months = []
 
-def download_cn_future_by_market(market):
-    """ download the cn future data from exchanges by market."""
+        for year in range(start_year, end_year):
+            for month in range(1, 13):
+                # use calendar.mongthrange to get month last day
+                monthrange = calendar.monthrange(year, month)
+                start_day = f"{year}{month:02d}01"
+                end_day = f"{year}{month:02d}{monthrange[1]:02d}"
+                months.append((start_day, end_day))
 
-    df = pd.DataFrame()
+        return months
 
-    month_list = get_month_list()
-    for month in month_list:
-        logger.info("start to download %s %s-%s", market, month[0], month[1])
-        try:
-            # please refer the following link for more details
-            # https://akshare.akfamily.xyz/data/futures/futures.html#id53
-            daily_df = ak.get_futures_daily(
-                start_date=month[0],
-                end_date=month[1],
-                market=market)
-            file_name = f"{market}-{month[0]}.csv"
-            daily_df.to_csv(os.path.join(OUTPUT_DIR, file_name))
+    def download_month_data_by_market(self, start_date, end_date, market):
+        """
+        Do download the month data by market
 
-            df = pd.concat([df, daily_df])
-            logger.info(
-                "download %s %s-%s success", market, month[0], month[1])
-        except (Exception, ) as e:  # pylint: disable=broad-except
-            logger.error(e)
+        please refer the following link for more details
+        https://akshare.akfamily.xyz/data/futures/futures.html#id53
+        """
+        retry = 5
 
-    return df
+        while retry > 0:
+            try:
+                df = ak.get_futures_daily(
+                    start_date=start_date,
+                    end_date=end_date,
+                    market=market)
+                # return the result if success
+                return df
+
+            # pylint: disable=broad-except
+            except Exception:
+                retry -= 1
+                msg = f"failed download {market} {start_date}-{end_date}"
+                logger.warning(msg)
+
+        # raise exception after 5 times retry
+        raise exception.DownloadDataError
+
+    def download_data_by_market(self, market):
+        """download the data by market"""
+
+        # make market directory if not exists.
+        dst_dir = os.path.join(OUTPUT_DIR, market)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+
+        start_year = MARKETS_CN[market]["start_year"]
+        end_year = MARKETS_CN[market]["end_year"]
+        months = self.get_months(start_year, end_year)
+
+        # download the month data
+        for start_date, end_date in months:
+            file_path = os.path.join(dst_dir, f"{start_date}-{end_date}.csv")
+
+            # skip download if the file already exists
+            # the download progress take a very long time.
+            if os.path.exists(file_path):
+                continue
+
+            # download the file
+            msg = f"try to download {market} {start_date}-{end_date}"
+            logger.info(msg)
+
+            df = self.download_month_data_by_market(
+                start_date,
+                end_date,
+                market)
+
+            if len(df) > 0:
+                # write to the file if it's not a empty data
+                df.to_csv(file_path)
+
+                msg = f"download {market} {start_date}-{end_date} success"
+                logger.info(msg)
+            else:
+                msg = f"empty data for {market} {start_date}-{end_date}"
+                logger.info(msg)
+
+    def download_all_markets_data(self):
+        """download all the data
+
+        1. download the data to output/{market}/{data}.csv
+        2. generate the contract data to output/source/{future}/{contract}.csv
+        3. generate the adjust data to output/adjust/{future}.csv
+        """
+        for market in MARKETS_CN:
+            logger.info("start to download market %s", market)
+            self.download_data_by_market(market)
+            logger.info("market %s download finished", market)
+            # TODO(fixme)
+            self.generate_contract_csvs_by_market(market)
+
+    def load_dataframe_from_csv_file(self, file_path):
+        """load dataframe from a single csv file."""
+
+        df = pd.read_csv(
+            file_path,
+            index_col=const.DATETIME,
+            names=AKSHARE_DATA_COLUMNS,
+            dtype=AKSHARE_DATA_DTYPE,
+            header=0)
+
+        # convert the datetime from string type to datetime type.
+        df.index = df.index.map(
+            lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+
+        # TODO(fix me)
+        # get the expire date by contract
+        # df.expire = df.expire.map(
+        #    lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+
+        # sort and drop the duplicated index row.
+        df.sort_index(inplace=True)
+        # df = df.reset_index().drop_duplicates(
+        #    subset=const.DATETIME,
+        #    keep="first").set_index("datetime")
+
+        # TODO(fix me)
+        # self._validate_and_fix(df, file_path)
+
+        return df
+
+    def load_dataframe_by_market(self, market):
+        """load dataframe from all the csv file by market."""
+
+        df_list = []
+
+        src_dir = os.path.join(OUTPUT_DIR, market)
+        for file in os.listdir(src_dir):
+            file_path = os.path.join(src_dir, file)
+            # load the dataframe for single csv file.
+            df = self.load_dataframe_from_csv_file(file_path)
+            df_list.append(df)
+
+        return pd.concat(df_list)
+
+    def list_futures(self, df):
+        """list all the future from the concat dataframe"""
+        futures = set()
+
+        for _, row in df.iterrows():
+            future = row[future_const.VARIETY]
+            futures.add(future)
+
+        return futures
+
+    def list_contracts(self, df, future):
+        """list all the contract from the concat dataframe"""
+        contracts = set()
+
+        for _, row in df.iterrows():
+            variety = row[future_const.VARIETY]
+            if future != variety:
+                continue
+
+            contract = row[future_const.CONTRACT]
+            contracts.add(contract)
+
+        return contracts
+
+    def generate_single_contract_csv(self, df, future, contract, dst_dir):
+        """generate single contract csv file."""
+
+        # create a dedicated future directory
+        future_dst_dir = os.path.join(dst_dir, future)
+        if not os.path.exists(future_dst_dir):
+            os.makedirs(future_dst_dir)
+
+        file_path = os.path.join(future_dst_dir, f"{contract}.csv")
+        contract_df = df[df[future_const.CONTRACT] == contract]
+        contract_df.to_csv(file_path)
+
+    def generate_contract_csvs_by_market(self, market):
+        """generate contract files"""
+
+        # create the source directory if not exists
+        dst_dir = os.path.join(OUTPUT_DIR, "source")
+
+        # 1. get all of the data by markert
+        df = self.load_dataframe_by_market(market)
+
+        # 2. list all of the future
+        futures = self.list_futures(df)
+        for future in futures:
+
+            # 3. list all of the contract by future
+            contracts = self.list_contracts(df, future)
+            for contract in contracts:
+
+                # 4. generate single contract csv file
+                self.generate_single_contract_csv(
+                    df,
+                    future,
+                    contract,
+                    dst_dir)
 
 
 if __name__ == '__main__':
-    # create output directory
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
 
-    # download future data and write to csv file
-    for cn_market in CN_MARKETS:
-        logger.info("start to download market %s", cn_market)
-        data = download_cn_future_by_market(cn_market)
-        data.to_csv(os.path.join(OUTPUT_DIR, f"{cn_market}.csv"))
-        logger.info("market %s download finished", cn_market)
+    d = FutureCNDownload()
+    d.download_all_markets_data()

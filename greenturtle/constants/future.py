@@ -24,6 +24,9 @@ VOLUME = "volume"
 TOTAL_VOLUME = "total_volume"
 OPEN_INTEREST = "open_interest"
 TOTAL_OPEN_INTEREST = "total_open_interest"
+SETTLE = "settle"
+PRE_SETTLE = "pre_settle"
+VARIETY = "variety"
 
 # others future constants
 UNKNOWN = "unknown"
