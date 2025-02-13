@@ -34,7 +34,7 @@ class GreenTurtleBaseException(Exception):
             else:
                 message = str(message)
 
-            # pylint: disable=broad-except
+        # pylint: disable=broad-except
         except Exception:
             self._log_exception(message)
 
@@ -87,3 +87,8 @@ class DataLowPriceAbnormalError(GreenTurtleBaseException):
 class DataPriceNegativeError(GreenTurtleBaseException):
     """Data price negative error."""
     msg_fmt = "Data price negative error."
+
+
+class DownloadDataError(GreenTurtleBaseException):
+    """Download data error."""
+    msg_fmt = "Download data error."
