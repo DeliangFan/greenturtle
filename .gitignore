@@ -43,6 +43,7 @@ download/crypto/spot/
 download/*/csv/
 download/*/output/
 download/future_us/data/
+download/future/source
 
 # Others, like tmp notes
 experiments/future/FIXME.MD

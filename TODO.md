@@ -34,6 +34,7 @@
 
 ## TODO
 
+- [P0] refactor the download and process module
 - [P0] Get the china future data
 - [P0] Do some benchmark for china future data
 - [P0] Fix e2e test
