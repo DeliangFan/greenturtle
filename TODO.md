@@ -31,10 +31,13 @@
 - [P0][Done] Validate the high quality data
 - [P0][Done] Get the CSI concat data
 - [P0][Done] Benchmark with the CSI concat date
+- [P0][Done] refactor the download module
+- [P0][Done] refactor the generate contract module 
 
 ## TODO
 
-- [P0] refactor the download and process module
+- [P0] refactor the generate continuous and adjusted module 
+- [P0] refactor the const module
 - [P0] Get the china future data
 - [P0] Do some benchmark for china future data
 - [P0] Fix e2e test

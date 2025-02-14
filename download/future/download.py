@@ -29,11 +29,10 @@ For cn future markets, the data are download from.
 For us future markets, it would better to buy data from third part provider.
 """
 
+from greenturtle.data.download import cn_future
 
-from greenturtle.data.download import cn_future_from_akshare
 
-CN_ORIGINAL_DIR = "./source/cn"
-
+DST_DIR = "./source/cn"
 CN_MARKETS = {
     "CFFEX": {
         "start_year": 2010,
@@ -63,8 +62,8 @@ CN_MARKETS = {
 
 
 if __name__ == "__main__":
-    f = cn_future_from_akshare.CNFutureFromAKShare(
+    f = cn_future.CNFutureFromAKShare(
         CN_MARKETS,
-        CN_ORIGINAL_DIR,
+        DST_DIR,
     )
-    f.download_all()
+    f.download()
