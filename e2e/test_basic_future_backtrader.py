@@ -18,7 +18,8 @@
 from datetime import datetime
 import unittest
 
-import greenturtle.constants.future as future_const
+from greenturtle.constants.future import types
+from greenturtle.constants.future import varieties
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import future_simulator
 from greenturtle.stragety.backtrader import buyhold
@@ -40,15 +41,15 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.fromdate = datetime(2001, 1, 1)
         self.todate = datetime(2024, 12, 31)
 
-        for group in future_const.FUTURE.values():
+        for group in varieties.US_VARIETIES.values():
             for name, future in group.items():
 
                 # skip if not downloadable from yahoo.
                 # pylint: disable=invalid-name
-                if future_const.YAHOO_CODE not in future:
+                if types.YAHOO_CODE not in future:
                     continue
 
-                yahoo_code = future[future_const.YAHOO_CODE]
+                yahoo_code = future[types.YAHOO_CODE]
 
                 # get feed data from yahoo finance
                 data = future_data.get_feed_from_yahoo_finance(

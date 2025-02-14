@@ -17,15 +17,16 @@
 
 from backtrader import comminfo
 
-import greenturtle.constants.future as future_const
+from greenturtle.constants.future import types
 from greenturtle import exception
 from greenturtle.simulator.backtrader import simulator
 
 
 class FutureSimulator(simulator.Simulator):
     """future simulator"""
-    def __init__(self, cash=1000000, slippage=0, plot=False):
+    def __init__(self, cash=1000000, slippage=0, plot=False, varieties=None):
         super().__init__(cash=cash, slippage=slippage, plot=plot)
+        self.varieties = varieties
 
     def set_commission(self, commission=4, margin=None, mult=1.0, name=None):
         """set commission for future by name."""
@@ -38,24 +39,22 @@ class FutureSimulator(simulator.Simulator):
             name=name,
         )
 
-    @staticmethod
-    def get_auto_margin(name):
+    def get_auto_margin(self, name):
         """get auto margin for future by name."""
-        for group in future_const.FUTURE.values():
+        for group in self.varieties.values():
             for future_name, future in group.items():
                 if future_name == name:
-                    return future[future_const.AUTO_MARGIN]
+                    return future[types.AUTO_MARGIN]
 
         # raise exception if not found
         raise exception.AutoMarginNotFound
 
-    @staticmethod
-    def get_multiplier(name):
+    def get_multiplier(self, name):
         """get multiplier for future by name."""
-        for group in future_const.FUTURE.values():
+        for group in self.varieties.values():
             for future_name, future in group.items():
                 if future_name == name:
-                    return future[future_const.MULTIPLIER]
+                    return future[types.MULTIPLIER]
 
         # raise exception if not found
         raise exception.MultiplierNotFound

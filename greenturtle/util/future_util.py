@@ -17,12 +17,12 @@
 """some util from future"""
 
 
-import greenturtle.constants.future as future_const
+from greenturtle.constants.future import varieties
 
 
 def get_group_by_name(name):
     """get group name by future name"""
-    for group_name, group_value in future_const.FUTURE.items():
+    for group_name, group_value in varieties.US_VARIETIES.items():
         for future_name in group_value:
             if future_name == name:
                 return group_name
