@@ -20,14 +20,14 @@ import os
 
 import backtrader as bt
 
-import greenturtle.constants.future as future_const
+from greenturtle.constants.future import varieties
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import future_simulator
 from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output/adjust"
+DATA_DIR = "../../download/future/continuous/us/csidata_adjusted_greenturtle"
 SKIP_LIST = (
     "BTC", "ETH",
 )
@@ -35,7 +35,10 @@ SKIP_LIST = (
 
 if __name__ == '__main__':
 
-    s = future_simulator.FutureSimulator(plot=True)
+    s = future_simulator.FutureSimulator(
+        plot=True,
+        varieties=varieties.US_VARIETIES)
+
     s.add_strategy(
         ema.EMAEnhanced,
         fast_period=3,
@@ -43,15 +46,15 @@ if __name__ == '__main__':
         channel_period=5,
         atr_period=25,
         risk_factor=0.002,
-        group_risk_factors=future_const.DEFAULT_GROUP_RISK_FACTORS,
+        group_risk_factors=varieties.DEFAULT_GROUP_RISK_FACTORS,
     )
 
     fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
 
     # add all data to simulator
-    for group in future_const.FUTURE.values():
-        for name, future in group.items():
+    for group in varieties.US_VARIETIES.values():
+        for name in group:
             # skip if in SKIP_LIST or filename not exists.
             if name in SKIP_LIST:
                 continue

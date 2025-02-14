@@ -18,19 +18,20 @@
 import datetime
 import os
 
+from greenturtle.constants.future import varieties
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import future_simulator
 from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output/main"
+DATA_DIR = "../../download/future/continuous/us/csidata_adjusted_greenturtle"
 NAME = "GC"
 
 
 if __name__ == '__main__':
 
-    s = future_simulator.FutureSimulator()
+    s = future_simulator.FutureSimulator(varieties=varieties.US_VARIETIES)
     s.set_default_commission_by_name(NAME)
 
     # get the data

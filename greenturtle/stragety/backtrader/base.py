@@ -19,7 +19,7 @@ import abc
 
 import backtrader as bt
 
-from greenturtle import constants
+from greenturtle.constants.future import types
 from greenturtle.data import validation
 from greenturtle.util import future_util
 from greenturtle.util.logging import logging
@@ -312,10 +312,10 @@ class BaseStrategy(bt.Strategy):
         data = self.symbols_data[name]
         commissioninfo = self.broker.getcommissioninfo(data)
 
-        if self.portfolio_type == constants.PORTFOLIO_TYPE_ATR:
+        if self.portfolio_type == types.PORTFOLIO_TYPE_ATR:
             return self._compute_portfolio_by_atr(name, commissioninfo)
 
-        if self.portfolio_type == constants.PORTFOLIO_TYPE_AVERAGE:
+        if self.portfolio_type == types.PORTFOLIO_TYPE_AVERAGE:
             return self._compute_portfolio_by_average(
                 number,
                 data,

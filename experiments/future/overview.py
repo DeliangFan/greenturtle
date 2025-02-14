@@ -22,7 +22,7 @@ import backtrader as bt
 import pandas as pd
 
 from greenturtle.analyzers import correlation
-import greenturtle.constants.future as future_const
+from greenturtle.constants.future import varieties
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.simulator.backtrader import future_simulator
 from greenturtle.stragety.backtrader import ema
@@ -31,8 +31,7 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 # pylint: disable=R0801
-DATA_DIR = "../../download/future_us/output/main"
-# NOTE(fixme) ZR data in yahoo finance looks bad
+DATA_DIR = "../../download/future/continuous/us/csidata_adjusted_greenturtle"
 
 
 if __name__ == '__main__':
@@ -43,13 +42,14 @@ if __name__ == '__main__':
     fromdate = datetime.datetime(2004, 1, 1)
     todate = x = datetime.datetime(2024, 12, 31)
 
-    for group in future_const.FUTURE.values():
-        for name, future in group.items():
+    for group in varieties.US_VARIETIES.values():
+        for name in group:
             filename = os.path.join(DATA_DIR, f"{name}.csv")
             if not os.path.exists(filename):
                 continue
 
-            s = future_simulator.FutureSimulator()
+            s = future_simulator.FutureSimulator(
+                varieties=varieties.US_VARIETIES)
             s.set_default_commission_by_name(name)
             s.add_strategy(ema.EMA)
 

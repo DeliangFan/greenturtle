@@ -44,42 +44,25 @@ import numpy as np
 from backtrader.feeds import GenericCSVData
 import yfinance as yf
 
-import greenturtle.constants as const
-import greenturtle.constants.future as future_const
+from greenturtle.constants.future import types
 
 
-COLUMN_ORDER = [
-    future_const.CONTRACT,
-    future_const.EXPIRE,
-    const.OPEN,
-    const.HIGH,
-    const.LOW,
-    const.CLOSE,
-    const.ORI_OPEN,
-    const.ORI_HIGH,
-    const.ORI_LOW,
-    const.ORI_CLOSE,
-    future_const.VOLUME,
-    future_const.TOTAL_VOLUME,
-    future_const.OPEN_INTEREST,
-    future_const.TOTAL_OPEN_INTEREST,
-]
-
+# TODO(fixme), generate automatically
 CLASS_PARAM = (
-    (future_const.CONTRACT, 1),
-    (future_const.EXPIRE, 2),
-    (const.OPEN, 3),
-    (const.HIGH, 4),
-    (const.LOW, 5),
-    (const.CLOSE, 6),
-    (const.ORI_OPEN, 7),
-    (const.ORI_HIGH, 8),
-    (const.ORI_LOW, 9),
-    (const.ORI_CLOSE, 10),
-    (future_const.VOLUME, 11),
-    (future_const.TOTAL_VOLUME, 12),
-    (future_const.OPEN_INTEREST, 13),
-    (future_const.TOTAL_OPEN_INTEREST, 14),
+    (types.CONTRACT, 1),
+    (types.EXPIRE, 2),
+    (types.OPEN, 3),
+    (types.HIGH, 4),
+    (types.LOW, 5),
+    (types.CLOSE, 6),
+    (types.ORI_OPEN, 7),
+    (types.ORI_HIGH, 8),
+    (types.ORI_LOW, 9),
+    (types.ORI_CLOSE, 10),
+    (types.VOLUME, 11),
+    (types.TOTAL_VOLUME, 12),
+    (types.OPEN_INTEREST, 13),
+    (types.TOTAL_OPEN_INTEREST, 14),
 )
 
 
@@ -111,37 +94,37 @@ def get_data_frame_from_yahoo_finance(
     df = df.xs(key=yahoo_code, axis=1, level="Ticker")
 
     # rename the columns
-    df.rename(columns={"Open": const.ORI_OPEN}, inplace=True)
-    df.rename(columns={"Close": const.ORI_CLOSE}, inplace=True)
-    df.rename(columns={"High": const.ORI_HIGH}, inplace=True)
-    df.rename(columns={"Low": const.ORI_LOW}, inplace=True)
+    df.rename(columns={"Open": types.ORI_OPEN}, inplace=True)
+    df.rename(columns={"Close": types.ORI_CLOSE}, inplace=True)
+    df.rename(columns={"High": types.ORI_HIGH}, inplace=True)
+    df.rename(columns={"Low": types.ORI_LOW}, inplace=True)
 
     # rename the adjust name
-    df.rename(columns={"Adj Close": const.CLOSE}, inplace=True)
+    df.rename(columns={"Adj Close": types.CLOSE}, inplace=True)
 
     # rename the volume
-    df.rename(columns={"Volume": future_const.VOLUME}, inplace=True)
+    df.rename(columns={"Volume": types.VOLUME}, inplace=True)
 
     # add new price columns, these are for adjusted price
-    df[const.OPEN] = np.nan
-    df[const.HIGH] = np.nan
-    df[const.LOW] = np.nan
+    df[types.OPEN] = np.nan
+    df[types.HIGH] = np.nan
+    df[types.LOW] = np.nan
     for index, row in df.iterrows():
-        factor = row[const.CLOSE] / row[const.ORI_CLOSE]
+        factor = row[types.CLOSE] / row[types.ORI_CLOSE]
         # set the open/high/low adjusted price.
-        df.at[index, const.OPEN] = row[const.ORI_OPEN] * factor
-        df.at[index, const.HIGH] = row[const.ORI_HIGH] * factor
-        df.at[index, const.LOW] = row[const.ORI_LOW] * factor
+        df.at[index, types.OPEN] = row[types.ORI_OPEN] * factor
+        df.at[index, types.HIGH] = row[types.ORI_HIGH] * factor
+        df.at[index, types.LOW] = row[types.ORI_LOW] * factor
 
     # the contract/expire/open_interest columns to unknown etc
-    df[future_const.CONTRACT] = np.nan
-    df[future_const.EXPIRE] = np.nan
-    df[future_const.OPEN_INTEREST] = np.nan
-    df[future_const.TOTAL_VOLUME] = np.nan
-    df[future_const.TOTAL_OPEN_INTEREST] = np.nan
+    df[types.CONTRACT] = np.nan
+    df[types.EXPIRE] = np.nan
+    df[types.OPEN_INTEREST] = np.nan
+    df[types.TOTAL_VOLUME] = np.nan
+    df[types.TOTAL_OPEN_INTEREST] = np.nan
 
     # adjust the column order
-    df = df[COLUMN_ORDER]
+    df = df[types.CONTINUOUS_COLUMN]
 
     return df
 

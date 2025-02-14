@@ -28,9 +28,8 @@ import re
 
 import pandas as pd
 
-import greenturtle.constants as const
-import greenturtle.constants.future as future_const
-import greenturtle.data.backtrader.future as future_data
+from greenturtle.constants.future import types
+from greenturtle.constants.future import varieties
 from greenturtle.data import validation
 from greenturtle import exception
 from greenturtle.util.logging import logging
@@ -44,32 +43,32 @@ ADJUST_DIR = os.path.join(BASE_DIR, "output/adjust")
 
 # pylint: disable=R0801
 CSI_DATA_COLUMNS = (
-    "datetime",
-    future_const.CONTRACT,
-    future_const.EXPIRE,
-    const.OPEN,
-    const.HIGH,
-    const.LOW,
-    const.CLOSE,
-    future_const.VOLUME,
-    future_const.OPEN_INTEREST,
-    future_const.TOTAL_VOLUME,
-    future_const.TOTAL_OPEN_INTEREST,
+    types.DATETIME,
+    types.CONTRACT,
+    types.EXPIRE,
+    types.OPEN,
+    types.HIGH,
+    types.LOW,
+    types.CLOSE,
+    types.VOLUME,
+    types.OPEN_INTEREST,
+    types.TOTAL_VOLUME,
+    types.TOTAL_OPEN_INTEREST,
 )
 
 # pylint: disable=R0801
 CSI_DATA_DTYPE = {
-    "datetime": str,
-    future_const.CONTRACT: str,
-    future_const.EXPIRE: str,
-    const.OPEN: float,
-    const.HIGH: float,
-    const.LOW: float,
-    const.CLOSE: float,
-    future_const.VOLUME: int,
-    future_const.OPEN_INTEREST: int,
-    future_const.TOTAL_VOLUME: int,
-    future_const.TOTAL_OPEN_INTEREST: int,
+    types.DATETIME: str,
+    types.CONTRACT: str,
+    types.EXPIRE: str,
+    types.OPEN: float,
+    types.HIGH: float,
+    types.LOW: float,
+    types.CLOSE: float,
+    types.VOLUME: int,
+    types.OPEN_INTEREST: int,
+    types.TOTAL_VOLUME: int,
+    types.TOTAL_OPEN_INTEREST: int,
 }
 
 
@@ -133,10 +132,10 @@ class Process2AdjustPrice:
         for date in df.index:
             try:
                 validation.validate_price(
-                    df.loc[date, const.OPEN],
-                    df.loc[date, const.HIGH],
-                    df.loc[date, const.LOW],
-                    df.loc[date, const.CLOSE],
+                    df.loc[date, types.OPEN],
+                    df.loc[date, types.HIGH],
+                    df.loc[date, types.LOW],
+                    df.loc[date, types.CLOSE],
                 )
             except (
                     exception.DataLowPriceAbnormalError,
@@ -145,17 +144,17 @@ class Process2AdjustPrice:
                 msg = f"validate {file_path} at {date} failed, try to fix"
                 logger.warning(msg)
 
-                df.loc[date, const.LOW] = min(
-                    df.loc[date, const.OPEN],
-                    df.loc[date, const.HIGH],
-                    df.loc[date, const.LOW],
-                    df.loc[date, const.CLOSE],
+                df.loc[date, types.LOW] = min(
+                    df.loc[date, types.OPEN],
+                    df.loc[date, types.HIGH],
+                    df.loc[date, types.LOW],
+                    df.loc[date, types.CLOSE],
                 )
-                df.loc[date, const.HIGH] = max(
-                    df.loc[date, const.OPEN],
-                    df.loc[date, const.HIGH],
-                    df.loc[date, const.LOW],
-                    df.loc[date, const.CLOSE],
+                df.loc[date, types.HIGH] = max(
+                    df.loc[date, types.OPEN],
+                    df.loc[date, types.HIGH],
+                    df.loc[date, types.LOW],
+                    df.loc[date, types.CLOSE],
                 )
 
     def load_dataframes_from_csv_files(self):
@@ -178,7 +177,7 @@ class Process2AdjustPrice:
 
             # add the contract name column.
             contract = file.split(".")[0]
-            df[future_const.CONTRACT] = contract
+            df[types.CONTRACT] = contract
             self.dfs_dict[contract] = df
 
     def init_adjust_dataframe(self, fromdate=None, todate=None):
@@ -231,15 +230,15 @@ class Process2AdjustPrice:
             # if contract name not found, raise exception
             if contract is None:
                 raise exception.ContractNotFound(contract)
-            adjust_df.loc[date, future_const.CONTRACT] = contract
+            adjust_df.loc[date, types.CONTRACT] = contract
 
         # 3. do a backward check to make sure the contract name is always
         # continuous by time order.
-        newer_contract = adjust_df.iloc[-1][future_const.CONTRACT]
+        newer_contract = adjust_df.iloc[-1][types.CONTRACT]
 
         for date in sorted_dates:
             row = adjust_df.loc[date]
-            contract = row[future_const.CONTRACT]
+            contract = row[types.CONTRACT]
 
             if self.compare_contract_order(
                     older=contract,
@@ -251,34 +250,34 @@ class Process2AdjustPrice:
                       f"which should not newer than {newer_contract}"
                 logger.warning(msg)
                 # correct the abnormal contract name.
-                adjust_df.loc[date, future_const.CONTRACT] = newer_contract
+                adjust_df.loc[date, types.CONTRACT] = newer_contract
 
         return adjust_df
 
     def add_prices_column(self, adjusted_df):
         """add source prices column to adjust dataframe."""
         for date in adjusted_df.index:
-            contract = adjusted_df.loc[date, future_const.CONTRACT]
+            contract = adjusted_df.loc[date, types.CONTRACT]
             source_df = self.dfs_dict[contract]
 
             # prices columns
-            adjusted_df.loc[date, const.ORI_OPEN] = \
-                source_df.loc[date, const.OPEN]
-            adjusted_df.loc[date, const.ORI_HIGH] = \
-                source_df.loc[date, const.HIGH]
-            adjusted_df.loc[date, const.ORI_LOW] = \
-                source_df.loc[date, const.LOW]
-            adjusted_df.loc[date, const.ORI_CLOSE] = \
-                source_df.loc[date, const.CLOSE]
+            adjusted_df.loc[date, types.ORI_OPEN] = \
+                source_df.loc[date, types.OPEN]
+            adjusted_df.loc[date, types.ORI_HIGH] = \
+                source_df.loc[date, types.HIGH]
+            adjusted_df.loc[date, types.ORI_LOW] = \
+                source_df.loc[date, types.LOW]
+            adjusted_df.loc[date, types.ORI_CLOSE] = \
+                source_df.loc[date, types.CLOSE]
 
             # volume
-            volume = int(source_df.loc[date, future_const.VOLUME])
-            adjusted_df.loc[date, future_const.VOLUME] = volume
+            volume = int(source_df.loc[date, types.VOLUME])
+            adjusted_df.loc[date, types.VOLUME] = volume
 
             # open interest
             open_interest = \
-                int(source_df.loc[date, future_const.OPEN_INTEREST])
-            adjusted_df.loc[date, future_const.OPEN_INTEREST] = open_interest
+                int(source_df.loc[date, types.OPEN_INTEREST])
+            adjusted_df.loc[date, types.OPEN_INTEREST] = open_interest
 
         return adjusted_df
 
@@ -290,17 +289,17 @@ class Process2AdjustPrice:
         sorted_dates = sorted(dates, reverse=True)
 
         # 2. initiate the factor and newer close price
-        newer_contact = adjusted_df.iloc[-1][future_const.CONTRACT]
+        newer_contact = adjusted_df.iloc[-1][types.CONTRACT]
         factor = 1.0
 
         # 3. backward compute the factors
         for date in sorted_dates:
-            contract = adjusted_df.loc[date, future_const.CONTRACT]
+            contract = adjusted_df.loc[date, types.CONTRACT]
             # multiply the factors when meeting a switch of the contract
             if contract != newer_contact:
                 newer_df = self.dfs_dict[newer_contact]
-                newer_close_price = newer_df.loc[date, const.CLOSE]
-                close_price = adjusted_df.loc[date, const.ORI_CLOSE]
+                newer_close_price = newer_df.loc[date, types.CLOSE]
+                close_price = adjusted_df.loc[date, types.ORI_CLOSE]
                 # compute the factor
                 factor = factor * newer_close_price / close_price
                 msg = f"compute factor at {date} as contract rolling."
@@ -317,37 +316,37 @@ class Process2AdjustPrice:
         for date in adjusted_df.index:
             factor = adjusted_df.loc[date, "factor"]
             # adjust open
-            adjusted_df.loc[date, const.OPEN] = \
-                round(factor * adjusted_df.loc[date, const.ORI_OPEN], 6)
+            adjusted_df.loc[date, types.OPEN] = \
+                round(factor * adjusted_df.loc[date, types.ORI_OPEN], 6)
             # adjust high
-            adjusted_df.loc[date, const.HIGH] = \
-                round(factor * adjusted_df.loc[date, const.ORI_HIGH], 6)
+            adjusted_df.loc[date, types.HIGH] = \
+                round(factor * adjusted_df.loc[date, types.ORI_HIGH], 6)
             # adjust low
-            adjusted_df.loc[date, const.LOW] = \
-                round(factor * adjusted_df.loc[date, const.ORI_LOW], 6)
+            adjusted_df.loc[date, types.LOW] = \
+                round(factor * adjusted_df.loc[date, types.ORI_LOW], 6)
             # adjust close
-            adjusted_df.loc[date, const.CLOSE] = \
-                round(factor * adjusted_df.loc[date, const.ORI_CLOSE], 6)
+            adjusted_df.loc[date, types.CLOSE] = \
+                round(factor * adjusted_df.loc[date, types.ORI_CLOSE], 6)
 
         return adjusted_df
 
     def add_others_column(self, adjusted_df):
         """add others column like volumne to adjust dataframe."""
         for date in adjusted_df.index:
-            contract = adjusted_df.loc[date, future_const.CONTRACT]
+            contract = adjusted_df.loc[date, types.CONTRACT]
             source_df = self.dfs_dict[contract]
 
             # add volume, open interest columns etc
-            adjusted_df.loc[date, future_const.EXPIRE] = \
-                source_df.loc[date, future_const.EXPIRE]
-            adjusted_df.loc[date, future_const.VOLUME] = \
-                source_df.loc[date, future_const.VOLUME]
-            adjusted_df.loc[date, future_const.TOTAL_VOLUME] = \
-                source_df.loc[date, future_const.TOTAL_VOLUME]
-            adjusted_df.loc[date, future_const.OPEN_INTEREST] = \
-                source_df.loc[date, future_const.OPEN_INTEREST]
-            adjusted_df.loc[date, future_const.TOTAL_OPEN_INTEREST] = \
-                source_df.loc[date, future_const.TOTAL_OPEN_INTEREST]
+            adjusted_df.loc[date, types.EXPIRE] = \
+                source_df.loc[date, types.EXPIRE]
+            adjusted_df.loc[date, types.VOLUME] = \
+                source_df.loc[date, types.VOLUME]
+            adjusted_df.loc[date, types.TOTAL_VOLUME] = \
+                source_df.loc[date, types.TOTAL_VOLUME]
+            adjusted_df.loc[date, types.OPEN_INTEREST] = \
+                source_df.loc[date, types.OPEN_INTEREST]
+            adjusted_df.loc[date, types.TOTAL_OPEN_INTEREST] = \
+                source_df.loc[date, types.TOTAL_OPEN_INTEREST]
 
         return adjusted_df
 
@@ -382,7 +381,7 @@ class Process2AdjustPrice:
         adjust_df = self.add_others_column(adjust_df)
 
         # set the order for columns
-        adjust_df = adjust_df[future_data.COLUMN_ORDER]
+        adjust_df = adjust_df[types.CONTINUOUS_COLUMN]
 
         if not os.path.exists(self.dst_dir):
             os.makedirs(self.dst_dir)
@@ -393,15 +392,15 @@ class Process2AdjustPrice:
 
 if __name__ == "__main__":
 
-    for group in future_const.FUTURE.values():
-        for future_name, future in group.items():
-            src_directory = os.path.join(SOURCE_DIR, future_name)
+    for group in varieties.US_VARIETIES.values():
+        for variety in group:
+            src_directory = os.path.join(SOURCE_DIR, variety)
             if not os.path.exists(src_directory):
                 continue
 
             # initiate the process
             p = Process2AdjustPrice(
-                future_name,
+                variety,
                 fromdate=datetime.datetime(2005, 2, 1),
                 todate=datetime.datetime(2025, 2, 6),
                 src_dir=src_directory,

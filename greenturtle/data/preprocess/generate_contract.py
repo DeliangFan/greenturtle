@@ -22,8 +22,7 @@ import os
 import numpy as np
 import pandas as pd
 
-import greenturtle.constants.future as future_const
-import greenturtle.constants as const
+from greenturtle.constants.future import types
 from greenturtle.util.logging import logging
 
 
@@ -32,50 +31,37 @@ logger = logging.get_logger()
 
 # pylint: disable=R0801
 AKSHARE_DATA_COLUMNS = (
-    const.ID,
-    future_const.CONTRACT,
-    const.DATETIME,
-    const.OPEN,
-    const.HIGH,
-    const.LOW,
-    const.CLOSE,
-    future_const.VOLUME,
-    future_const.OPEN_INTEREST,
-    const.TURN_OVER,
-    future_const.SETTLE,
-    future_const.PRE_SETTLE,
-    future_const.VARIETY,
+    types.ID,
+    types.CONTRACT,
+    types.DATETIME,
+    types.OPEN,
+    types.HIGH,
+    types.LOW,
+    types.CLOSE,
+    types.VOLUME,
+    types.OPEN_INTEREST,
+    types.TURN_OVER,
+    types.SETTLE,
+    types.PRE_SETTLE,
+    types.VARIETY,
 )
 
 # pylint: disable=R0801
 AKSHARE_DATA_DTYPE = {
-    const.ID: int,
-    future_const.CONTRACT: str,
-    const.DATETIME: str,
-    const.OPEN: float,
-    const.HIGH: float,
-    const.LOW: float,
-    const.CLOSE: float,
-    future_const.VOLUME: int,
-    future_const.OPEN_INTEREST: float,
-    const.TURN_OVER: float,
-    future_const.SETTLE: float,
-    future_const.PRE_SETTLE: float,
-    future_const.VARIETY: str,
+    types.ID: int,
+    types.CONTRACT: str,
+    types.DATETIME: str,
+    types.OPEN: float,
+    types.HIGH: float,
+    types.LOW: float,
+    types.CLOSE: float,
+    types.VOLUME: int,
+    types.OPEN_INTEREST: float,
+    types.TURN_OVER: float,
+    types.SETTLE: float,
+    types.PRE_SETTLE: float,
+    types.VARIETY: str,
 }
-
-CONTRACT_COLUMN = [
-    future_const.CONTRACT,
-    future_const.EXPIRE,
-    const.OPEN,
-    const.HIGH,
-    const.LOW,
-    const.CLOSE,
-    future_const.VOLUME,
-    future_const.TOTAL_VOLUME,
-    future_const.OPEN_INTEREST,
-    future_const.TOTAL_OPEN_INTEREST,
-]
 
 
 class GenerateContract:
@@ -123,13 +109,13 @@ class GenerateContractFromAKShare(GenerateContract):
         df = self.load_all_by_market(market)
 
         # 2. list all the futures
-        futures = self.list_futures(df)
-        for future in futures:
+        varietis = self.list_varietis(df)
+        for variety in varietis:
             # 3. list all the contracts by future
-            contracts = self.list_contracts(df, future)
+            contracts = self.list_contracts(df, variety)
             for contract in contracts:
                 # 4. generate single contract csv file
-                self.generate_one(df, future, contract)
+                self.generate_one(df, variety, contract)
 
     @staticmethod
     def load_one(file_path):
@@ -137,7 +123,7 @@ class GenerateContractFromAKShare(GenerateContract):
 
         df = pd.read_csv(
             file_path,
-            index_col=const.DATETIME,
+            index_col=types.DATETIME,
             names=AKSHARE_DATA_COLUMNS,
             dtype=AKSHARE_DATA_DTYPE,
             header=0)
@@ -165,67 +151,66 @@ class GenerateContractFromAKShare(GenerateContract):
         return pd.concat(df_list)
 
     @staticmethod
-    def list_futures(df):
-        """list all the future from the concat dataframe"""
-        futures = set()
+    def list_varietis(df):
+        """list all the varieties from the concat dataframe"""
+        varieties = set()
 
         for _, row in df.iterrows():
-            future = row[future_const.VARIETY]
-            futures.add(future)
+            variety = row[types.VARIETY]
+            varieties.add(variety)
 
-        return futures
+        return varieties
 
     @staticmethod
-    def list_contracts(df, future):
+    def list_contracts(df, variety):
         """list all the contract from the concat dataframe"""
         contracts = set()
 
         for _, row in df.iterrows():
-            variety = row[future_const.VARIETY]
-            if future != variety:
+            if variety != row[types.VARIETY]:
                 continue
 
-            contract = row[future_const.CONTRACT]
+            contract = row[types.CONTRACT]
             contracts.add(contract)
 
         return contracts
 
-    def generate_one(self, df, future, contract):
+    def generate_one(self, df, variety, contract):
         """generate single contract csv file."""
 
         # 1. create a dedicated future directory
-        future_dst_dir = str(os.path.join(self.dst_dir, future))
-        if not os.path.exists(future_dst_dir):
-            os.makedirs(future_dst_dir)
+        variety_dst_dir = str(os.path.join(self.dst_dir, variety))
+        if not os.path.exists(variety_dst_dir):
+            os.makedirs(variety_dst_dir)
 
         # 2. filter the data by contract
-        contract_df = df[df[future_const.CONTRACT] == contract].copy()
+        contract_df = df[df[types.CONTRACT] == contract].copy()
 
         # 3. sort by index and remove duplicates
         contract_df.sort_index(inplace=True)
         contract_df = contract_df.reset_index().drop_duplicates(
-            subset=const.DATETIME,
-            keep="first").set_index(const.DATETIME)
+            subset=types.DATETIME,
+            keep="first").set_index(types.DATETIME)
 
         # 4. add other columns
         for index, row in contract_df.iterrows():
-            future = row[future_const.VARIETY]
+            future = row[types.VARIETY]
             # get total volume
             total_volume = self.get_total_volume(df, index, future)
-            contract_df.loc[index, future_const.TOTAL_VOLUME] = total_volume
+            contract_df.loc[index, types.TOTAL_VOLUME] = total_volume
             # get total open interest
             total_open_interest = \
                 self.get_total_open_interest(df, index, future)
-            contract_df.loc[index, future_const.TOTAL_OPEN_INTEREST] = \
+            contract_df.loc[index, types.TOTAL_OPEN_INTEREST] = \
                 total_open_interest
 
         # TODO(fixme) get the expire date by contract
-        contract_df[future_const.EXPIRE] = np.nan
-        # filter unwanted column and sort the order of columns
-        contract_df = contract_df[CONTRACT_COLUMN]
+        contract_df[types.EXPIRE] = np.nan
+        # 5. filter unwanted column and sort the order of columns
+        contract_df = contract_df[types.CONTRACT_COLUMN]
 
-        # write to csv file
-        file_path = os.path.join(future_dst_dir, f"{contract}.csv")
+        # 6. write to csv file
+        file_path = os.path.join(variety_dst_dir, f"{contract}.csv")
         contract_df.to_csv(file_path, header=False)
 
     @staticmethod
@@ -236,26 +221,26 @@ class GenerateContractFromAKShare(GenerateContract):
 
         # filter by index(date) and future
         df = df[df.index.isin([index])]
-        df = df[df[future_const.VARIETY] == future]
+        df = df[df[types.VARIETY] == future]
 
         for _, row in df.iterrows():
-            volume = row[future_const.VOLUME]
+            volume = row[types.VOLUME]
             total_volume += volume
 
         return total_volume
 
     @staticmethod
-    def get_total_open_interest(df, index, future):
+    def get_total_open_interest(df, index, variety):
         """get total open interesst for a future by date"""
 
         total_open_interest = 0
 
         # filter by index(date) and future
         df = df[df.index.isin([index])]
-        df = df[df[future_const.VARIETY] == future]
+        df = df[df[types.VARIETY] == variety]
 
         for _, row in df.iterrows():
-            open_interest = row[future_const.OPEN_INTEREST]
+            open_interest = row[types.OPEN_INTEREST]
             total_open_interest += open_interest
 
         return total_open_interest
