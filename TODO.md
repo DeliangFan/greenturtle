@@ -34,10 +34,10 @@
 - [P0][Done] refactor the download module
 - [P0][Done] refactor the generate contract module 
 - [P0][Done] refactor the const module
+- [P0][Done] refactor the generate continuous and adjusted module 
 
 ## TODO
 
-- [P0] refactor the generate continuous and adjusted module 
 - [P0] Get the china future data
 - [P0] Do some benchmark for china future data
 - [P0] Fix e2e test

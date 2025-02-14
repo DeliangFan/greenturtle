@@ -89,6 +89,11 @@ class DataPriceNegativeError(GreenTurtleBaseException):
     msg_fmt = "Data price negative error."
 
 
+class DataContractAbnormalError(GreenTurtleBaseException):
+    """Data contract abnormal error."""
+    msg_fmt = "Data contract abnormal error."
+
+
 class DownloadDataError(GreenTurtleBaseException):
     """Download data error."""
     msg_fmt = "Download data error."
