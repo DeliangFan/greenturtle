@@ -34,16 +34,16 @@ from greenturtle.data.download import cn_future
 
 DST_DIR = "./source/cn"
 CN_MARKETS = {
+    "SHFE": {
+        "start_year": 2003,
+        "end_year": 2025,
+    },
     "CFFEX": {
         "start_year": 2010,
         "end_year": 2025,
     },
     "DCE": {
         "start_year": 2001,
-        "end_year": 2025,
-    },
-    "SHFE": {
-        "start_year": 1992,
         "end_year": 2025,
     },
     "INE": {

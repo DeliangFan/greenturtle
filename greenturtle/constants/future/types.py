@@ -38,6 +38,8 @@ TOTAL_OPEN_INTEREST = "total_open_interest"
 SETTLE = "settle"
 PRE_SETTLE = "pre_settle"
 VARIETY = "variety"
+# adjust factor
+ADJUST_FACTOR = "adjust_factor"
 
 # yahoo dedicated code constant
 YAHOO_CODE = "yahoo_code"
@@ -61,10 +63,24 @@ CONTRACT_COLUMN = [
     LOW,
     CLOSE,
     VOLUME,
-    TOTAL_VOLUME,
     OPEN_INTEREST,
+    TOTAL_VOLUME,
     TOTAL_OPEN_INTEREST,
 ]
+
+CONTRACT_DATA_DTYPE = {
+    DATETIME: str,
+    CONTRACT: str,
+    EXPIRE: str,
+    OPEN: float,
+    HIGH: float,
+    LOW: float,
+    CLOSE: float,
+    VOLUME: int,
+    OPEN_INTEREST: int,
+    TOTAL_VOLUME: int,
+    TOTAL_OPEN_INTEREST: int,
+}
 
 # csv structure for continuous
 CONTINUOUS_COLUMN = [

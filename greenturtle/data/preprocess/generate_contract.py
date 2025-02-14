@@ -64,6 +64,7 @@ AKSHARE_DATA_DTYPE = {
 }
 
 
+# pylint: disable=too-few-public-methods
 class GenerateContract:
     """
     GenerateContract generate the single future contract csv file.
@@ -94,9 +95,6 @@ class GenerateContractFromAKShare(GenerateContract):
     """
     Generate contract file from the data downloaded by akshare.
     """
-
-    def __init__(self, markets, src_dir, dst_dir):
-        super().__init__(markets, src_dir, dst_dir)
 
     def generate(self):
         """generate the contract csv file."""
