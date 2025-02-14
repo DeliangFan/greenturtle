@@ -13,76 +13,26 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# Copyright (c) 2025 GreenTurtle
-# All Rights Reserved.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
-
 """Download the cn future data from exchanges."""
 
+import abc
 import calendar
 import os
 import time
 
 import akshare as ak
 
-import greenturtle.constants.future as future_const
-import greenturtle.constants as const
 from greenturtle import exception
 from greenturtle.util.logging import logging
 
 
 logger = logging.get_logger()
 
-# pylint: disable=R0801
-AKSHARE_DATA_COLUMNS = (
-    const.ID,
-    future_const.CONTRACT,
-    const.DATETIME,
-    const.OPEN,
-    const.HIGH,
-    const.LOW,
-    const.CLOSE,
-    future_const.VOLUME,
-    future_const.OPEN_INTEREST,
-    const.TURN_OVER,
-    future_const.SETTLE,
-    future_const.PRE_SETTLE,
-    future_const.VARIETY,
-)
 
-# pylint: disable=R0801
-AKSHARE_DATA_DTYPE = {
-    const.ID: int,
-    future_const.CONTRACT: str,
-    const.DATETIME: str,
-    const.OPEN: float,
-    const.HIGH: float,
-    const.LOW: float,
-    const.CLOSE: float,
-    future_const.VOLUME: int,
-    future_const.OPEN_INTEREST: float,
-    const.TURN_OVER: float,
-    future_const.SETTLE: float,
-    future_const.PRE_SETTLE: float,
-    future_const.VARIETY: str,
-}
-
-
-class CNFutureFromAKShare:
+# pylint: disable=too-few-public-methods
+class CNFuture:
     """
-    FutureCNDownload used for downloading the cn future data from
-    exchanges by month.
+    FutureCN download used for downloading the cn future data by month.
 
     It will keep the original data format and write them to csv format
     files in the dst directory.
@@ -96,10 +46,21 @@ class CNFutureFromAKShare:
         /{file2}.csv
         ...
     """
-
     def __init__(self, markets, dst_dir):
         self.markets = markets
         self.dst_dir = dst_dir
+
+    @abc.abstractmethod
+    def download(self):
+        """download all the data."""
+        raise NotImplementedError
+
+
+class CNFutureFromAKShare(CNFuture):
+    """
+    FutureCNDownload used for downloading the cn future data from
+    exchanges by month.
+    """
 
     def get_months(self, start_year, end_year):
         """get the month list with start date and end date."""
@@ -187,7 +148,7 @@ class CNFutureFromAKShare:
             # sleep a few seconds to avoid being blocked by server side.
             time.sleep(10)
 
-    def download_all(self):
+    def download(self):
         """download all the data."""
         for market in self.markets:
             logger.info("start to download market %s", market)
