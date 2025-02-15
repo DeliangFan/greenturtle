@@ -54,6 +54,9 @@ DESCRIPTION = "description"
 PORTFOLIO_TYPE_ATR = "atr"
 PORTFOLIO_TYPE_AVERAGE = "average"
 
+# datetime format for future
+DATE_FORMAT = "%Y%m%d"
+
 # csv structure for contract
 CONTRACT_COLUMN = [
     CONTRACT,

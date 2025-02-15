@@ -21,7 +21,7 @@ which means that these download scripts should convert the data into the
 desired format so that the cerebro could consume the data with datafeed.
 
 Data structure.
-- index, datetime with "%Y-%m-%d"
+- index, datetime with "%Y%m%d"
 - column contract: contract name,
 - column expire: expire date
 - column open: open price, the open price should be adjusted price
@@ -146,7 +146,7 @@ def get_feed_from_csv_file(
     data = FutureCSV(
         name=name,
         dataname=filename,
-        dtformat="%Y-%m-%d",
+        dtformat=types.DATE_FORMAT,
         timeframe=timeframe,
         datatime=0,
         plot=False,
