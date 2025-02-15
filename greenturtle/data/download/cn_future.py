@@ -135,7 +135,7 @@ class CNFutureFromAKShare(CNFuture):
                 end_date,
                 market)
 
-            if len(df) > 0:
+            if df is not None and len(df) > 0:
                 # write to the file if it's not a empty data
                 df.to_csv(file_path)
 

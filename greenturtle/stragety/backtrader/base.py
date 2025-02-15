@@ -397,15 +397,20 @@ class BaseStrategy(bt.Strategy):
 
         return portfolios
 
+    def _filter_portfolios_by_valid(self, portfolios):
+        """filter the portfolios by data valid."""
+        filtered = {}
+        for k, v in portfolios.items():
+            if self._is_valid(k):
+                filtered[k] = v
+        return filtered
+
     def execute(self, current_portfolios, desired_portfolios):
         """execute the orders with the following rule."""
 
         # 1. filter the portfolios with invalid data
-        tmp = {}
-        for k, v in current_portfolios.items():
-            if self._is_valid(k):
-                tmp[k] = v
-        current_portfolios = tmp
+        current_portfolios = self._filter_portfolios_by_valid(
+            current_portfolios)
 
         # 2. sell the unwanted symbols.
         for name in current_portfolios:
@@ -414,17 +419,15 @@ class BaseStrategy(bt.Strategy):
 
         # 3. trade the symbols both in current and desired portfolios
         # 3.1 trade the symbols to get more available cash
-        for name in current_portfolios:
+        for name, current_size in current_portfolios.items():
             if name in desired_portfolios:
-                current_size = current_portfolios[name]
                 desired_size = desired_portfolios[name]
                 if abs(current_size) > abs(desired_size):
                     self.order_target_size_with_log(name, desired_size)
 
         # 3.2 trade other symbols both in current and desired portfolios
-        for name in current_portfolios:
+        for name, current_size in current_portfolios.items():
             if name in desired_portfolios:
-                current_size = current_portfolios[name]
                 desired_size = desired_portfolios[name]
                 if current_size == desired_size:
                     continue
