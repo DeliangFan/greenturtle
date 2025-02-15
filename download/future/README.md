@@ -15,7 +15,12 @@ To solve this, we need to clear define the data struct for different type of fut
   - The directory should be future/contract/{cn|us}/...
   - The data format should be the same in every csv file
 
-- Generate data for backtesting
+- Generate continuous data
   - Read the data from single contracts and generate the continuous and adjust contract
-  - The directory should be future/backtesting/{cn|us}/...
+  - The directory should be future/continuous/{cn|us}/...
+  - The data format should be the same in every csv file
+
+- Align data which is already as input for backtrader
+  - Read the data from continuous contracts and align the date
+  - The directory should be future/align/{cn|us}/...
   - The data format should be the same in every csv file

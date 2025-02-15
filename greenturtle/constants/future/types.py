@@ -40,6 +40,8 @@ PRE_SETTLE = "pre_settle"
 VARIETY = "variety"
 # adjust factor
 ADJUST_FACTOR = "adjust_factor"
+# valid, used for align and padding
+VALID = "valid"
 
 # yahoo dedicated code constant
 YAHOO_CODE = "yahoo_code"
@@ -101,7 +103,37 @@ CONTINUOUS_COLUMN = [
     TOTAL_VOLUME,
     OPEN_INTEREST,
     TOTAL_OPEN_INTEREST,
+    VALID,
 ]
+
+CONTINUOUS_LINES = (
+    ORI_OPEN,
+    ORI_HIGH,
+    ORI_LOW,
+    ORI_CLOSE,
+    TOTAL_VOLUME,
+    TOTAL_OPEN_INTEREST,
+    VALID,
+)
+
+CONTINUOUS_DATA_DTYPE = {
+    DATETIME: str,
+    CONTRACT: str,
+    EXPIRE: str,
+    OPEN: float,
+    HIGH: float,
+    LOW: float,
+    CLOSE: float,
+    ORI_OPEN: float,
+    ORI_HIGH: float,
+    ORI_LOW: float,
+    ORI_CLOSE: float,
+    VOLUME: int,
+    OPEN_INTEREST: int,
+    TOTAL_VOLUME: int,
+    TOTAL_OPEN_INTEREST: int,
+    VALID: int,
+}
 
 # month codes alphabets to number constants
 MONTH_CODES_A2N = {

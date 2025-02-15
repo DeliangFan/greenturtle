@@ -35,13 +35,13 @@
 - [P0][Done] refactor the generate contract module 
 - [P0][Done] refactor the const module
 - [P0][Done] refactor the generate continuous and adjusted module 
+- [P1][Done] Deal with the data limited to the lasted start date.
 
 ## TODO
 
 - [P0] Get the china future data
 - [P0] Do some benchmark for china future data
 - [P0] Fix e2e test
-- [P1] Deal with the data limited to the lasted start date.
 - [P1] Add pyfolio
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
 - [P0] Online serving for long term
