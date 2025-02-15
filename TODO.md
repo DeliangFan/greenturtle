@@ -44,6 +44,7 @@
 - [P1] Deal with the data limited to the lasted start date.
 - [P1] Add pyfolio
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
+- [P0] Online serving for long term
 
 
 # Issues

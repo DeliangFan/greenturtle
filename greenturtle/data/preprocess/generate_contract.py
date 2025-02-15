@@ -128,7 +128,7 @@ class GenerateContractFromAKShare(GenerateContract):
 
         # convert the datetime from string type to datetime type.
         df.index = df.index.map(
-            lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+            lambda x: datetime.datetime.strptime(x, types.DATE_FORMAT))
 
         # sort and drop the duplicated index row.
         df.sort_index(inplace=True)
@@ -209,7 +209,10 @@ class GenerateContractFromAKShare(GenerateContract):
 
         # 6. write to csv file
         file_path = os.path.join(variety_dst_dir, f"{contract}.csv")
-        contract_df.to_csv(file_path, header=False)
+        contract_df.to_csv(
+            file_path,
+            header=False,
+            date_format=types.DATE_FORMAT)
 
     @staticmethod
     def get_total_volume(df, index, future):

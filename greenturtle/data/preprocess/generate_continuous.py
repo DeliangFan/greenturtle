@@ -76,10 +76,10 @@ class GenerateContinuous:
 
         # convert the datetime from string type to datetime type.
         df.index = df.index.map(
-            lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+            lambda x: datetime.datetime.strptime(x, types.DATE_FORMAT))
 
         df.expire = df.expire.map(
-            lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+            lambda x: datetime.datetime.strptime(x, types.DATE_FORMAT))
 
         # sort and drop the duplicated index row.
         df.sort_index(inplace=True)
@@ -351,7 +351,7 @@ class GenerateContinuous:
             os.makedirs(self.dst_dir)
 
         dst_path = os.path.join(self.dst_dir, f"{self.name}.csv")
-        df.to_csv(dst_path)
+        df.to_csv(dst_path, date_format=types.DATE_FORMAT)
 
 
 class GenerateContinuousFromCSIData(GenerateContinuous):
