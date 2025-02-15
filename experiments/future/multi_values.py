@@ -27,10 +27,7 @@ from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future/continuous/us/csidata_adjusted_greenturtle"
-SKIP_LIST = (
-    "BTC", "ETH",
-)
+DATA_DIR = "../../download/future/align/us/"
 
 
 if __name__ == '__main__':
@@ -55,10 +52,6 @@ if __name__ == '__main__':
     # add all data to simulator
     for group in varieties.US_VARIETIES.values():
         for name in group:
-            # skip if in SKIP_LIST or filename not exists.
-            if name in SKIP_LIST:
-                continue
-
             filename = os.path.join(DATA_DIR, f"{name}.csv")
             if not os.path.exists(filename):
                 continue

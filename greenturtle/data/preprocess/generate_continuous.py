@@ -301,6 +301,7 @@ class GenerateContinuous:
 
     def add_others_column(self, df):
         """add others column like volumne to adjust dataframe."""
+
         for date in df.index:
             contract = df.loc[date, types.CONTRACT]
             contract_df = self.dfs_dict[contract]
@@ -314,6 +315,7 @@ class GenerateContinuous:
                 contract_df.loc[date, types.OPEN_INTEREST]
             df.loc[date, types.TOTAL_OPEN_INTEREST] = \
                 contract_df.loc[date, types.TOTAL_OPEN_INTEREST]
+            df.loc[date, types.VALID] = 1
 
         return df
 

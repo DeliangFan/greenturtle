@@ -131,6 +131,11 @@ class BaseStrategy(bt.Strategy):
             data = self.getdatabyname(name)
             self._do_validate_data(data)
 
+    def _is_valid(self, name):
+        """is variety data valid."""
+        data = self.symbols_data[name]
+        return data.valid[0] > 0
+
     @staticmethod
     def _do_validate_data(data):
         """valid the single data."""
@@ -195,11 +200,15 @@ class BaseStrategy(bt.Strategy):
         symbols = set()
 
         for name in self.names:
+            if not self._is_valid(name):
+                continue
+
             # 1. for symbol already in position, hold it unless it meet
             # the condition for selling to close.
             if name in long_hold:
                 if not self.is_sell_to_close(name):
                     symbols.add(name)
+
             # 2. for symbol not in position, buy it if it meets the condition
             # for buying to open.
             if name not in hold:
@@ -215,6 +224,9 @@ class BaseStrategy(bt.Strategy):
             return symbols
 
         for name in self.names:
+            if not self._is_valid(name):
+                continue
+
             # 1. for symbol already in position, hold it unless it meet
             # the condition for buying to close.
             if name in short_hold:
@@ -388,13 +400,20 @@ class BaseStrategy(bt.Strategy):
     def execute(self, current_portfolios, desired_portfolios):
         """execute the orders with the following rule."""
 
-        # 1. sell the unwanted symbols.
+        # 1. filter the portfolios with invalid data
+        tmp = {}
+        for k, v in current_portfolios.items():
+            if self._is_valid(k):
+                tmp[k] = v
+        current_portfolios = tmp
+
+        # 2. sell the unwanted symbols.
         for name in current_portfolios:
             if name not in desired_portfolios:
                 self.order_target_size_with_log(name, 0)
 
-        # 2. trade the symbols both in current and desired portfolios
-        # 2.1 trade the symbols to get more available cash
+        # 3. trade the symbols both in current and desired portfolios
+        # 3.1 trade the symbols to get more available cash
         for name in current_portfolios:
             if name in desired_portfolios:
                 current_size = current_portfolios[name]
@@ -402,7 +421,7 @@ class BaseStrategy(bt.Strategy):
                 if abs(current_size) > abs(desired_size):
                     self.order_target_size_with_log(name, desired_size)
 
-        # 2.2 trade other symbols both in current and desired portfolios
+        # 3.2 trade other symbols both in current and desired portfolios
         for name in current_portfolios:
             if name in desired_portfolios:
                 current_size = current_portfolios[name]
@@ -412,7 +431,7 @@ class BaseStrategy(bt.Strategy):
                 if abs(current_size) <= abs(desired_size):
                     self.order_target_size_with_log(name, desired_size)
 
-        # 3. trade the new open symbols.
+        # 4. trade the new open symbols.
         for name in desired_portfolios:
             if name not in current_portfolios:
                 desired_size = desired_portfolios[name]

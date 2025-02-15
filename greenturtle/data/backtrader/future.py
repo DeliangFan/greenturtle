@@ -36,6 +36,7 @@ Data structure.
 - column total_volume: total volume of all contracts
 - column open_interest: open interest
 - column total_open_interest: total open interest of all contracts
+- column valid: row data valid or not
 """
 
 
@@ -63,16 +64,19 @@ CLASS_PARAM = (
     (types.TOTAL_VOLUME, 12),
     (types.OPEN_INTEREST, 13),
     (types.TOTAL_OPEN_INTEREST, 14),
+    (types.VALID, 15),
 )
 
 
 class FutureCSV(GenericCSVData):
     """Future CSV data feed"""
+    lines = types.CONTINUOUS_LINES
     params = CLASS_PARAM
 
 
 class FuturePandasData(bt.feeds.PandasData):
     """Future panda data feed."""
+    lines = types.CONTINUOUS_LINES
     params = CLASS_PARAM
 
 
@@ -122,6 +126,7 @@ def get_data_frame_from_yahoo_finance(
     df[types.OPEN_INTEREST] = np.nan
     df[types.TOTAL_VOLUME] = np.nan
     df[types.TOTAL_OPEN_INTEREST] = np.nan
+    df[types.VALID] = True
 
     # adjust the column order
     df = df[types.CONTINUOUS_COLUMN]
