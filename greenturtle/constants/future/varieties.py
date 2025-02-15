@@ -18,6 +18,8 @@
 from greenturtle.constants.future import types
 
 
+DEFAULT_RISK_FACTOR = 0.002
+
 # Some data is copy from
 # https://www.schwab.com.sg/investment-products/us-futures-market
 US_AGRICULTURE = {
@@ -96,9 +98,6 @@ US_AGRICULTURE = {
         types.AUTO_MARGIN: 5,
         types.DESCRIPTION: "Oats",
     },  # 燕麦
-}
-
-US_SOFTS = {
     "CC": {
         types.YAHOO_CODE: "CC=F",
         types.MULTIPLIER: 10,
@@ -349,7 +348,6 @@ US_INTEREST_RATES = {
 
 US_VARIETIES = {
     "agriculture": US_AGRICULTURE,
-    "soft": US_SOFTS,
     "metal": US_METALS,
     "energy": US_ENERGY,
     "crypto": US_CRYPTO,
@@ -358,14 +356,387 @@ US_VARIETIES = {
     "interest_rates": US_INTEREST_RATES,
 }
 
-DEFAULT_RISK_FACTOR = 0.002
-DEFAULT_GROUP_RISK_FACTORS = {
-    "agriculture": 0.01,
-    "soft": 0.01,
+DEFAULT_US_GROUP_RISK_FACTORS = {
+    "agriculture": 0.02,
     "metal": 0.01,
     "energy": 0.01,
     "crypto": 0.01,
     "currency": 0.01,
     "stock_indices": 0.01,
     "interest_rates": 0.01,
+}
+
+# skip 原木/胶合板/纤维板/麦类/稻类/油菜籽 due to low volume.
+CN_AGRICULTURE = {
+    "C": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "玉米",
+    },
+    "CS": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "玉米淀粉",
+    },
+    "A": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "黄大豆1号",
+    },
+    "B": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "黄大豆2号",
+    },
+    "M": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "豆粕",
+    },
+    "Y": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "大豆原油",
+    },
+    "P": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "棕榈油",
+    },
+    "JD": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "鲜鸡蛋",
+    },
+    "RR": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "粳米",
+    },
+    "LH": {
+        types.MULTIPLIER: 16,
+        types.AUTO_MARGIN: 1.6,
+        types.DESCRIPTION: "生猪",
+    },
+    "PK": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "花生仁",
+    },
+    "SR": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "白砂糖（简称“白糖”）",
+    },
+    "CF": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "棉花",
+    },
+    "RM": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "菜籽粕（简称“菜粕”）",
+    },
+    "OI": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "菜籽油（简称“菜油”）",
+    },
+    "CY": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "棉纱",
+    },
+    "AP": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "鲜苹果（简称“苹果”）",
+    },
+    "CJ": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "干制红枣（简称“红枣”）",
+    },
+}
+
+# skip 线材 due to low volume
+CN_METALS = {
+    "CU": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "阴极铜",
+    },
+    "AL": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "铝",
+    },
+    "ZN": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "锌",
+    },
+    "PB": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "铅",
+    },
+    "NI": {
+        types.MULTIPLIER: 1,
+        types.AUTO_MARGIN: 0.1,
+        types.DESCRIPTION: "镍",
+    },
+    "SN": {
+        types.MULTIPLIER: 1,
+        types.AUTO_MARGIN: 0.1,
+        types.DESCRIPTION: "锡",
+    },
+    "SI": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "工业硅",
+    },
+    "AO": {
+        types.MULTIPLIER: 20,
+        types.AUTO_MARGIN: 2,
+        types.DESCRIPTION: "氧化铝",
+    },
+    "LC": {
+        types.MULTIPLIER: 1,
+        types.AUTO_MARGIN: 0.1,
+        types.DESCRIPTION: "碳酸锂",
+    },
+    "PS": {
+        types.MULTIPLIER: 3,
+        types.AUTO_MARGIN: 0.3,
+        types.DESCRIPTION: "多晶硅",
+    },
+    "RB": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "螺纹钢",
+    },
+    "HC": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "热轧卷板",
+    },
+    "SS": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "不锈钢",
+    },
+    "J": {
+        types.MULTIPLIER: 100,
+        types.AUTO_MARGIN: 10,
+        types.DESCRIPTION: "冶金焦炭",
+    },
+    "JM": {
+        types.MULTIPLIER: 60,
+        types.AUTO_MARGIN: 6,
+        types.DESCRIPTION: "焦煤",
+    },
+    "I": {
+        types.MULTIPLIER: 100,
+        types.AUTO_MARGIN: 10,
+        types.DESCRIPTION: "铁矿石",
+    },
+    "SF": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "硅铁",
+    },
+    "SM": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "锰硅",
+    },
+    "AU": {
+        types.MULTIPLIER: 1000,
+        types.AUTO_MARGIN: 100,
+        types.DESCRIPTION: "黄金",
+    },
+    "AG": {
+        types.MULTIPLIER: 15,
+        types.AUTO_MARGIN: 1.5,
+        types.DESCRIPTION: "白银",
+    },
+}
+
+CN_ENERGY = {
+    "SC": {
+        types.MULTIPLIER: 1000,
+        types.AUTO_MARGIN: 100,
+        types.DESCRIPTION: "中质含硫原油",
+    },
+    "LU": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "低硫燃料油",
+    },
+    "FU": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "燃料油",
+    },
+    "BU": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "石油沥青",
+    },
+    "RU": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "天然橡胶",
+    },
+    "NR": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "20号胶",
+    },
+    "SP": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "漂白硫酸盐针叶木浆",
+    },
+    "TA": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "精对苯二甲酸（PTA）",
+    },
+    "MA": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "甲醇",
+    },
+    "FG": {
+        types.MULTIPLIER: 20,
+        types.AUTO_MARGIN: 2,
+        types.DESCRIPTION: "平板玻璃（简称“玻璃”）",
+    },
+    "UR": {
+        types.MULTIPLIER: 20,
+        types.AUTO_MARGIN: 2,
+        types.DESCRIPTION: "尿素",
+    },
+    "SA": {
+        types.MULTIPLIER: 20,
+        types.AUTO_MARGIN: 2,
+        types.DESCRIPTION: "纯碱",
+    },
+    "L": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "线型低密度聚乙烯",
+    },
+    "V": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "聚氯乙烯",
+    },
+    "PP": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "聚丙烯",
+    },
+    "EG": {
+        types.MULTIPLIER: 10,
+        types.AUTO_MARGIN: 1,
+        types.DESCRIPTION: "乙二醇",
+    },
+    "EB": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "苯乙烯",
+    },
+    "PG": {
+        types.MULTIPLIER: 20,
+        types.AUTO_MARGIN: 2,
+        types.DESCRIPTION: "液化石油气",
+    },
+    "PF": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "涤纶短纤（简称“短纤”）",
+    },
+    "BR": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "丁二烯橡胶",
+    },
+    "PX": {
+        types.MULTIPLIER: 5,
+        types.AUTO_MARGIN: 0.5,
+        types.DESCRIPTION: "对二甲苯",
+    },
+    "SH": {
+        types.MULTIPLIER: 30,
+        types.AUTO_MARGIN: 3,
+        types.DESCRIPTION: "烧碱",
+    },
+}
+
+CN_INDICES = {
+    "EC": {
+        types.MULTIPLIER: 50,
+        types.AUTO_MARGIN: 6,
+        types.DESCRIPTION: "上海出口集装箱结算运价指数（欧洲航线）",
+    },
+    "IF": {
+        types.MULTIPLIER: 300,
+        types.AUTO_MARGIN: 30,
+        types.DESCRIPTION: "沪深300指数",
+    },
+    "IC": {
+        types.MULTIPLIER: 200,
+        types.AUTO_MARGIN: 20,
+        types.DESCRIPTION: "中证500指数",
+    },
+    "IM": {
+        types.MULTIPLIER: 200,
+        types.AUTO_MARGIN: 20,
+        types.DESCRIPTION: "中证1000指数",
+    },
+    "IH": {
+        types.MULTIPLIER: 300,
+        types.AUTO_MARGIN: 30,
+        types.DESCRIPTION: "上证50指数",
+    },
+    "TS": {
+        types.MULTIPLIER: 20000,
+        types.AUTO_MARGIN: 100,
+        types.DESCRIPTION: "面值为200万元人民币、票面利率为3%的名义(2)中短期国债",
+    },
+    "TF": {
+        types.MULTIPLIER: 10000,
+        types.AUTO_MARGIN: 200,
+        types.DESCRIPTION: "面值为100万元人民币、票面利率为3%的名义(5)中期国债",
+    },
+    "T": {
+        types.MULTIPLIER: 10000,
+        types.AUTO_MARGIN: 300,
+        types.DESCRIPTION: "面值为100万元人民币、票面利率为3%的名义(10)长期国债",
+    },
+    "TL": {
+        types.MULTIPLIER: 10000,
+        types.AUTO_MARGIN: 500,
+        types.DESCRIPTION: "面值为100万元人民币、票面利率为3%的名义(10)超长期国债",
+    },
+}
+
+# For china future, these data are from
+# https://www.cfachina.org/servicesupport/sspz/
+CN_VARIETIES = {
+    "agriculture": CN_AGRICULTURE,
+    "metal": CN_METALS,
+    "energy": CN_ENERGY,
+    "indices": CN_INDICES,
+}
+
+DEFAULT_CN_GROUP_RISK_FACTORS = {
+    "agriculture": 0.05,
+    "metal": 0.05,
+    "energy": 0.05,
+    "stock_indices": 0.05,
 }

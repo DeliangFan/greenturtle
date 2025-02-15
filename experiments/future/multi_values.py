@@ -43,7 +43,7 @@ if __name__ == '__main__':
         channel_period=5,
         atr_period=25,
         risk_factor=0.002,
-        group_risk_factors=varieties.DEFAULT_GROUP_RISK_FACTORS,
+        group_risk_factors=varieties.DEFAULT_US_GROUP_RISK_FACTORS,
     )
 
     fromdate = datetime.datetime(2006, 1, 1)

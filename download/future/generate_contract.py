@@ -23,7 +23,7 @@ DST_DIR = "./contract/cn"
 
 if __name__ == "__main__":
     g = generate_contract.GenerateContractFromAKShare(
-        markets=["CFFEX"],
+        markets=["CFFEX", "DCE", "INE", "CZCE", "GFEX"],
         src_dir=SRC_DIR,
         dst_dir=DST_DIR,
     )

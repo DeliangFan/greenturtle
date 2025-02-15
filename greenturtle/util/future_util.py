@@ -16,14 +16,20 @@
 
 """some util from future"""
 
-
 from greenturtle.constants.future import varieties
 
 
+# TODO(fixme), some varieties' name are conflict in us and cn future
 def get_group_by_name(name):
     """get group name by future name"""
     for group_name, group_value in varieties.US_VARIETIES.items():
         for future_name in group_value:
             if future_name == name:
                 return group_name
+
+    for group_name, group_value in varieties.CN_VARIETIES.items():
+        for future_name in group_value:
+            if future_name == name:
+                return group_name
+
     return None
