@@ -30,8 +30,8 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 
-SRC_DIR = "./continuous/us/csidata_adjusted_greenturtle"
-DST_DIR = "./align/us"
+SRC_DIR = "./continuous/cn/exchange_adjusted_greenturtle"
+DST_DIR = "./align/cn"
 
 
 if __name__ == "__main__":
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         os.mkdir(DST_DIR)
 
     varieties_path = {}
-    for group in varieties.US_VARIETIES.values():
+    for group in varieties.CN_VARIETIES.values():
         for variety in group:
             file_path = os.path.join(SRC_DIR, f"{variety}.csv")
             if os.path.exists(file_path):

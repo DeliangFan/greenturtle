@@ -21,10 +21,11 @@ adjusted prices.
 
 import abc
 import copy
-import datetime
+from datetime import datetime
 import os
 import re
 
+import numpy as np
 import pandas as pd
 
 from greenturtle.constants.future import types
@@ -76,10 +77,11 @@ class GenerateContinuous:
 
         # convert the datetime from string type to datetime type.
         df.index = df.index.map(
-            lambda x: datetime.datetime.strptime(x, types.DATE_FORMAT))
+            lambda x: datetime.strptime(x, types.DATE_FORMAT))
 
         df.expire = df.expire.map(
-            lambda x: datetime.datetime.strptime(x, types.DATE_FORMAT))
+            lambda x: x if np.isnan(x) else datetime.strptime(
+                x, types.DATE_FORMAT))
 
         # sort and drop the duplicated index row.
         df.sort_index(inplace=True)
@@ -128,7 +130,7 @@ class GenerateContinuous:
                 )
 
         # validate the contract
-        if len(contracts) != 1:
+        if len(contracts) > 1:
             raise exception.DataContractAbnormalError()
 
     @abc.abstractmethod
@@ -367,5 +369,18 @@ class GenerateContinuousFromCSIData(GenerateContinuous):
         pattern = r"^" + self.name + r"_20[0-9][0-9][FGHJKMNQUVXZ]\.csv$"
         if self.name in ("BTC", "ETH"):
             pattern = r"^" + self.name + r"20[0-9][0-9][FGHJKMNQUVXZ]\.csv$"
+
+        return pattern
+
+
+class GenerateContinuousFromAKShare(GenerateContinuous):
+    """
+    GenerateContinuousFromAKShare generate a csv file with adjusted price
+    from akshare data.
+    """
+
+    def get_pattern(self):
+        """akshare data file name pattern format"""
+        pattern = r"[a-zA-Z0-9]*.csv$"
 
         return pattern
