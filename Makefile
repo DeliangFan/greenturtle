@@ -10,11 +10,6 @@ e2etest:
 
 test: unittest e2etest
 
-# TODO(wsfdl), rafactor experiments to e2e test
-crypto_experiment:
-	cd experiments/crypto && python single.py
-	cd experiments/crypto && python rsrs.py
-
 stock_experiment:
 	cd experiments/stock && python overview.py
 	cd experiments/stock && python single.py
@@ -25,6 +20,6 @@ future_experiment:
 	cd experiments/future && python overview.py
 	cd experiments/future && python multi_values.py
 
-experiment: crypto_experiment stock_experiment future_experiment
+experiment: stock_experiment future_experiment
 
 all: fmt test

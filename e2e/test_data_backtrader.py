@@ -19,12 +19,9 @@ import datetime
 import os
 import unittest
 
-import pandas as pd
-
 from greenturtle.constants.future import types
 import greenturtle.data.backtrader.stock as stock_data
 import greenturtle.data.backtrader.future as future_data
-import greenturtle.data.backtrader.crypto as crypto_data
 from greenturtle.util.logging import logging
 
 
@@ -108,41 +105,6 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         data = future_data.get_feed_from_csv_file(
             self.name,
             self.filename)
-        data.start()
-
-        # TODO(fixme), provide better e2e test assert.
-        self.assertIsNotNone(data)
-        data.f.close()
-
-
-class TestCryptoDataWithBackTrader(unittest.TestCase):
-    """test greenturtle.data.backtrader.crypto file."""
-
-    def setUp(self):
-        """set up for each test case."""
-        self.name = "BTC"
-        self.filename = f"{self.name}.csv"
-        data = {
-            "datatime": [datetime.datetime(2004, 1, 1)],
-            "open": 10,
-            "high": 12,
-            "low": 8,
-            "close": 9,
-            "volume": 100,
-        }
-        df = pd.DataFrame(data)
-        df.to_csv(self.filename)
-
-    def tearDown(self):
-        """tear down for each test case."""
-
-        if os.path.exists(self.filename):
-            os.remove(self.filename)
-
-    def test_get_feed_from_csv_file(self):
-        """test get_feed_from_csv_file."""
-
-        data = crypto_data.get_feed_from_csv_file(self.name, self.filename)
         data.start()
 
         # TODO(fixme), provide better e2e test assert.
