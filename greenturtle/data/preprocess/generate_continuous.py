@@ -90,6 +90,7 @@ class GenerateContinuous:
             keep="first").set_index(types.DATETIME)
 
         self._validate_and_fix(df, file_path)
+        self._filling_nan(df)
 
         return df
 
@@ -132,6 +133,27 @@ class GenerateContinuous:
         # validate the contract
         if len(contracts) > 1:
             raise exception.DataContractAbnormalError()
+
+    def _filling_nan(self, df):
+        """drop nan and fill missing values."""
+        indexs = copy.deepcopy(df.index)
+        sorted_indexs = sorted(indexs, reverse=True)
+
+        newer_row = None
+        for index in sorted_indexs:
+            row = df.loc[index]
+            if (
+                    np.isnan(row[types.OPEN]) or
+                    np.isnan(row[types.HIGH]) or
+                    np.isnan(row[types.LOW]) or
+                    np.isnan(row[types.CLOSE])
+            ) and newer_row is not None:
+                df.at[index, types.OPEN] = newer_row[types.OPEN]
+                df.at[index, types.HIGH] = newer_row[types.HIGH]
+                df.at[index, types.LOW] = newer_row[types.LOW]
+                df.at[index, types.CLOSE] = newer_row[types.CLOSE]
+
+            newer_row = df.loc[index]
 
     @abc.abstractmethod
     def get_pattern(self):
@@ -350,6 +372,9 @@ class GenerateContinuous:
 
         # set the order for columns
         df = df[types.CONTINUOUS_COLUMN]
+
+        # filling nan
+        self._filling_nan(df)
 
         if not os.path.exists(self.dst_dir):
             os.makedirs(self.dst_dir)
