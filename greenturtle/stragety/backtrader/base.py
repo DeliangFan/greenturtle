@@ -21,7 +21,6 @@ import backtrader as bt
 
 from greenturtle.constants.future import types
 from greenturtle.data import validation
-from greenturtle.util import future_util
 from greenturtle.util.logging import logging
 from greenturtle import exception
 
@@ -41,6 +40,7 @@ class BaseStrategy(bt.Strategy):
                  atr_period=100,
                  leverage_limit=0.95,
                  portfolio_type=None,
+                 varieties=None,
                  group_risk_factors=None):
 
         super().__init__()
@@ -48,6 +48,7 @@ class BaseStrategy(bt.Strategy):
         self.risk_factor = risk_factor
         self.leverage_limit = leverage_limit
         self.portfolio_type = portfolio_type
+        self.varieties = varieties
         self.group_risk_factors = group_risk_factors
         self.order = None
         self.bankruptcy = False
@@ -134,7 +135,9 @@ class BaseStrategy(bt.Strategy):
     def _is_valid(self, name):
         """is variety data valid."""
         data = self.symbols_data[name]
-        return data.valid[0] > 0
+        if hasattr(data, "valid"):
+            return data.valid[0] > 0
+        return True
 
     @staticmethod
     def _do_validate_data(data):
@@ -344,6 +347,14 @@ class BaseStrategy(bt.Strategy):
 
         return size
 
+    def _get_group_by_name(self, name):
+        """get group name by variety name"""
+        for group_name, group_value in self.varieties.items():
+            for variety in group_value:
+                if variety == name:
+                    return group_name
+        return None
+
     def adjust_portfolio_by_group(self, portfolios):
         """refine portfolio by group."""
         if self.group_risk_factors is None:
@@ -353,7 +364,7 @@ class BaseStrategy(bt.Strategy):
         group_risk = {}
         # calculate the group risk
         for name in portfolios:
-            group_name = future_util.get_group_by_name(name)
+            group_name = self._get_group_by_name(name)
             # raise exception if group not found.
             if group_name is None:
                 raise exception.GroupNameNotFound
@@ -366,7 +377,7 @@ class BaseStrategy(bt.Strategy):
         # 2. adjust the size according to current group risk and the
         # limitation of the group risk.
         for name in portfolios:
-            group_name = future_util.get_group_by_name(name)
+            group_name = self._get_group_by_name(name)
             risk = group_risk[group_name]
             limit = self.group_risk_factors[group_name]
             if risk > limit:

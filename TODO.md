@@ -36,11 +36,13 @@
 - [P0][Done] refactor the const module
 - [P0][Done] refactor the generate continuous and adjusted module 
 - [P1][Done] Deal with the data limited to the lasted start date.
+- [P0][Done] Get the china future data
+- [P0][Done] Do some benchmark for china future data
 
 ## TODO
 
-- [P0] Get the china future data
-- [P0] Do some benchmark for china future data
+- [P0] fetch the failed china data and test again
+- [P0] better understand about the cn commission
 - [P0] Fix e2e test
 - [P1] Add pyfolio
 - [P1] Refactor, abstract the balance for stock and bond with buy one.

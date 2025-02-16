@@ -31,20 +31,20 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 
-SRC_DIR = "./contract/us"
-DST_DIR = "./continuous/us/csidata_adjusted_greenturtle"
+SRC_DIR = "./contract/cn"
+DST_DIR = "./continuous/cn/exchange_adjusted_greenturtle"
 
 
 if __name__ == "__main__":
 
-    for group in varieties.US_VARIETIES.values():
+    for group in varieties.CN_VARIETIES.values():
         for variety in group:
             src_dir = os.path.join(SRC_DIR, variety)
             if not os.path.exists(src_dir):
                 continue
 
             # initiate the process
-            p = generate_continuous.GenerateContinuousFromCSIData(
+            p = generate_continuous.GenerateContinuousFromAKShare(
                 variety,
                 fromdate=datetime.datetime(2005, 2, 1),
                 todate=datetime.datetime(2025, 2, 6),

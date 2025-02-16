@@ -367,6 +367,7 @@ DEFAULT_US_GROUP_RISK_FACTORS = {
 }
 
 # skip 原木/胶合板/纤维板/麦类/稻类/油菜籽 due to low volume.
+# skip 黄大豆2号 due to some abormal data
 CN_AGRICULTURE = {
     "C": {
         types.MULTIPLIER: 10,
@@ -382,11 +383,6 @@ CN_AGRICULTURE = {
         types.MULTIPLIER: 10,
         types.AUTO_MARGIN: 1,
         types.DESCRIPTION: "黄大豆1号",
-    },
-    "B": {
-        types.MULTIPLIER: 10,
-        types.AUTO_MARGIN: 1,
-        types.DESCRIPTION: "黄大豆2号",
     },
     "M": {
         types.MULTIPLIER: 10,
@@ -738,5 +734,5 @@ DEFAULT_CN_GROUP_RISK_FACTORS = {
     "agriculture": 0.05,
     "metal": 0.05,
     "energy": 0.05,
-    "stock_indices": 0.05,
+    "indices": 0.05,
 }

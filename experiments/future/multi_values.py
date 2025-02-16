@@ -27,14 +27,16 @@ from greenturtle.stragety.backtrader import ema
 
 
 # pylint: disable=R0801
-DATA_DIR = "../../download/future/align/us/"
+DATA_DIR = "../../download/future/align/cn/"
 
 
 if __name__ == '__main__':
 
+    varieties_map = varieties.CN_VARIETIES
+
     s = future_simulator.FutureSimulator(
         plot=True,
-        varieties=varieties.US_VARIETIES)
+        varieties=varieties_map)
 
     s.add_strategy(
         ema.EMAEnhanced,
@@ -42,15 +44,16 @@ if __name__ == '__main__':
         slow_period=12,
         channel_period=5,
         atr_period=25,
-        risk_factor=0.002,
-        group_risk_factors=varieties.DEFAULT_US_GROUP_RISK_FACTORS,
+        risk_factor=0.004,
+        varieties=varieties_map,
+        group_risk_factors=varieties.DEFAULT_CN_GROUP_RISK_FACTORS,
     )
 
     fromdate = datetime.datetime(2006, 1, 1)
     todate = datetime.datetime(2024, 12, 31)
 
     # add all data to simulator
-    for group in varieties.US_VARIETIES.values():
+    for group in varieties_map.values():
         for name in group:
             filename = os.path.join(DATA_DIR, f"{name}.csv")
             if not os.path.exists(filename):
