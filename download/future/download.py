@@ -32,11 +32,6 @@ For us future markets, it would better to buy data from third part provider.
 from greenturtle.data.download import cn_future
 
 
-# NOTE(fixme), the following data are missing
-# SHFE 20040601-20040630
-# SHFE 20070601-20070630
-# SHFE 20081201-20081231
-# SHFE 20090101-20090131
 DST_DIR = "./source/cn"
 CN_MARKETS = {
     "CFFEX": {

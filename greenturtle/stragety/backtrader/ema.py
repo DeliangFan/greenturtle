@@ -106,7 +106,7 @@ class EMAEnhanced(EMA):
         data_close = data.close[0]
         highest = self.highest[name]
         atr = self.atrs[name]
-        stop = highest[0] >= data_close + 2 * atr[0]
+        stop = highest[0] >= data_close + 3 * atr[0]
 
         return fast_ema[0] < slow_ema[0] or stop
 
@@ -130,6 +130,6 @@ class EMAEnhanced(EMA):
         data_close = data.close[0]
         lowest = self.lowest[name]
         atr = self.atrs[name]
-        stop = data_close >= lowest[0] + 2 * atr[0]
+        stop = data_close >= lowest[0] + 3 * atr[0]
 
         return fast_ema[0] > slow_ema[0] or stop
