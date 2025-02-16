@@ -731,8 +731,8 @@ CN_VARIETIES = {
 }
 
 DEFAULT_CN_GROUP_RISK_FACTORS = {
-    "agriculture": 0.05,
-    "metal": 0.05,
-    "energy": 0.05,
+    "agriculture": 0.08,
+    "metal": 0.08,
+    "energy": 0.08,
     "indices": 0.05,
 }

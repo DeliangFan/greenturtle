@@ -26,12 +26,11 @@ from greenturtle.simulator.backtrader import future_simulator
 from greenturtle.stragety.backtrader import ema
 
 
-# pylint: disable=R0801
-DATA_DIR = "../../download/future/align/cn/"
-
-
 if __name__ == '__main__':
 
+    DATA_DIR = "../../download/future/align/cn/"
+    RISK_FACTOR = 0.004
+    group_risk_factors = varieties.DEFAULT_CN_GROUP_RISK_FACTORS
     varieties_map = varieties.CN_VARIETIES
 
     s = future_simulator.FutureSimulator(
@@ -40,13 +39,13 @@ if __name__ == '__main__':
 
     s.add_strategy(
         ema.EMAEnhanced,
-        fast_period=3,
-        slow_period=12,
-        channel_period=5,
-        atr_period=25,
-        risk_factor=0.004,
+        fast_period=10,
+        slow_period=100,
+        channel_period=50,
+        atr_period=100,
+        risk_factor=RISK_FACTOR,
         varieties=varieties_map,
-        group_risk_factors=varieties.DEFAULT_CN_GROUP_RISK_FACTORS,
+        group_risk_factors=group_risk_factors,
     )
 
     fromdate = datetime.datetime(2006, 1, 1)
