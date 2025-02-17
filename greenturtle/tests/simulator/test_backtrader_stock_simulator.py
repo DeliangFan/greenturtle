@@ -13,15 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""utils for pandas"""
+"""unit tests for stock_simulator.py"""
 
-import pandas as pd
+import unittest
+
+from greenturtle.simulator.backtrader import stock_simulator
 
 
-def init_pandas():
-    """Set some options for pandas."""
+class TestStockSimulator(unittest.TestCase):
+    """unit tests for stock_simulator.py"""
 
-    pd.options.mode.copy_on_write = False
-    pd.set_option('display.max_columns', 20)
-    pd.set_option('display.max_rows', 20)
-    pd.set_option('display.width', 200)
+    def test_set_commission_success(self):
+        """test set_commission success"""
+        f = stock_simulator.StockSimulator()
+        f.set_commission(commission=0.001)

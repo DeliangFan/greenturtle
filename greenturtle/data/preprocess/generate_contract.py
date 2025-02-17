@@ -215,14 +215,14 @@ class GenerateContractFromAKShare(GenerateContract):
             date_format=types.DATE_FORMAT)
 
     @staticmethod
-    def get_total_volume(df, index, future):
+    def get_total_volume(df, index, variety):
         """get total volumes for a future by date"""
 
         total_volume = 0
 
         # filter by index(date) and future
         df = df[df.index.isin([index])]
-        df = df[df[types.VARIETY] == future]
+        df = df[df[types.VARIETY] == variety]
 
         for _, row in df.iterrows():
             volume = row[types.VOLUME]

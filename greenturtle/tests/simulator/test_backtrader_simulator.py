@@ -13,6 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""utils for time."""
+"""unit tests for simulator.py"""
 
-DEFAULT_FORMAT = "%Y-%m-%d %H:%M:%S"
+import unittest
+
+from greenturtle.data.backtrader import future
+from greenturtle.simulator.backtrader import simulator
+from greenturtle.stragety.backtrader import ema
+
+
+class TestSimulator(unittest.TestCase):
+    """unit tests for simulator.py"""
+
+    def test_without_run(self):
+        """test with no run"""
+        s = simulator.Simulator()
+        s.add_strategy(ema.EMA)
+        fake_data = future.get_feed_from_csv_file("fake", "fake_filename")
+        s.add_data(fake_data, "fake")
