@@ -49,7 +49,7 @@ from greenturtle.constants.future import types
 
 
 # TODO(fixme), generate automatically
-CLASS_PARAM = (
+CSV_CLASS_PARAM = (
     (types.CONTRACT, 1),
     (types.EXPIRE, 2),
     (types.OPEN, 3),
@@ -67,17 +67,35 @@ CLASS_PARAM = (
     (types.VALID, 15),
 )
 
+PANDAS_DATA_CLASS_PARAM = (
+    (types.CONTRACT, 0),
+    (types.EXPIRE, 1),
+    (types.OPEN, 2),
+    (types.HIGH, 3),
+    (types.LOW, 4),
+    (types.CLOSE, 5),
+    (types.ORI_OPEN, 6),
+    (types.ORI_HIGH, 7),
+    (types.ORI_LOW, 8),
+    (types.ORI_CLOSE, 9),
+    (types.VOLUME, 10),
+    (types.TOTAL_VOLUME, 11),
+    (types.OPEN_INTEREST, 12),
+    (types.TOTAL_OPEN_INTEREST, 13),
+    (types.VALID, 14),
+)
+
 
 class FutureCSV(GenericCSVData):
     """Future CSV data feed"""
     lines = types.CONTINUOUS_LINES
-    params = CLASS_PARAM
+    params = CSV_CLASS_PARAM
 
 
 class FuturePandasData(bt.feeds.PandasData):
     """Future panda data feed."""
     lines = types.CONTINUOUS_LINES
-    params = CLASS_PARAM
+    params = PANDAS_DATA_CLASS_PARAM
 
 
 # pylint: disable=too-many-positional-arguments,too-many-arguments
