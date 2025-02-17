@@ -12,14 +12,3 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-"""init pandas for display"""
-
-import pandas as pd
-
-
-# Set display options for pandas
-pd.options.mode.copy_on_write = False
-pd.set_option('display.max_columns', 20)
-pd.set_option('display.max_rows', 20)
-pd.set_option('display.width', 200)

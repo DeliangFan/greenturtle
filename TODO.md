@@ -40,13 +40,15 @@
 - [P0][Done] Do some benchmark for china future data
 - [P0][Done] fetch the failed china data and test again
 - [P0][Done] better understand about the cn commission
+- [P1][Done] Add unittest for validation and simulator
 
 ## TODO
 
 - [P0] Fix e2e test
 - [P0] Refine the commission
-- [P1] Refactor, abstract the balance for stock and bond with buy one.
 - [P0] Online serving for long term
+- [P1] Refactor, abstract the balance for stock and bond with buy one.
+- [P1] Add more unittest(data, strategy, simulator)
 - [P2] Add pyfolio
 
 
