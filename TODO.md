@@ -45,8 +45,17 @@
 
 ## TODO
 
+- [P0] [Serving] Notification message for transaction
+- [P0] [Serving] Adaptor to the data stream
+- [P0] [Serving] Adapter to the ctp API
+- [P0] [Serving] Metrics and alarm for service availability
+- [P0] [Serving] Persistence logs
+- [P0] [Serving] Deployment
+- [P0] [Serving] Refactor according to training or online serving
+
 - [P0] Refine the commission
-- [P0] Online serving for long term
+- [P0] Analysis the profit and losing
+- [P0] Evaluate the CTA factors
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
 - [P1] Add more unittest(data, strategy, simulator)
 - [P2] Add pyfolio
