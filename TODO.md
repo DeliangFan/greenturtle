@@ -45,8 +45,14 @@
 
 ## TODO
 
-- [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Adaptor to the data stream
+    - [MySQL] Introduce mysql
+    - [MySQL] Define the tables for contract, continues contract
+    - [MySQL] Datafeed adaptor mysql
+    - [MySQL] Syncer the delta data to mysql
+    - [MySQL] Choose the main contract and adaptor
+    - [MySQL] Better validation and padding
+- [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Metrics and alarm for service availability
 - [P0] [Serving] Persistence logs
