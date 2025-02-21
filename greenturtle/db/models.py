@@ -16,6 +16,7 @@
 """models for the greenturtle database."""
 
 from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -29,15 +30,24 @@ class Contract(Base):
     """contract model"""
     __tablename__ = 'contract'
 
+    __table_args__ = (
+        UniqueConstraint(
+            'date',
+            'name',
+            'variety',
+            'source',
+            'country',
+        ),
+    )
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(DateTime, index=True, nullable=False)
-    expire = Column(DateTime)
-    variety = Column(String(255), index=True, nullable=False)
-    name = Column(String(255), index=True, nullable=False)
-    source = Column(String(255), nullable=False)
-    country = Column(String(255), nullable=False)
-    exchange = Column(String(255))
-    group = Column(String(255))
+    name = Column(String(31), index=True, nullable=False)
+    variety = Column(String(31), index=True, nullable=False)
+    source = Column(String(31), index=True, nullable=False)
+    country = Column(String(31), index=True, nullable=False)
+    exchange = Column(String(31))
+    group = Column(String(31))
     open = Column(Float, default=None)
     high = Column(Float, default=None)
     low = Column(Float, default=None)
@@ -46,3 +56,39 @@ class Contract(Base):
     open_interest = Column(Integer, default=0)
     total_volume = Column(Integer, default=0)
     total_open_interest = Column(Integer, default=0)
+    expire = Column(DateTime)
+
+
+# pylint: disable=too-few-public-methods
+class ContinuousContract(Base):
+    """continuous contract model"""
+    __tablename__ = 'continuous_contract'
+
+    __table_args__ = (
+        UniqueConstraint(
+            'date',
+            'name',
+            'variety',
+            'source',
+            'country',
+        ),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(DateTime, index=True, nullable=False)
+    name = Column(String(31), index=True, nullable=False)
+    variety = Column(String(31), index=True, nullable=False)
+    source = Column(String(31), nullable=False)
+    country = Column(String(31), nullable=False)
+    exchange = Column(String(31))
+    group = Column(String(31))
+    open = Column(Float, default=None)
+    high = Column(Float, default=None)
+    low = Column(Float, default=None)
+    close = Column(Float, default=None)
+    volume = Column(Integer, default=0)
+    open_interest = Column(Integer, default=0)
+    total_volume = Column(Integer, default=0)
+    total_open_interest = Column(Integer, default=0)
+    expire = Column(DateTime)
+    adjust_factor = Column(Float, default=None)
