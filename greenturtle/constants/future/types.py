@@ -59,6 +59,14 @@ PORTFOLIO_TYPE_AVERAGE = "average"
 # datetime format for future
 DATE_FORMAT = "%Y%m%d"
 
+# Country
+CN = "CN"
+US = "US"
+
+# Data Source
+CSI = "CSI"
+AKSHARE = "akshare"
+
 # csv structure for contract
 CONTRACT_COLUMN = [
     CONTRACT,

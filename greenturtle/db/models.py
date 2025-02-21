@@ -24,6 +24,11 @@ from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
     """base model"""
 
+    def update(self, values):
+        """Make the model object behave like a dict."""
+        for k, v in values.items():
+            setattr(self, k, v)
+
 
 # pylint: disable=too-few-public-methods
 class Contract(Base):
@@ -46,16 +51,19 @@ class Contract(Base):
     variety = Column(String(31), index=True, nullable=False)
     source = Column(String(31), index=True, nullable=False)
     country = Column(String(31), index=True, nullable=False)
-    exchange = Column(String(31))
-    group = Column(String(31))
+    exchange = Column(String(31), default=None)
+    group = Column(String(31), default=None)
     open = Column(Float, default=None)
     high = Column(Float, default=None)
     low = Column(Float, default=None)
     close = Column(Float, default=None)
-    volume = Column(Integer, default=0)
-    open_interest = Column(Integer, default=0)
-    total_volume = Column(Integer, default=0)
-    total_open_interest = Column(Integer, default=0)
+    volume = Column(Integer, default=None)
+    open_interest = Column(Integer, default=None)
+    total_volume = Column(Integer, default=None)
+    total_open_interest = Column(Integer, default=None)
+    turn_over = Column(Float, default=None)
+    settle = Column(Float, default=None)
+    pre_settle = Column(Float, default=None)
     expire = Column(DateTime)
 
 
@@ -78,17 +86,20 @@ class ContinuousContract(Base):
     date = Column(DateTime, index=True, nullable=False)
     name = Column(String(31), index=True, nullable=False)
     variety = Column(String(31), index=True, nullable=False)
-    source = Column(String(31), nullable=False)
-    country = Column(String(31), nullable=False)
-    exchange = Column(String(31))
-    group = Column(String(31))
+    source = Column(String(31), index=True, nullable=False)
+    country = Column(String(31), index=True, nullable=False)
+    exchange = Column(String(31), default=None)
+    group = Column(String(31), default=None)
     open = Column(Float, default=None)
     high = Column(Float, default=None)
     low = Column(Float, default=None)
     close = Column(Float, default=None)
-    volume = Column(Integer, default=0)
-    open_interest = Column(Integer, default=0)
-    total_volume = Column(Integer, default=0)
-    total_open_interest = Column(Integer, default=0)
+    volume = Column(Integer, default=None)
+    open_interest = Column(Integer, default=None)
+    total_volume = Column(Integer, default=None)
+    total_open_interest = Column(Integer, default=None)
+    turn_over = Column(Float, default=None)
+    settle = Column(Float, default=None)
+    pre_settle = Column(Float, default=None)
     expire = Column(DateTime)
     adjust_factor = Column(Float, default=None)
