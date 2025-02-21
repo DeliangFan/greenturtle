@@ -20,7 +20,7 @@ import argparse
 import munch
 import yaml
 
-from greenturtle.db.migrations import migration
+from greenturtle.db import api
 
 
 parser = argparse.ArgumentParser(
@@ -44,4 +44,5 @@ if __name__ == "__main__":
         conf = munch.DefaultMunch.fromDict(conf_dict)
 
         # do migrate
-        migration.create_all(conf)
+        manager = api.DBManager(conf)
+        manager.create_all()
