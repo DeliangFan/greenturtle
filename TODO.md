@@ -46,13 +46,15 @@
 - [P0][Done] [MySQL] Define the tables for contract, continues contract
 - [P0][Done] [MySQL] Syncer the delta data to mysql
 - [P0][Done] [Varieties] filter delta data according to variety constant
+- [P1][Done] Data exchange plugin for csv, db, datafeed etc
+- [P0][Done] [MySQL] Choose the main contract and adaptor
 
 ## TODO
 
 - [P0] [Serving] Adaptor to the data stream
     - [MySQL] Datafeed adaptor mysql
-    - [MySQL] Choose the main contract and adaptor
     - [MySQL] Better validation and padding
+    - [MySQL] Delta continuous contract support
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 
@@ -67,7 +69,6 @@
 - [P0] Refine the commission
 - [P0] Analysis the profit and losing
 - [P0] Evaluate the CTA factors
-- [P1] Data exchange plugin for csv, db, datafeed etc
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
 - [P1] Add more unittest(data, strategy, simulator)
 - [P2] Add pyfolio

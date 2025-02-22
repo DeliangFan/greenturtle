@@ -97,3 +97,13 @@ class DataContractAbnormalError(GreenTurtleBaseException):
 class DownloadDataError(GreenTurtleBaseException):
     """Download data error."""
     msg_fmt = "Download data error."
+
+
+class SourceCountryNotSupportedError(GreenTurtleBaseException):
+    """source and country not supported error."""
+    msg_fmt = "Source and country not supported error."
+
+
+class ContinuousContractOrderAbnormalError(GreenTurtleBaseException):
+    """Continuous contract order error."""
+    msg_fmt = "Continuous contract order error."

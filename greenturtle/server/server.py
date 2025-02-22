@@ -22,8 +22,9 @@ from greenturtle.constants.future import types
 from greenturtle.constants.future import varieties
 from greenturtle.db import api as dbapi
 from greenturtle.data.download import cn_future
-from greenturtle.util import util
+from greenturtle.data import transform
 from greenturtle.util.logging import logging
+from greenturtle.util import util
 
 
 logger = logging.get_logger()
@@ -51,7 +52,7 @@ class Server:
         ):
             for exchange in types.CN_EXCHANGES:
                 # load data by exchange
-                loader = cn_future.DeltaCNFutureFromAKShare([exchange], 1)
+                loader = cn_future.DeltaCNFutureFromAKShare([exchange], 7)
                 df = loader.download()
 
                 msg = f"start insert {exchange} delta data to database"
@@ -60,8 +61,8 @@ class Server:
                 for _, row in df.iterrows():
                     # format the field
                     date = datetime.strptime(str(row.date), types.DATE_FORMAT)
-                    row = util.nan2none(row)
-                    row = util.emptystring2none(row)
+                    row = transform.pd_row_nan_2_none(row)
+                    row = transform.pd_row_emptystring_2_none(row)
                     group = util.get_group(
                         row.variety,
                         varieties.CN_VARIETIES)
