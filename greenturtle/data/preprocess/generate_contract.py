@@ -55,7 +55,7 @@ AKSHARE_DATA_DTYPE = {
     types.HIGH: float,
     types.LOW: float,
     types.CLOSE: float,
-    types.VOLUME: int,
+    types.VOLUME: "Int64",
     types.OPEN_INTEREST: float,
     types.TURN_OVER: float,
     types.SETTLE: float,

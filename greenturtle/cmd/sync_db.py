@@ -17,12 +17,11 @@
 
 import argparse
 
-import munch
-import yaml
-
 from greenturtle.db import api
+from greenturtle.util import config
 
 
+# pylint: disable=R0801
 parser = argparse.ArgumentParser(
     prog='GreenTurtle for trading',
     description='scripts for create the database for greenturtle')
@@ -36,13 +35,10 @@ parser.add_argument(
 
 
 if __name__ == "__main__":
+    # load config
     args = parser.parse_args()
+    conf = config.load_config(args.conf)
 
-    with open(args.conf, encoding="utf-8") as f:
-        # load the config and convert to object like config
-        conf_dict = yaml.safe_load(f)
-        conf = munch.DefaultMunch.fromDict(conf_dict)
-
-        # do migrate
-        manager = api.DBManager(conf)
-        manager.create_all()
+    # do create database tables
+    manager = api.DBManager(conf.db)
+    manager.create_all()

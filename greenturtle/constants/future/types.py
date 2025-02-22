@@ -67,6 +67,17 @@ US = "US"
 CSI = "CSI"
 AKSHARE = "akshare"
 
+# US Exchanges
+CME = "CME"
+# CN Exchanges
+CFFEX = "CFFEX"
+CZCE = "CZCE"
+DCE = "DCE"
+GFEX = "GFEX"
+INE = "INE"
+SHFE = "SHFE"
+CN_EXCHANGES = (CFFEX, CZCE, DCE, GFEX, INE, SHFE)
+
 # csv structure for contract
 CONTRACT_COLUMN = [
     CONTRACT,

@@ -13,32 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""greenturtle online service entrance"""
+"""config utils"""
 
-import argparse
-
-from greenturtle.util import config
-from greenturtle.server import server
+import munch
+import yaml
 
 
-# pylint: disable=R0801
-parser = argparse.ArgumentParser(
-    prog='GreenTurtle for trading',
-    description='scripts for create the database for greenturtle')
-
-parser.add_argument(
-    "--conf",
-    type=str,
-    default="/etc/greenturtle/greenturtle.yaml",
-    help="config file for greenturtle"
-)
-
-
-if __name__ == "__main__":
-    # load config
-    args = parser.parse_args()
-    conf = config.load_config(args.conf)
-
-    # serving
-    s = server.Server(conf)
-    s.start()
+def load_config(config_path):
+    """load the config by path."""
+    with open(config_path, encoding="utf-8") as f:
+        # load the config and convert to object like config
+        conf_dict = yaml.safe_load(f)
+        conf = munch.DefaultMunch.fromDict(conf_dict)
+        return conf
