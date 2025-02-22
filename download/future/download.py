@@ -62,7 +62,7 @@ CN_MARKETS = {
 
 
 if __name__ == "__main__":
-    f = cn_future.CNFutureFromAKShareFull(
+    f = cn_future.FullCNFutureToFileFromAKShare(
         CN_MARKETS,
         DST_DIR,
     )

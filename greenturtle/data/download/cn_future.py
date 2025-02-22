@@ -97,7 +97,7 @@ class CNFutureFromAKShare(CNFuture):
         raise NotImplementedError
 
 
-class CNFutureFromAKShareFull(CNFutureFromAKShare):
+class FullCNFutureToFileFromAKShare(CNFutureFromAKShare):
     """download all the full data by exchange."""
 
     def __init__(self, exchanges, dst_dir):
@@ -168,7 +168,7 @@ class CNFutureFromAKShareFull(CNFutureFromAKShare):
             logger.info("exchange %s download finished", exchange)
 
 
-class CNFutureFromAKShareDelta(CNFutureFromAKShare):
+class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
     """download latest delta data by exchange"""
 
     def __init__(self, exchanges, delta=30):

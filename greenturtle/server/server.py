@@ -51,7 +51,7 @@ class Server:
         ):
             for exchange in types.CN_EXCHANGES:
                 # load data by exchange
-                loader = cn_future.CNFutureFromAKShareDelta([exchange], 1)
+                loader = cn_future.DeltaCNFutureFromAKShare([exchange], 1)
                 df = loader.download()
 
                 msg = f"start insert {exchange} delta data to database"
