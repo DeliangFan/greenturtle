@@ -18,16 +18,32 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.sql import func
 
 
 # pylint: disable=too-few-public-methods
 class Base(DeclarativeBase):
     """base model"""
 
+    # pylint: disable=E1102
+    created_at = Column(DateTime(), server_default=func.now())
+    updated_at = Column(DateTime(), onupdate=func.now())
+
     def update(self, values):
         """Make the model object behave like a dict."""
         for k, v in values.items():
             setattr(self, k, v)
+
+    def to_dict(self):
+        """attribute to dict."""
+
+        attr_dict = self.__dict__.copy()
+        attr_dict.pop("_sa_instance_state", None)
+        attr_dict.pop("id", None)
+        attr_dict.pop("created_at", None)
+        attr_dict.pop("updated_at", None)
+
+        return attr_dict
 
 
 # pylint: disable=too-few-public-methods

@@ -25,14 +25,14 @@ from greenturtle.db import models
 # pylint: disable=too-few-public-methods
 class DBManager:
     """Database manager."""
-    def __init__(self, conf):
+    def __init__(self, db_conf):
         url = sqlalchemy.URL.create(
             drivername='mysql+pymysql',
-            username=conf.db.username,
-            password=conf.db.password,
-            host=conf.db.host,
-            port=conf.db.port,
-            database=conf.db.database,
+            username=db_conf.username,
+            password=db_conf.password,
+            host=db_conf.host,
+            port=db_conf.port,
+            database=db_conf.database,
         )
         self.engine = sqlalchemy.create_engine(url)
 
@@ -132,6 +132,23 @@ class DBAPI:
         """get all contracts by variety, source and country."""
         with Session(self.engine) as session:
             query = session.query(models.Contract).filter(
+                models.Contract.variety == variety,
+                models.Contract.source == source,
+                models.Contract.country == country
+            )
+
+            return query.all()
+
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def contract_get_all_by_date_variety_source_country(self,
+                                                        date,
+                                                        variety,
+                                                        source,
+                                                        country):
+        """get all contracts by variety, source and country."""
+        with Session(self.engine) as session:
+            query = session.query(models.Contract).filter(
+                models.Contract.date == date,
                 models.Contract.variety == variety,
                 models.Contract.source == source,
                 models.Contract.country == country

@@ -15,24 +15,6 @@
 
 """some utility functions"""
 
-import pandas as pd
-
-
-def nan2none(row):
-    """convert pandas nan to None type."""
-    new_row = row.copy()
-    for k, v in row.items():
-        new_row[k] = None if pd.isnull(v) else v
-    return new_row
-
-
-def emptystring2none(row):
-    """convert pandas empty string to None type."""
-    new_row = row.copy()
-    for k, v in row.items():
-        new_row[k] = None if v == "" else v
-    return new_row
-
 
 def get_group(variety, varieties):
     """get group name by variety name"""
