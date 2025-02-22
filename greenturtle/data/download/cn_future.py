@@ -17,10 +17,12 @@
 
 import abc
 import calendar
+import datetime
 import os
 import time
 
 import akshare as ak
+import pandas as pd
 
 from greenturtle import exception
 from greenturtle.util.logging import logging
@@ -39,16 +41,15 @@ class CNFuture:
 
     The dst directory will look like
     dst_dir
-      /{market0}
+      /{exchange0}
         /{file0}.csv
         /{file1}.csv
-      /{market1}
+      /{exchange1}
         /{file2}.csv
         ...
     """
-    def __init__(self, markets, dst_dir):
-        self.markets = markets
-        self.dst_dir = dst_dir
+    def __init__(self, exchanges):
+        self.exchanges = exchanges
 
     @abc.abstractmethod
     def download(self):
@@ -61,6 +62,47 @@ class CNFutureFromAKShare(CNFuture):
     FutureCNDownload used for downloading the cn future data from
     exchanges by month.
     """
+
+    def download_data_by_period(self, start_date, end_date, exchange):
+        """
+        Do download the month data by exchange
+
+        please refer the following link for more details
+        https://akshare.akfamily.xyz/data/futures/futures.html#id53
+        """
+        retry = 5
+
+        while retry > 0:
+            try:
+                df = ak.get_futures_daily(
+                    start_date=start_date,
+                    end_date=end_date,
+                    market=exchange)
+                # return the result if success
+                return df
+            # pylint: disable=broad-except
+            except Exception:
+                retry -= 1
+                msg = f"failed download {exchange} {start_date}-{end_date}"
+                logger.warning(msg)
+
+            # sleep a few seconds to avoid being blocked by server side.
+            time.sleep(10)
+
+        # raise exception after 5 times retry
+        raise exception.DownloadDataError
+
+    def download(self):
+        """download all the data."""
+        raise NotImplementedError
+
+
+class CNFutureFromAKShareFull(CNFutureFromAKShare):
+    """download all the full data by exchange."""
+
+    def __init__(self, exchanges, dst_dir):
+        super().__init__(exchanges)
+        self.dst_dir = dst_dir
 
     def get_months(self, start_year, end_year):
         """get the month list with start date and end date."""
@@ -76,45 +118,16 @@ class CNFutureFromAKShare(CNFuture):
 
         return months
 
-    def download_month_data_by_market(self, start_date, end_date, market):
-        """
-        Do download the month data by market
+    def download_full_data_by_exchange(self, exchange):
+        """download the full data by exchange"""
 
-        please refer the following link for more details
-        https://akshare.akfamily.xyz/data/futures/futures.html#id53
-        """
-        retry = 5
-
-        while retry > 0:
-            try:
-                df = ak.get_futures_daily(
-                    start_date=start_date,
-                    end_date=end_date,
-                    market=market)
-                # return the result if success
-                return df
-            # pylint: disable=broad-except
-            except Exception:
-                retry -= 1
-                msg = f"failed download {market} {start_date}-{end_date}"
-                logger.warning(msg)
-
-            # sleep a few seconds to avoid being blocked by server side.
-            time.sleep(10)
-
-        # raise exception after 5 times retry
-        raise exception.DownloadDataError
-
-    def download_data_by_market(self, market):
-        """download the data by market"""
-
-        # make market directory if not exists.
-        dst_dir = os.path.join(self.dst_dir, market)
+        # make exchange directory if not exists.
+        dst_dir = os.path.join(self.dst_dir, exchange)
         if not os.path.exists(dst_dir):
             os.makedirs(dst_dir)
 
-        start_year = self.markets[market]["start_year"]
-        end_year = self.markets[market]["end_year"]
+        start_year = self.exchanges[exchange]["start_year"]
+        end_year = self.exchanges[exchange]["end_year"]
         months = self.get_months(start_year, end_year)
 
         # download the month data
@@ -127,22 +140,21 @@ class CNFutureFromAKShare(CNFuture):
                 continue
 
             # download the file
-            msg = f"try to download {market} {start_date}-{end_date}"
+            msg = f"try to download {exchange} {start_date}-{end_date}"
             logger.info(msg)
 
-            df = self.download_month_data_by_market(
+            df = self.download_data_by_period(
                 start_date,
                 end_date,
-                market)
+                exchange)
 
             if df is not None and len(df) > 0:
                 # write to the file if it's not a empty data
                 df.to_csv(file_path)
-
-                msg = f"download {market} {start_date}-{end_date} success"
+                msg = f"download {exchange} {start_date}-{end_date} success"
                 logger.info(msg)
             else:
-                msg = f"empty data for {market} {start_date}-{end_date}"
+                msg = f"empty data for {exchange} {start_date}-{end_date}"
                 logger.info(msg)
 
             # sleep a few seconds to avoid being blocked by server side.
@@ -150,7 +162,57 @@ class CNFutureFromAKShare(CNFuture):
 
     def download(self):
         """download all the data."""
-        for market in self.markets:
-            logger.info("start to download market %s", market)
-            self.download_data_by_market(market)
-            logger.info("market %s download finished", market)
+        for exchange in self.exchanges:
+            logger.info("start to download exchange %s", exchange)
+            self.download_full_data_by_exchange(exchange)
+            logger.info("exchange %s download finished", exchange)
+
+
+class CNFutureFromAKShareDelta(CNFutureFromAKShare):
+    """download latest delta data by exchange"""
+
+    def __init__(self, exchanges, delta=30):
+        super().__init__(exchanges)
+        self.delta = delta
+
+    def download_delta_data_by_exchange(self, exchange):
+        """download the full data by exchange"""
+        delta = self.delta
+        interval = 30
+        t = datetime.datetime.now()
+        dfs = []
+
+        while delta >= interval:
+            # prepare the parameters
+            end_date = f"{t.year}{t.month:02d}{t.day:02d}"
+            start = t + datetime.timedelta(days=-interval)
+            start_date = f"{start.year}{start.month:02d}{start.day:02d}"
+            # download the data
+            df = self.download_data_by_period(start_date, end_date, exchange)
+            dfs.append(df)
+            # update the value
+            delta -= interval
+            t = start
+
+        if delta > 0:
+            # prepare the data
+            end_date = f"{t.year}{t.month:02d}{t.day:02d}"
+            start = t + datetime.timedelta(days=-delta)
+            start_date = f"{start.year}{start.month:02d}{start.day:02d}"
+
+            # download and update the value
+            df = self.download_data_by_period(start_date, end_date, exchange)
+            dfs.append(df)
+
+        return pd.concat(dfs)
+
+    def download(self):
+        """download all the data."""
+        dfs = []
+        for exchange in self.exchanges:
+            logger.info("start to download exchange %s", exchange)
+            df = self.download_delta_data_by_exchange(exchange)
+            dfs.append(df)
+            logger.info("exchange %s download finished", exchange)
+
+        return pd.concat(dfs)

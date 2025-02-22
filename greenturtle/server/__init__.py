@@ -12,33 +12,3 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-"""greenturtle online service entrance"""
-
-import argparse
-
-from greenturtle.util import config
-from greenturtle.server import server
-
-
-# pylint: disable=R0801
-parser = argparse.ArgumentParser(
-    prog='GreenTurtle for trading',
-    description='scripts for create the database for greenturtle')
-
-parser.add_argument(
-    "--conf",
-    type=str,
-    default="/etc/greenturtle/greenturtle.yaml",
-    help="config file for greenturtle"
-)
-
-
-if __name__ == "__main__":
-    # load config
-    args = parser.parse_args()
-    conf = config.load_config(args.conf)
-
-    # serving
-    s = server.Server(conf)
-    s.start()

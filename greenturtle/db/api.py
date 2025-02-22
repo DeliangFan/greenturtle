@@ -44,14 +44,14 @@ class DBManager:
 class DBAPI:
     """Database API."""
 
-    def __init__(self, conf):
+    def __init__(self, db_conf):
         url = sqlalchemy.URL.create(
             drivername='mysql+pymysql',
-            username=conf.db.username,
-            password=conf.db.password,
-            host=conf.db.host,
-            port=conf.db.port,
-            database=conf.db.database,
+            username=db_conf.username,
+            password=db_conf.password,
+            host=db_conf.host,
+            port=db_conf.port,
+            database=db_conf.database,
         )
         self.engine = sqlalchemy.create_engine(url)
 

@@ -42,23 +42,28 @@
 - [P0][Done] better understand about the cn commission
 - [P1][Done] Add unittest for validation and simulator
 - [P0][Done] Fix e2e test
+- [P0][Done] [MySQL] Introduce mysql
+- [P0][Done] [MySQL] Define the tables for contract, continues contract
+- [P0][Done] [MySQL] Syncer the delta data to mysql
 
 ## TODO
 
 - [P0] [Serving] Adaptor to the data stream
-    - [MySQL] Introduce mysql
-    - [MySQL] Define the tables for contract, continues contract
+    - [Varieties] Add missing varieties
     - [MySQL] Datafeed adaptor mysql
-    - [MySQL] Syncer the delta data to mysql
     - [MySQL] Choose the main contract and adaptor
     - [MySQL] Better validation and padding
-- [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Adapter to the ctp API
-- [P0] [Serving] Metrics and alarm for service availability
+- [P0] [Serving] Trading strategy for backtest and server 
+- [P0] [Serving] Portfolio management strategy for backtest and server 
+- [P0] [Serving] Abstract for broker
+- [P0] [Serving] Refactor according to training or online serving
+- [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
-- [P0] [Serving] Refactor according to training or online serving
+- [P0] [Serving] Metrics and alarm for service availability
 
+- [P0] Refactor the e2etest according to local data
 - [P0] Refine the commission
 - [P0] Analysis the profit and losing
 - [P0] Evaluate the CTA factors
