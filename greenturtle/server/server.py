@@ -59,12 +59,17 @@ class Server:
 
                 for _, row in df.iterrows():
                     # format the field
+                    date = datetime.strptime(str(row.date), types.DATE_FORMAT)
                     row = util.nan2none(row)
                     row = util.emptystring2none(row)
                     group = util.get_group(
                         row.variety,
                         varieties.CN_VARIETIES)
-                    date = datetime.strptime(str(row.date), types.DATE_FORMAT)
+                    if group is None:
+                        # skip the variety without group, most of the
+                        # varieties are filtered due to low volume or
+                        # low quality data.
+                        continue
 
                     # format the values field
                     values = row.to_dict()

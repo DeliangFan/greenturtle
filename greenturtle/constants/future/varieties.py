@@ -366,8 +366,22 @@ DEFAULT_US_GROUP_RISK_FACTORS = {
     "interest_rates": 0.01,
 }
 
-# skip 原木/胶合板/纤维板/麦类/稻类/油菜籽 due to low volume.
-# skip 黄大豆2号 due to some abormal data
+# Due to the data quality and low volume, these varieties will be skipped.
+# - WR(线材)
+# - BC(国际铜)
+# - LG(原木)
+# - FB(纤维板)
+# - BB(胶合板)
+# - B(黄大豆2号)
+# - ZC(动力煤)
+# - WH(强麦)
+# - RS(油菜籽)
+# - RI(早籼稻)
+# - PR(瓶片)
+# - PM(普麦)
+# - LR(晚稻)
+# - JR(粳稻)
+# - SC(国际原油)
 CN_AGRICULTURE = {
     "C": {
         types.MULTIPLIER: 10,
@@ -456,7 +470,6 @@ CN_AGRICULTURE = {
     },
 }
 
-# skip 线材 due to low volume
 CN_METALS = {
     "CU": {
         types.MULTIPLIER: 5,
