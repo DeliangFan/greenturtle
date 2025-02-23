@@ -21,24 +21,12 @@ from greenturtle import exception
 def validate_price(open_price, high_price, low_price, close_price):
     """validate price"""
 
-    validate_type(open_price, high_price, low_price, close_price)
-    validate_positive_price(open_price)
-    validate_positive_price(high_price)
-    validate_positive_price(low_price)
-    validate_positive_price(close_price)
+    validate_non_negative_price(open_price)
+    validate_non_negative_price(high_price)
+    validate_non_negative_price(low_price)
+    validate_non_negative_price(close_price)
     validate_high_price(open_price, high_price, low_price, close_price)
     validate_low_price(open_price, high_price, low_price, close_price)
-
-
-def validate_type(open_price, high_price, low_price, close_price):
-    """validate price type, price could only be int or float type"""
-    if not (
-            isinstance(open_price, (int, float)) and
-            isinstance(high_price, (int, float)) and
-            isinstance(low_price, (int, float)) and
-            isinstance(close_price, (int, float))
-    ):
-        raise exception.DataPriceInvalidTypeError
 
 
 def validate_high_price(open_price, high_price, low_price, close_price):
@@ -61,8 +49,8 @@ def validate_low_price(open_price, high_price, low_price, close_price):
         raise exception.DataLowPriceAbnormalError
 
 
-def validate_positive_price(price):
+def validate_non_negative_price(price):
     """validate data price non-negative"""
 
-    if price <= 0:
-        raise exception.DataPriceNonPositiveError
+    if price < 0:
+        raise exception.DataPriceNegativeError
