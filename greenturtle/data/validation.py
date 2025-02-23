@@ -21,7 +21,7 @@ from greenturtle import exception
 def validate_price(open_price, high_price, low_price, close_price):
     """validate price"""
 
-    validate_type(open_price, high_price, low_price, close_price)
+    validate_price_type(open_price, high_price, low_price, close_price)
     validate_positive_price(open_price)
     validate_positive_price(high_price)
     validate_positive_price(low_price)
@@ -30,7 +30,7 @@ def validate_price(open_price, high_price, low_price, close_price):
     validate_low_price(open_price, high_price, low_price, close_price)
 
 
-def validate_type(open_price, high_price, low_price, close_price):
+def validate_price_type(open_price, high_price, low_price, close_price):
     """validate price type, price could only be int or float type"""
     if not (
             isinstance(open_price, (int, float)) and
