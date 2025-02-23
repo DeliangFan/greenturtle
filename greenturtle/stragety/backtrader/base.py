@@ -142,10 +142,7 @@ class BaseStrategy(bt.Strategy):
     @staticmethod
     def _do_validate_data(data):
         """valid the single data."""
-        validation.validate_price(data.open[0],
-                                  data.high[0],
-                                  data.low[0],
-                                  data.close[0])
+        validation.validate_price(data.open, data.high, data.low, data.close)
 
     def _check_bankruptcy(self):
         """check if account is bankrupt"""

@@ -232,7 +232,7 @@ class GenerateContractFromAKShare(GenerateContract):
 
     @staticmethod
     def get_total_open_interest(df, index, variety):
-        """get total open interest for a future by date"""
+        """get total open interesst for a future by date"""
 
         total_open_interest = 0
 
