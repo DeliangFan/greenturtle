@@ -24,17 +24,22 @@ from greenturtle.data import validation
 class TestValidation(unittest.TestCase):
     """unit tests for validation.py"""
 
-    def test_validate_non_negative_price_success(self):
-        """test validate_non_negative_price success."""
-        validation.validate_non_negative_price(100)
-        validation.validate_non_negative_price(0)
+    def test_validate_positive_price_success(self):
+        """test validate_positive_price success."""
+        validation.validate_positive_price(100)
+        validation.validate_positive_price(1)
 
-    def test_validate_non_negative_price_failure(self):
-        """test validate_non_negative_price failure."""
+    def test_validate_positive_price_failure(self):
+        """test validate_positive_price failure."""
         self.assertRaises(
-            exception.DataPriceNegativeError,
-            validation.validate_non_negative_price,
+            exception.DataPriceNonPositiveError,
+            validation.validate_positive_price,
             -1,
+        )
+        self.assertRaises(
+            exception.DataPriceNonPositiveError,
+            validation.validate_positive_price,
+            0,
         )
 
     def test_validate_high_price_success(self):
@@ -74,7 +79,7 @@ class TestValidation(unittest.TestCase):
     def test_validate_price_failure(self):
         """test validate_price failure."""
         self.assertRaises(
-            exception.DataPriceNegativeError,
+            exception.DataPriceNonPositiveError,
             validation.validate_price, 100, 101, -1, 98
         )
         self.assertRaises(
