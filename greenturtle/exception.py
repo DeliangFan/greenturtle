@@ -84,9 +84,14 @@ class DataLowPriceAbnormalError(GreenTurtleBaseException):
     msg_fmt = "Data low price abnormal error."
 
 
-class DataPriceNegativeError(GreenTurtleBaseException):
-    """Data price negative error."""
-    msg_fmt = "Data price negative error."
+class DataPriceNonPositiveError(GreenTurtleBaseException):
+    """Data price non positive error."""
+    msg_fmt = "Data price non positive error."
+
+
+class DataPriceInvalidTypeError(GreenTurtleBaseException):
+    """Data price invalid type error."""
+    msg_fmt = "Data price invalid type error."
 
 
 class DataContractAbnormalError(GreenTurtleBaseException):
