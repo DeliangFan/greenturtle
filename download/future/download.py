@@ -47,7 +47,10 @@ CN_MARKETS = {
         "end_year": 2025,
     },
     "CZCE": {
-        "start_year": 2010,
+        # you would better not download the data ten years ago
+        # since the CZCE symbol name will repeat every 10 years.
+        # Fuck the CZCE, so stupid naming approach.
+        "start_year": 2017,
         "end_year": 2025,
     },
     "GFEX": {

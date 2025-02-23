@@ -15,6 +15,8 @@
 
 """continuous contract."""
 
+import datetime
+
 from greenturtle.constants.future import types
 from greenturtle.data import transform
 from greenturtle.data import validation
@@ -22,6 +24,7 @@ from greenturtle import exception
 from greenturtle.util.logging import logging
 
 
+ROLLING_INTERVAL = 15
 logger = logging.get_logger()
 
 
@@ -40,19 +43,9 @@ class ContinuousContract:
         # get all contracts and build a sorted date index
         contracts = self.get_all_contracts()
         dates = self.get_sorted_dates(contracts)
-        continuous_contracts = {}
 
         # select the main contract for every date
-        logger.info("start build %s continuous contracts", self.variety)
-        for date in dates:
-            contract = self.get_main_contract(date)
-            contract = transform.contract_model_2_continuous_contract_model(
-                contract)
-            continuous_contracts[date] = contract
-        logger.info("build %s continuous contracts success", self.variety)
-
-        # fix contract order
-        self.fix_continuous_contracts_order(dates, continuous_contracts)
+        continuous_contracts = self.get_continuous_contract(dates)
 
         # compute the adjust factor
         self.compute_adjust_factor(dates, continuous_contracts)
@@ -61,16 +54,17 @@ class ContinuousContract:
         # compute total volume and total open interest
         self.compute_total_volume_and_open_interest(dates,
                                                     continuous_contracts)
-        logger.info("refine %s other attributes", self.variety)
+        logger.info("compute %s total volume, open interest success",
+                    self.variety)
 
         # validate the contract order
         self.validate_and_fix(dates, continuous_contracts)
-        msg = f"validate and fix {self.variety} continuous contracts success"
+        msg = f"validate {self.variety} continuous contracts success"
         logger.info(msg)
 
         # write to database
         self.write_to_db(continuous_contracts)
-        msg = f"write {self.variety} continuos contract to database success"
+        msg = f"write {self.variety} continuous contract to database success"
         logger.info(msg)
 
     @staticmethod
@@ -85,6 +79,24 @@ class ContinuousContract:
         dates.sort()
 
         return dates
+
+    def get_continuous_contract(self, dates):
+        """get continuous contract from main contract."""
+        logger.info("start build %s continuous contracts", self.variety)
+
+        prev_contract = None
+        continuous_contracts = {}
+
+        for date in dates:
+            contract = self.get_main_contract(date, prev_contract)
+            contract = transform.contract_model_2_continuous_contract_model(
+                contract)
+            continuous_contracts[date] = contract
+            prev_contract = contract
+
+        logger.info("build %s continuous contracts success", self.variety)
+
+        return continuous_contracts
 
     def get_all_contracts(self):
         """get all the contract according to the variety."""
@@ -102,12 +114,11 @@ class ContinuousContract:
 
         return contracts
 
-    def get_main_contract(self, date):
+    def get_main_contract(self, date, prev_contract):
         """
         get the main contract according to volume, open interest or expire
-        TODO(fixme): add support for expire
         """
-        return self.get_main_contract_by_open_interest(date)
+        return self.get_main_contract_by_open_interest(date, prev_contract)
 
     def get_main_contract_by_volume(self, date):
         """
@@ -123,47 +134,29 @@ class ContinuousContract:
 
         return contracts[0]
 
-    def get_main_contract_by_open_interest(self, date):
-        """get the main contract according to open interest"""
+    def get_main_contract_by_open_interest(self, date, prev_contract):
+        """
+        1. get the main contract according to open interest
+        2. make sure the contract is ROLLING_INTERVAL before expired
+        3. will not switch back to early contract
+        """
         getter = self.dbapi.contract_get_all_by_date_variety_source_country
-
         contracts = getter(date, self.variety, self.source, self.country)
-        contracts.sort(key=lambda x: x.open_interest, reverse=True)
 
+        contracts.sort(key=lambda x: x.open_interest, reverse=True)
         if len(contracts) == 0:
             raise exception.ContractNotFound
 
-        return contracts[0]
+        for contract in contracts:
+            date = contract.date
+            expire = contract.expire
+            if date + datetime.timedelta(days=ROLLING_INTERVAL) < expire:
+                if prev_contract is None:
+                    return contract
+                if expire >= prev_contract.expire:
+                    return contract
 
-    def fix_continuous_contracts_order(self, dates, continuous_contracts):
-        """fix continuous contracts order."""
-        if len(dates) == 0:
-            return
-
-        sets = set()
-        prev = continuous_contracts[dates[0]]
-        sets.add(prev.name)
-
-        for date in dates[1:]:
-            now = continuous_contracts[date]
-            if now.name == prev.name:
-                continue
-            # TODO(fixme) deal unexpected order, however, it is not a good
-            # ideal to use the contract name to determine the order.
-            # now.name < prev.name, bad approach!
-            if now.name in sets:
-                now = self.dbapi.contract_get_by_constraint(date,
-                                                            prev.name,
-                                                            self.variety,
-                                                            self.source,
-                                                            self.country)
-                func = transform.contract_model_2_continuous_contract_model
-                now = func(now)
-                continuous_contracts[date] = now
-                logger.info("fix %s contract order at %s", self.variety, date)
-
-            sets.add(now.name)
-            prev = now
+        raise exception.ContractNotFound
 
     def compute_adjust_factor(self, dates, continuous_contracts):
         """compute adjustment factor."""
@@ -247,10 +240,10 @@ class ContinuousContract:
         # validate and fix the price field
         self._validate_and_fix_price(dates, continuous_contracts)
 
-        # validate the nan
+        # pay attention to the low volume and open interest
+        self._validate_volume_and_open_interest(dates, continuous_contracts)
 
-    @staticmethod
-    def _validate_order(dates, continuous_contracts):
+    def _validate_order(self, dates, continuous_contracts):
         """validate the contract order"""
         if len(dates) == 0:
             return
@@ -265,7 +258,8 @@ class ContinuousContract:
                 continue
             # raise exception for not continuous contract
             if now.name in sets:
-                raise exception.ContinuousContractOrderAbnormalError
+                msg = f"{self.variety} contract {date} bad order"
+                logger.error(msg)
 
             sets.add(now.name)
             prev = now
@@ -281,10 +275,13 @@ class ContinuousContract:
                     contract.open,
                     contract.high,
                     contract.low,
-                    contract.close)
+                    contract.close
+                )
             except (
                     exception.DataPriceLowAbnormalError,
-                    exception.DataPriceHighAbnormalError):
+                    exception.DataPriceHighAbnormalError
+            ):
+                # deal with data price high/low abnormal error
                 msg = f"validate price {self.variety} {date} failed, fix it"
                 logger.warning(msg)
                 # fix the data
@@ -298,7 +295,11 @@ class ContinuousContract:
                     contract.high,
                     contract.low,
                     contract.close)
-            except exception.DataPriceInvalidTypeError as exc:
+            except (
+                    exception.DataPriceInvalidTypeError,
+                    exception.DataPriceNonPositiveError
+            ) as exc:
+                # deal with data price invalid type and non-positive error
                 msg = f"validate price type {self.variety} {date} failed" + \
                       ", fix it"
                 logger.warning(msg)
@@ -316,14 +317,30 @@ class ContinuousContract:
 
             prev = contract
 
+    def _validate_volume_and_open_interest(self, dates, continuous_contracts):
+        """
+        validate the contract volume and open interest with low value
+        - volume < 1000
+        - open interest < 1500
+        """
+        for date in dates:
+            contract = continuous_contracts[date]
+            if contract.volume < 1000:
+                logger.warning(
+                    "%s %s low volume: %d",
+                    self.variety,
+                    date,
+                    contract.volume)
+            if contract.open_interest < 1500:
+                logger.warning(
+                    "%s %s low open interest: %d",
+                    self.variety,
+                    date,
+                    contract.open_interest)
+
     def write_to_db(self, continuous_contracts):
         """write to database."""
         for c in continuous_contracts.values():
-            self.dbapi.continuous_contract_create(c.date,
-                                                  c.name,
-                                                  c.variety,
-                                                  c.source,
-                                                  c.country,
-                                                  c.exchange,
-                                                  c.group,
-                                                  c.to_dict())
+            self.dbapi.continuous_contract_create(
+                c.date, c.name, c.variety, c.source, c.country,
+                c.exchange, c.group, c.to_dict())

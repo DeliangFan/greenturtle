@@ -56,6 +56,7 @@
     - [MySQL] Datafeed adaptor mysql
     - [MySQL] Better validation and padding
     - [MySQL] Delta continuous contract support
+- [P0] [Serving] Attention for download the data before close.
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 
