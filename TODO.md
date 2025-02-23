@@ -52,6 +52,7 @@
 ## TODO
 
 - [P0] [Serving] Adaptor to the data stream
+    - [MySQL] Add expire data, and expire should not be non
     - [MySQL] Datafeed adaptor mysql
     - [MySQL] Better validation and padding
     - [MySQL] Delta continuous contract support
