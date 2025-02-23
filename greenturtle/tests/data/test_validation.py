@@ -72,6 +72,23 @@ class TestValidation(unittest.TestCase):
             validation.validate_low_price, 98, 101, 99, 100
         )
 
+    def test_validate_price_type_failure(self):
+        """test validate_price_type failure."""
+        self.assertRaises(
+            exception.DataPriceInvalidTypeError,
+            validation.validate_price_type, None, 101, -1, 98
+        )
+        self.assertRaises(
+            exception.DataPriceInvalidTypeError,
+            validation.validate_price, 102, "", 98, 100
+        )
+
+    def test_validate_price_type_success(self):
+        """test validate_price_type success."""
+        """test validate_low_price success."""
+        validation.validate_high_price(100, 101, 99, 100)
+        validation.validate_high_price(100.0, 100.1, 99, 100)
+
     def test_validate_price_success(self):
         """test validate_price success."""
         validation.validate_price(100, 101, 99, 100)
