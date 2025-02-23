@@ -21,8 +21,9 @@ from datetime import datetime
 from greenturtle.constants.future import types
 from greenturtle.constants.future import varieties
 from greenturtle.db import api as dbapi
-from greenturtle.data.download import cn_future
+from greenturtle.data.download import future
 from greenturtle.data import transform
+from greenturtle import exception
 from greenturtle.util.logging import logging
 from greenturtle.util import util
 
@@ -50,9 +51,14 @@ class Server:
                 (self.conf.country == types.CN) and
                 (self.conf.source == types.AKSHARE)
         ):
+            symbol_loader = future.DeltaCNFutureSymbolsFromAKShare(
+                types.CN_EXCHANGES)
+            symbols_expire = symbol_loader.get_symbols_expire()
+            logger.info("get symbols expire success")
+
             for exchange in types.CN_EXCHANGES:
                 # load data by exchange
-                loader = cn_future.DeltaCNFutureFromAKShare([exchange], 7)
+                loader = future.DeltaCNFutureFromAKShare([exchange], 30)
                 df = loader.download()
 
                 msg = f"start insert {exchange} delta data to database"
@@ -76,23 +82,49 @@ class Server:
                     values = row.to_dict()
                     if "turnover" in values and types.TURN_OVER not in values:
                         values[types.TURN_OVER] = values["turnover"]
+                    self._set_symbol(values, row.symbol, symbols_expire)
 
                     # insert to database
                     self.dbapi.contract_create(
-                        date,
-                        row.symbol,
-                        row.variety,
-                        types.AKSHARE,
-                        types.CN,
-                        exchange,
-                        group,
-                        values,
-                    )
+                        date, row.symbol, row.variety, types.AKSHARE,
+                        types.CN, exchange, group, values)
 
                 msg = f"insert {exchange} delta data to database success"
                 logger.info(msg)
         else:
             raise NotImplementedError
+
+    def _set_symbol(self, values, symbol, symbols_expire):
+        """set symbol"""
+        if symbol in symbols_expire:
+            values[types.EXPIRE] = symbols_expire[symbol]
+            return
+
+        # black magic from the exchange, they use upper or lower
+        # case chars, the little greenturtle sucks.
+        lower = symbol.lower()
+        if lower in symbols_expire:
+            values[types.EXPIRE] = symbols_expire[lower]
+            return
+        # sucks again.
+        upper = symbol.upper()
+        if upper in symbols_expire:
+            values[types.EXPIRE] = symbols_expire[upper]
+            return
+
+        msg = f"failed get expire for {symbol} from online, will try db"
+        logger.warning(msg)
+        contracts = self.dbapi.contract_get_all_by_name_source_country(
+            symbol, self.conf.source, self.conf.country)
+
+        for contract in contracts:
+            if contract.expire is not None:
+                values[types.EXPIRE] = contract.expire
+                return
+
+        msg = f"failed to get expire for {symbol} from db, raise exception"
+        logger.error(msg)
+        raise exception.DataInvalidExpireError
 
     def initialize_broker(self):
         """initialize broker"""

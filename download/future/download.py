@@ -29,7 +29,7 @@ For cn future markets, the data are download from.
 For us future markets, it would better to buy data from third part provider.
 """
 
-from greenturtle.data.download import cn_future
+from greenturtle.data.download import future
 
 
 DST_DIR = "./source/cn"
@@ -62,7 +62,7 @@ CN_MARKETS = {
 
 
 if __name__ == "__main__":
-    f = cn_future.FullCNFutureToFileFromAKShare(
+    f = future.FullCNFutureToFileFromAKShare(
         CN_MARKETS,
         DST_DIR,
     )

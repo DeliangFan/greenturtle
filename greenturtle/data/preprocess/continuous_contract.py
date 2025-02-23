@@ -283,8 +283,8 @@ class ContinuousContract:
                     contract.low,
                     contract.close)
             except (
-                    exception.DataLowPriceAbnormalError,
-                    exception.DataHighPriceAbnormalError):
+                    exception.DataPriceLowAbnormalError,
+                    exception.DataPriceHighAbnormalError):
                 msg = f"validate price {self.variety} {date} failed, fix it"
                 logger.warning(msg)
                 # fix the data

@@ -50,10 +50,10 @@ class TestValidation(unittest.TestCase):
     def test_validate_high_price_failure(self):
         """test validate_high_price failure."""
         self.assertRaises(
-            exception.DataHighPriceAbnormalError,
+            exception.DataPriceHighAbnormalError,
             validation.validate_high_price, 100, 99, 98, 100)
         self.assertRaises(
-            exception.DataHighPriceAbnormalError,
+            exception.DataPriceHighAbnormalError,
             validation.validate_high_price, 99, 99, 98, 100)
 
     def test_validate_low_price_success(self):
@@ -64,11 +64,11 @@ class TestValidation(unittest.TestCase):
     def test_validate_low_price_failure(self):
         """test validate_low_price failure."""
         self.assertRaises(
-            exception.DataLowPriceAbnormalError,
+            exception.DataPriceLowAbnormalError,
             validation.validate_low_price, 100, 101, 99, 98
         )
         self.assertRaises(
-            exception.DataLowPriceAbnormalError,
+            exception.DataPriceLowAbnormalError,
             validation.validate_low_price, 98, 101, 99, 100
         )
 
@@ -85,7 +85,6 @@ class TestValidation(unittest.TestCase):
 
     def test_validate_price_type_success(self):
         """test validate_price_type success."""
-        """test validate_low_price success."""
         validation.validate_high_price(100, 101, 99, 100)
         validation.validate_high_price(100.0, 100.1, 99, 100)
 
@@ -100,10 +99,10 @@ class TestValidation(unittest.TestCase):
             validation.validate_price, 100, 101, -1, 98
         )
         self.assertRaises(
-            exception.DataHighPriceAbnormalError,
+            exception.DataPriceHighAbnormalError,
             validation.validate_price, 102, 101, 98, 100
         )
         self.assertRaises(
-            exception.DataLowPriceAbnormalError,
+            exception.DataPriceLowAbnormalError,
             validation.validate_price, 100, 102, 99, 98
         )

@@ -48,11 +48,11 @@
 - [P0][Done] [Varieties] filter delta data according to variety constant
 - [P1][Done] Data exchange plugin for csv, db, datafeed etc
 - [P0][Done] [MySQL] Choose the main contract and adaptor
+- [P0][Done] [MySQL] Add expire data, and expire should not be non
 
 ## TODO
 
 - [P0] [Serving] Adaptor to the data stream
-    - [MySQL] Add expire data, and expire should not be non
     - [MySQL] Datafeed adaptor mysql
     - [MySQL] Better validation and padding
     - [MySQL] Delta continuous contract support

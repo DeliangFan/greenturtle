@@ -110,8 +110,8 @@ class GenerateContinuous:
                 # 2. prepare validating for contracts
                 contracts.add(row[types.CONTRACT])
             except (
-                    exception.DataLowPriceAbnormalError,
-                    exception.DataHighPriceAbnormalError):
+                    exception.DataPriceLowAbnormalError,
+                    exception.DataPriceHighAbnormalError):
 
                 msg = f"validate {file_path} at {index} failed, try to fix"
                 logger.warning(msg)
