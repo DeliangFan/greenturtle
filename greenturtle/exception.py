@@ -74,12 +74,12 @@ class AccountBankruptcy(GreenTurtleBaseException):
     msg_fmt = "account bankruptcy error."
 
 
-class DataHighPriceAbnormalError(GreenTurtleBaseException):
+class DataPriceHighAbnormalError(GreenTurtleBaseException):
     """Data high abnormal error."""
     msg_fmt = "Data high price abnormal error."
 
 
-class DataLowPriceAbnormalError(GreenTurtleBaseException):
+class DataPriceLowAbnormalError(GreenTurtleBaseException):
     """Data low abnormal error."""
     msg_fmt = "Data low price abnormal error."
 
@@ -107,6 +107,16 @@ class DownloadDataError(GreenTurtleBaseException):
 class SourceCountryNotSupportedError(GreenTurtleBaseException):
     """source and country not supported error."""
     msg_fmt = "Source and country not supported error."
+
+
+class ExchangeNotSupportedError(GreenTurtleBaseException):
+    """exchange not supported error."""
+    msg_fmt = "Exchange not supported error."
+
+
+class DataInvalidExpireError(GreenTurtleBaseException):
+    """Data invalid expire error."""
+    msg_fmt = "Data invalid expire error."
 
 
 class ContinuousContractOrderAbnormalError(GreenTurtleBaseException):

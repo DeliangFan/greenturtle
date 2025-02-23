@@ -90,6 +90,13 @@ class DBAPI:
 
         return contract_ref
 
+    def contract_update_by_id(self, contract_id, values):
+        """update contract to the database."""
+        with Session(self.engine) as session:
+            session.query(models.Contract).filter_by(
+                id=contract_id).update(values)
+            session.commit()
+
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def contract_get_by_constraint(self,
                                    date,
@@ -108,7 +115,6 @@ class DBAPI:
                 models.Contract.source == source,
                 models.Contract.country == country
             )
-
             return query.first()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -121,7 +127,6 @@ class DBAPI:
                 models.Contract.source == source,
                 models.Contract.country == country
             )
-
             return query.all()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -136,7 +141,6 @@ class DBAPI:
                 models.Contract.source == source,
                 models.Contract.country == country
             )
-
             return query.all()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -153,7 +157,16 @@ class DBAPI:
                 models.Contract.source == source,
                 models.Contract.country == country
             )
+            return query.all()
 
+    def contract_get_all_by_exchange_from_akshare_cn(self, exchange):
+        """get all contracts by exchange from akshare and country cn."""
+        with Session(self.engine) as session:
+            query = session.query(models.Contract).filter(
+                models.Contract.exchange == exchange,
+                models.Contract.source == types.AKSHARE,
+                models.Contract.country == types.CN,
+            )
             return query.all()
 
     def contract_get_all_by_name_from_csi_us(self, name):
@@ -220,7 +233,6 @@ class DBAPI:
                                               country):
 
         """get the continuous contract from the database by constraint."""
-
         with Session(self.engine) as session:
             query = session.query(models.ContinuousContract).filter(
                 models.ContinuousContract.date == date,
@@ -229,7 +241,6 @@ class DBAPI:
                 models.ContinuousContract.source == source,
                 models.ContinuousContract.country == country
             )
-
             return query.first()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -239,14 +250,12 @@ class DBAPI:
                                                            country):
 
         """get all contracts by name, source and country."""
-
         with Session(self.engine) as session:
             query = session.query(models.ContinuousContract).filter(
                 models.ContinuousContract.name == name,
                 models.ContinuousContract.source == source,
                 models.ContinuousContract.country == country
             )
-
             return query.all()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -268,7 +277,6 @@ class DBAPI:
         """
         get all continuous contracts by name from csi data and country us.
         """
-
         return self.continuous_contract_get_all_by_name_source_country(
             name, types.CSI, types.US)
 
@@ -276,7 +284,6 @@ class DBAPI:
         """
         get all continuous contracts by name from akshare and country cn.
         """
-
         return self.continuous_contract_get_all_by_name_source_country(
             name, types.AKSHARE, types.CN)
 
@@ -284,7 +291,6 @@ class DBAPI:
         """
         get all continuous contracts by variety from csi data and country us.
         """
-
         return self.continuous_contract_get_all_by_variety_source_country(
             variety, types.CSI, types.US)
 
@@ -292,6 +298,5 @@ class DBAPI:
         """
         get all continuous contracts by variety from akshare and country cn.
         """
-
         return self.continuous_contract_get_all_by_variety_source_country(
             variety, types.AKSHARE, types.CN)

@@ -24,6 +24,7 @@ import time
 import akshare as ak
 import pandas as pd
 
+from greenturtle.constants.future import types
 from greenturtle import exception
 from greenturtle.util.logging import logging
 
@@ -216,3 +217,113 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
             logger.info("exchange %s download finished", exchange)
 
         return pd.concat(dfs)
+
+
+class DeltaCNFutureSymbolsFromAKShare:
+    """download all the symbols data by exchanges"""
+    def __init__(self, exchanges):
+        self.exchanges = exchanges
+
+    def get_symbols_expire(self):
+        """get all the symbols expire data."""
+        ret = {}
+        for exchange in self.exchanges:
+            logger.info("start to download %s symbols", exchange)
+            df = self.get_symbol_details_by_exchange(exchange)
+            symbols_expire = self.get_symbols_expire_from_df(df, exchange)
+
+            for symbol, expire in symbols_expire.items():
+                ret[symbol] = expire
+            logger.info("finish download %s symbols", exchange)
+
+        return ret
+
+    def get_symbol_details_by_exchange(self, exchange):
+        """get all the symbols details data by exchange."""
+
+        if exchange == types.SHFE:
+            getter = ak.futures_contract_info_shfe
+        elif exchange == types.INE:
+            getter = ak.futures_contract_info_ine
+        elif exchange == types.CFFEX:
+            getter = ak.futures_contract_info_cffex
+        elif exchange == types.CZCE:
+            getter = ak.futures_contract_info_czce
+        elif exchange == types.GFEX:
+            getter = ak.futures_contract_info_gfex
+        elif exchange == types.DCE:
+            getter = ak.futures_contract_info_dce
+        else:
+            raise exception.ExchangeNotSupportedError
+
+        if exchange in (types.GFEX, types.DCE):
+            return self.do_getter(getter, exchange)
+
+        return self.do_getter_with_date_fallback(getter, exchange)
+
+    @staticmethod
+    def do_getter(getter, exchange):
+        """get the symbol without date parameter."""
+        retry = 5
+
+        while retry > 0:
+            try:
+                df = getter()
+                return df
+            # pylint: disable=broad-except
+            except Exception:
+                retry -= 1
+                logger.warning("failed download %s symbol, retry", exchange)
+            # sleep a few seconds to avoid being blocked by server side.
+            time.sleep(5)
+
+        # raise exception after 5 times retry
+        raise exception.DownloadDataError
+
+    def do_getter_with_date_fallback(self, getter, exchange):
+        """get the symbol with date parameter."""
+        # set a larger retry time due to the long holiday like
+        # spring festival and cn national day.
+        retry = 15
+        t = datetime.datetime.now()
+        while retry > 0:
+            try:
+                date = f"{t.year}{t.month:02d}{t.day:02d}"
+                df = getter(date=date)
+                return df
+            # pylint: disable=broad-except
+            except Exception:
+                retry -= 1
+                logger.warning("failed download %s symbol, retry", exchange)
+                t = t + datetime.timedelta(days=-1)
+            # sleep a few seconds to avoid being blocked by server side.
+            time.sleep(5)
+
+        # raise exception after 5 times retry
+        raise exception.DownloadDataError
+
+    def get_symbols_expire_from_df(self, df, exchange):
+        """get the symbols details from dataframe."""
+        symbols_details = {}
+        for _, row in df.iterrows():
+            symbol = row["合约代码"]
+            # black magic in some exchange, sucks.
+            symbol = symbol.replace(" ", "")
+            expire = None
+
+            # get the expire date according to the exchange.
+            if exchange in (types.SHFE, types.INE):
+                expire = row["到期日"]
+            elif exchange in (types.CFFEX, types.DCE):
+                expire = row["最后交易日"]
+            elif exchange == types.CZCE:
+                expire_str = row["交割结算日"]
+                expire = datetime.datetime.strptime(expire_str, "%Y-%m-%d")
+            elif exchange == types.GFEX:
+                expire = row["最后交易日"]
+
+            if expire is None:
+                raise exception.DataInvalidExpireError
+            symbols_details[symbol] = expire
+
+        return symbols_details

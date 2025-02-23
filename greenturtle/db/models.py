@@ -80,7 +80,7 @@ class Contract(Base):
     turn_over = Column(Float, default=None)
     settle = Column(Float, default=None)
     pre_settle = Column(Float, default=None)
-    expire = Column(DateTime)
+    expire = Column(DateTime, nullable=False)
 
 
 # pylint: disable=too-few-public-methods
@@ -117,5 +117,5 @@ class ContinuousContract(Base):
     turn_over = Column(Float, default=None)
     settle = Column(Float, default=None)
     pre_settle = Column(Float, default=None)
-    expire = Column(DateTime)
-    adjust_factor = Column(Float, default=None)
+    expire = Column(DateTime, nullable=False)
+    adjust_factor = Column(Float, nullable=False)

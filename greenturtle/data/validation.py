@@ -48,7 +48,7 @@ def validate_high_price(open_price, high_price, low_price, close_price):
             (high_price < low_price) or
             (high_price < close_price)
     ):
-        raise exception.DataHighPriceAbnormalError
+        raise exception.DataPriceHighAbnormalError
 
 
 def validate_low_price(open_price, high_price, low_price, close_price):
@@ -58,7 +58,7 @@ def validate_low_price(open_price, high_price, low_price, close_price):
             (low_price > high_price) or
             (low_price > close_price)
     ):
-        raise exception.DataLowPriceAbnormalError
+        raise exception.DataPriceLowAbnormalError
 
 
 def validate_positive_price(price):

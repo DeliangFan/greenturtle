@@ -17,15 +17,14 @@
 
 import unittest
 
-import numpy as np
 import pandas as pd
 
-from greenturtle import exception
 from greenturtle.data import transform
 from greenturtle.db import models
 
 
-class TestValidation(unittest.TestCase):
+class TestTransform(unittest.TestCase):
+    """unit tests for transform.py"""
 
     def test_contract_model_2_continuous_contract_model(self):
         """test pd_row_nan_2_none"""
