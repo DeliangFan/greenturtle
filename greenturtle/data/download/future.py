@@ -176,6 +176,7 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
         super().__init__(exchanges)
         self.delta = delta
 
+    # TODO(attention), what if download the data before close
     def download_delta_data_by_exchange(self, exchange):
         """download the full data by exchange"""
         delta = self.delta

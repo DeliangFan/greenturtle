@@ -366,22 +366,6 @@ DEFAULT_US_GROUP_RISK_FACTORS = {
     "interest_rates": 0.01,
 }
 
-# Due to the data quality and low volume, these varieties will be skipped.
-# - WR(线材)
-# - BC(国际铜)
-# - LG(原木)
-# - FB(纤维板)
-# - BB(胶合板)
-# - B(黄大豆2号)
-# - ZC(动力煤)
-# - WH(强麦)
-# - RS(油菜籽)
-# - RI(早籼稻)
-# - PR(瓶片)
-# - PM(普麦)
-# - LR(晚稻)
-# - JR(粳稻)
-# - SC(国际原油)
 CN_AGRICULTURE = {
     "C": {
         types.MULTIPLIER: 10,
@@ -452,11 +436,6 @@ CN_AGRICULTURE = {
         types.MULTIPLIER: 10,
         types.AUTO_MARGIN: 1,
         types.DESCRIPTION: "菜籽油（简称“菜油”）",
-    },
-    "CY": {
-        types.MULTIPLIER: 5,
-        types.AUTO_MARGIN: 0.5,
-        types.DESCRIPTION: "棉纱",
     },
     "AP": {
         types.MULTIPLIER: 10,
@@ -551,11 +530,6 @@ CN_METALS = {
         types.AUTO_MARGIN: 10,
         types.DESCRIPTION: "铁矿石",
     },
-    "SF": {
-        types.MULTIPLIER: 5,
-        types.AUTO_MARGIN: 0.5,
-        types.DESCRIPTION: "硅铁",
-    },
     "SM": {
         types.MULTIPLIER: 5,
         types.AUTO_MARGIN: 0.5,
@@ -574,11 +548,6 @@ CN_METALS = {
 }
 
 CN_ENERGY = {
-    "SC": {
-        types.MULTIPLIER: 1000,
-        types.AUTO_MARGIN: 100,
-        types.DESCRIPTION: "中质含硫原油",
-    },
     "LU": {
         types.MULTIPLIER: 10,
         types.AUTO_MARGIN: 1,
@@ -736,6 +705,24 @@ CN_INDICES = {
 
 # For china future, these data are from
 # https://www.cfachina.org/servicesupport/sspz/
+# Due to the data quality and low volume, these varieties will be skipped.
+# - WR(线材)
+# - BC(国际铜)
+# - LG(原木)
+# - FB(纤维板)
+# - BB(胶合板)
+# - B(黄大豆2号)
+# - ZC(动力煤)
+# - WH(强麦)
+# - RS(油菜籽)
+# - RI(早籼稻)
+# - PR(瓶片)
+# - PM(普麦)
+# - LR(晚稻)
+# - JR(粳稻)
+# - SC(国际原油)
+# - CY(棉纱)
+# - SF(硅铁)
 CN_VARIETIES = {
     "agriculture": CN_AGRICULTURE,
     "metal": CN_METALS,
