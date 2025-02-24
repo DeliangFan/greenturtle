@@ -177,6 +177,15 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
         self.delta = delta
 
     # TODO(attention), what if download the data before close
+    # At 15:00:
+    # At 17:00:
+    # At 20:00: it's able to download today's daily data within
+    # CFFEX, CZCE, DCE, GFEX, INE
+    #
+    # However, for zero volume contract
+    # CZCE: open, high, low, close are 0
+    # DCE/GFEX: open, high, low is 0, close is the same as yesterday.
+    # INE/SHFE: open, high, low is nan, close is the same as yesterday.
     def download_delta_data_by_exchange(self, exchange):
         """download the full data by exchange"""
         delta = self.delta

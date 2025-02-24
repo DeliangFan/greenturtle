@@ -45,7 +45,7 @@ class ContinuousContract:
         dates = self.get_sorted_dates(contracts)
 
         # select the main contract for every date
-        continuous_contracts = self.get_continuous_contract(dates)
+        continuous_contracts = self.build_continuous_contract(dates)
 
         # compute the adjust factor
         self.compute_adjust_factor(dates, continuous_contracts)
@@ -80,13 +80,11 @@ class ContinuousContract:
 
         return dates
 
-    def get_continuous_contract(self, dates):
+    def build_continuous_contract(self, dates, prev_contract=None):
         """get continuous contract from main contract."""
         logger.info("start build %s continuous contracts", self.variety)
 
-        prev_contract = None
         continuous_contracts = {}
-
         for date in dates:
             contract = self.get_main_contract(date, prev_contract)
             contract = transform.contract_model_2_continuous_contract_model(
@@ -100,16 +98,18 @@ class ContinuousContract:
 
     def get_all_contracts(self):
         """get all the contract according to the variety."""
-        getter = None
+        support = False
         if self.source == types.AKSHARE and self.country == types.CN:
-            getter = self.dbapi.contract_get_all_by_variety_from_akshare_cn
+            support = True
         elif self.source == types.CSI and self.country == types.US:
-            getter = self.dbapi.contract_get_all_by_variety_from_us_cn
+            support = True
 
-        if getter is None:
+        if not support:
             raise exception.SourceCountryNotSupportedError
 
-        contracts = getter(self.variety)
+        contracts = self.dbapi.contract_get_all_by_variety_source_country(
+            self.variety, self.source, self.country)
+
         logger.info("get all %s contracts success", self.variety)
 
         return contracts
@@ -148,8 +148,11 @@ class ContinuousContract:
             raise exception.ContractNotFound
 
         for contract in contracts:
-            date = contract.date
             expire = contract.expire
+            if not expire:
+                raise exception.DataInvalidExpireError
+
+            date = contract.date
             if date + datetime.timedelta(days=ROLLING_INTERVAL) < expire:
                 if prev_contract is None:
                     return contract
@@ -232,13 +235,13 @@ class ContinuousContract:
             total_open_interest += contract.open_interest
         return total_open_interest
 
-    def validate_and_fix(self, dates, continuous_contracts):
+    def validate_and_fix(self, dates, continuous_contracts, online=False):
         """validate continuous contracts."""
         # validate the contract order
         self._validate_order(dates, continuous_contracts)
 
         # validate and fix the price field
-        self._validate_and_fix_price(dates, continuous_contracts)
+        self._validate_and_fix_price(dates, continuous_contracts, online)
 
         # pay attention to the low volume and open interest
         self._validate_volume_and_open_interest(dates, continuous_contracts)
@@ -264,7 +267,10 @@ class ContinuousContract:
             sets.add(now.name)
             prev = now
 
-    def _validate_and_fix_price(self, dates, continuous_contracts):
+    def _validate_and_fix_price(self,
+                                dates,
+                                continuous_contracts,
+                                online=False):
         """validate and fix the contract price."""
         prev = None
         for date in dates:
@@ -280,10 +286,14 @@ class ContinuousContract:
             except (
                     exception.DataPriceLowAbnormalError,
                     exception.DataPriceHighAbnormalError
-            ):
+            ) as exc:
+                if online:
+                    logger.error("panic, would not fix for online trading")
+                    raise exc
+
                 # deal with data price high/low abnormal error
                 msg = f"validate price {self.variety} {date} failed, fix it"
-                logger.warning(msg)
+                logger.error(msg)
                 # fix the data
                 contract.low = min(
                     contract.open,
@@ -299,10 +309,14 @@ class ContinuousContract:
                     exception.DataPriceInvalidTypeError,
                     exception.DataPriceNonPositiveError
             ) as exc:
+                if online:
+                    logger.error("panic, would not fix for online trading")
+                    raise exc
+
                 # deal with data price invalid type and non-positive error
                 msg = f"validate price type {self.variety} {date} failed" + \
                       ", fix it"
-                logger.warning(msg)
+                logger.error(msg)
                 # fix the data
                 if prev is not None:
                     contract.open = prev.open
@@ -341,6 +355,78 @@ class ContinuousContract:
     def write_to_db(self, continuous_contracts):
         """write to database."""
         for c in continuous_contracts.values():
+            # only insert if not exist
+            found = self.dbapi.continuous_contract_get_by_constraint(
+                c.date, c.variety, c.source, c.country)
+            if found:
+                logger.info("%s %s already exist, skip", c.variety, c.date)
+                continue
+
             self.dbapi.continuous_contract_create(
                 c.date, c.name, c.variety, c.source, c.country,
                 c.exchange, c.group, c.to_dict())
+
+            logger.info("insert %s %s to db success", c.variety, c.date)
+
+
+class DeltaContinuousContract(ContinuousContract):
+    """
+    DeltaContinuousContract is used to generate delta continuous
+    contract, especially in online serving scenario.
+    """
+
+    def generate(self):
+        """
+        generate delta continuous contracts and write to database.
+        """
+        func = self.dbapi.continuous_contract_get_latest_by_variety_source_country  # noqa: E501
+        continuous_contract = func(self.variety, self.source, self.country)
+
+        if continuous_contract is None:
+            raise exception.ContinuousContractNotFound
+            # logger.warning("no continuous contract found, generate full")
+            # self.generate_full()
+            # return
+
+        # get all contracts and build a sorted date index
+        contracts = self.get_all_contracts_since_date(
+            continuous_contract.date)
+        if len(contracts) == 0:
+            logger.warning("no contract found since %s for %s",
+                           continuous_contract.date, self.variety)
+            return
+
+        dates = self.get_sorted_dates(contracts)
+
+        # select the main contract for every date
+        continuous_contracts = self.build_continuous_contract(
+            dates, continuous_contract)
+
+        # compute the adjust factor
+        self.compute_adjust_factor(dates, continuous_contracts)
+        logger.info("compute %s adjustment factor success for delta",
+                    self.variety)
+
+        # compute total volume and total open interest
+        self.compute_total_volume_and_open_interest(dates,
+                                                    continuous_contracts)
+        logger.info(
+            "compute %s total volume, open interest success for delta",
+            self.variety)
+
+        # validate the contract order
+        self.validate_and_fix(dates, continuous_contracts, online=True)
+        msg = f"validate {self.variety} delta continuous contracts success"
+        logger.info(msg)
+
+        # write to database
+        self.write_to_db(continuous_contracts)
+        msg = f"write {self.variety} delta continuous contract to db success"
+        logger.info(msg)
+
+    def get_all_contracts_since_date(self, date):
+        """get all contracts since date"""
+        f = self.dbapi.contract_get_all_by_variety_source_country_since_date
+        contracts = f(self.variety, self.source, self.country, date)
+        logger.info("get %s contracts since %s success", self.variety, date)
+        return contracts

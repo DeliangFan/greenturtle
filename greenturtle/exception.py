@@ -122,3 +122,8 @@ class DataInvalidExpireError(GreenTurtleBaseException):
 class ContinuousContractOrderAbnormalError(GreenTurtleBaseException):
     """Continuous contract order error."""
     msg_fmt = "Continuous contract order error."
+
+
+class ContinuousContractNotFound(GreenTurtleBaseException):
+    """Continuous contract not found error."""
+    msg_fmt = "Continuous contract not found error."
