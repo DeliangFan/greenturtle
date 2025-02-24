@@ -16,6 +16,7 @@
 """api to access the database."""
 
 import sqlalchemy
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from greenturtle.constants.future import types
@@ -41,6 +42,7 @@ class DBManager:
         models.Base.metadata.create_all(self.engine)
 
 
+# pylint: disable=too-many-public-methods
 class DBAPI:
     """Database API."""
 
@@ -144,6 +146,26 @@ class DBAPI:
             return query.all()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def contract_get_all_by_variety_source_country_since_date(self,
+                                                              variety,
+                                                              source,
+                                                              country,
+                                                              date=None):
+        """get all contracts by variety, source and country since data"""
+        with Session(self.engine) as session:
+            query = session.query(models.Contract)
+
+            if date is not None:
+                query = query.filter(models.Contract.date > date)
+
+            query = query.filter(
+                models.Contract.variety == variety,
+                models.Contract.source == source,
+                models.Contract.country == country
+            )
+            return query.all()
+
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def contract_get_all_by_date_variety_source_country(self,
                                                         date,
                                                         variety,
@@ -203,7 +225,7 @@ class DBAPI:
         """create continuous contract to the database."""
 
         continuous_contract = self.continuous_contract_get_by_constraint(
-            date, name, variety, source, country)
+            date, variety, source, country)
         if continuous_contract:
             return continuous_contract
 
@@ -227,7 +249,6 @@ class DBAPI:
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def continuous_contract_get_by_constraint(self,
                                               date,
-                                              name,
                                               variety,
                                               source,
                                               country):
@@ -236,7 +257,6 @@ class DBAPI:
         with Session(self.engine) as session:
             query = session.query(models.ContinuousContract).filter(
                 models.ContinuousContract.date == date,
-                models.ContinuousContract.name == name,
                 models.ContinuousContract.variety == variety,
                 models.ContinuousContract.source == source,
                 models.ContinuousContract.country == country
@@ -270,8 +290,23 @@ class DBAPI:
                 models.ContinuousContract.source == source,
                 models.ContinuousContract.country == country
             )
-
             return query.all()
+
+    def continuous_contract_get_latest_by_variety_source_country(self,
+                                                                 variety,
+                                                                 source,
+                                                                 country):
+        """get latest continuous contracts by variety, source and country."""
+        with Session(self.engine) as session:
+            query = session.query(models.ContinuousContract).filter(
+                models.ContinuousContract.variety == variety,
+                models.ContinuousContract.source == source,
+                models.ContinuousContract.country == country
+            ).order_by(
+                desc(models.ContinuousContract.date)
+            ).first()
+
+            return query
 
     def continuous_contract_get_all_by_name_from_csi_us(self, name):
         """

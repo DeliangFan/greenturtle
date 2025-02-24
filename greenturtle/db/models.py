@@ -91,7 +91,6 @@ class ContinuousContract(Base):
     __table_args__ = (
         UniqueConstraint(
             'date',
-            'name',
             'variety',
             'source',
             'country',

@@ -34,7 +34,7 @@
 - [P0][Done] refactor the download module
 - [P0][Done] refactor the generate contract module 
 - [P0][Done] refactor the const module
-- [P0][Done] refactor the generate continuous and adjusted module 
+- [P0][Done] refactor the continuous and adjusted generation module 
 - [P1][Done] Deal with the data limited to the lasted start date.
 - [P0][Done] Get the china future data
 - [P0][Done] Do some benchmark for china future data
@@ -49,13 +49,14 @@
 - [P1][Done] Data exchange plugin for csv, db, datafeed etc
 - [P0][Done] [MySQL] Choose the main contract and adaptor
 - [P0][Done] [MySQL] Add expire data, and expire should not be non
+- [P0][Done] [MySQL] Better validation and padding
+- [P0][Done] [MySQL] Delta continuous contract support
+- [P0][Done] [Serving] Attention for download the online data, test after close
 
 ## TODO
 
 - [P0] [Serving] Adaptor to the data stream
-    - [MySQL] Datafeed adaptor mysql
-    - [MySQL] Better validation and padding
-    - [MySQL] Delta continuous contract support
+  - [MySQL] Datafeed adaptor mysql
 - [P0] [Serving] Attention for download the data before close.
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
@@ -66,13 +67,14 @@
 - [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
 - [P0] [Serving] Metrics and alarm for service availability
-
+- [P0] Focus on CTA, remove stock part
 - [P0] Refactor the e2etest according to local data
 - [P0] Refine the commission
 - [P0] Analysis the profit and losing
 - [P0] Evaluate the CTA factors
 - [P1] Refactor, abstract the balance for stock and bond with buy one.
 - [P1] Add more unittest(data, strategy, simulator)
+- [P1] [Serving] Add support for multi account, support for both CN and US.
 - [P2] Add pyfolio
 
 

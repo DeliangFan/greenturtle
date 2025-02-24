@@ -15,13 +15,16 @@
 
 """online trading server"""
 
-import time
 from datetime import datetime
+import time
+
+import pandas as pd
 
 from greenturtle.constants.future import types
 from greenturtle.constants.future import varieties
 from greenturtle.db import api as dbapi
 from greenturtle.data.download import future
+from greenturtle.data.preprocess import continuous_contract
 from greenturtle.data import transform
 from greenturtle import exception
 from greenturtle.util.logging import logging
@@ -39,13 +42,14 @@ class Server:
 
     def start(self):
         """start server"""
-        self.synchronize_delta_data()
+        self.synchronize_delta_contract()
+        self.synchronize_delta_continuous_contract()
 
         while True:
             print("I am serving, heartbeat!")
             time.sleep(60)
 
-    def synchronize_delta_data(self):
+    def synchronize_delta_contract(self):
         """synchronize delta data."""
         if (
                 (self.conf.country == types.CN) and
@@ -58,41 +62,94 @@ class Server:
 
             for exchange in types.CN_EXCHANGES:
                 # load data by exchange
-                loader = future.DeltaCNFutureFromAKShare([exchange], 30)
+                loader = future.DeltaCNFutureFromAKShare([exchange], 7)
                 df = loader.download()
 
-                msg = f"start insert {exchange} delta data to database"
-                logger.info(msg)
-
+                logger.info("start insert %s delta data to db", exchange)
+                # do insert to database
                 for _, row in df.iterrows():
-                    # format the field
-                    date = datetime.strptime(str(row.date), types.DATE_FORMAT)
-                    row = transform.pd_row_nan_2_none(row)
-                    row = transform.pd_row_emptystring_2_none(row)
-                    group = util.get_group(
-                        row.variety,
-                        varieties.CN_VARIETIES)
-                    if group is None:
-                        # skip the variety without group, most of the
-                        # varieties are filtered due to low volume or
-                        # low quality data.
-                        continue
+                    self._synchronize_one_contract(row,
+                                                   symbols_expire,
+                                                   exchange)
 
-                    # format the values field
-                    values = row.to_dict()
-                    if "turnover" in values and types.TURN_OVER not in values:
-                        values[types.TURN_OVER] = values["turnover"]
-                    self._set_symbol(values, row.symbol, symbols_expire)
-
-                    # insert to database
-                    self.dbapi.contract_create(
-                        date, row.symbol, row.variety, types.AKSHARE,
-                        types.CN, exchange, group, values)
-
-                msg = f"insert {exchange} delta data to database success"
-                logger.info(msg)
+                logger.info("insert %s delta data to db success", exchange)
         else:
             raise NotImplementedError
+
+    def synchronize_delta_continuous_contract(self):
+        """synchronize delta continuous contract."""
+        if (
+                (self.conf.country == types.CN) and
+                (self.conf.source == types.AKSHARE)
+        ):
+            for group in varieties.CN_VARIETIES.values():
+                for variety in group:
+                    c = continuous_contract.DeltaContinuousContract(
+                        variety, self.conf.source, self.conf.country,
+                        self.dbapi)
+                    c.generate()
+        else:
+            raise NotImplementedError
+
+    def _synchronize_one_contract(self, row, symbols_expire, exchange):
+        """synchronize one contract."""
+        # format the field
+        date = datetime.strptime(str(row.date), types.DATE_FORMAT)
+        row = transform.pd_row_nan_2_none(row)
+        row = transform.pd_row_emptystring_2_none(row)
+        group = util.get_group(
+            row.variety,
+            varieties.CN_VARIETIES)
+
+        # skip the variety without group, most of the varieties
+        # are filtered due to low volume or low quality data.
+        if group is None:
+            return
+
+        # format the values field
+        values = row.to_dict()
+        if "turnover" in values and types.TURN_OVER not in values:
+            values[types.TURN_OVER] = values["turnover"]
+        self._set_symbol(values, row.symbol, symbols_expire)
+
+        # validate before insert to database
+        self._validate(row, values)
+
+        contract = self.dbapi.contract_get_by_constraint(
+            date, row.symbol, row.variety, types.AKSHARE, types.CN)
+        if contract is not None:
+            logger.info("%s %s already exists, skip", date, row.symbol)
+            return
+
+        logger.info("insert %s %s to database", date, row.symbol)
+        # insert to database
+        self.dbapi.contract_create(
+            date, row.symbol, row.variety, types.AKSHARE,
+            types.CN, exchange, group, values)
+
+    def _validate(self, row, values):
+        """validate data"""
+        # it is very dangerous for 0 close price since close price
+        # is used across all the trading progress.
+        close_zero = row.close == 0
+        open_nan_zero = row.open != 0 and not pd.isnull(row.open)
+        high_nan_zero = row.high != 0 and not pd.isnull(row.high)
+        low_nan_zero = row.low != 0 and not pd.isnull(row.low)
+
+        if close_zero and (
+                open_nan_zero or high_nan_zero or low_nan_zero):
+            raise exception.DataPriceInvalidTypeError
+
+        if pd.isnull(row.close):
+            raise exception.DataPriceInvalidTypeError
+
+        # expire is also very important since we use it for rolling
+        # contracts
+        if types.EXPIRE not in values:
+            raise exception.DataInvalidExpireError
+
+        if values[types.EXPIRE] is None:
+            raise exception.DataInvalidExpireError
 
     def _set_symbol(self, values, symbol, symbols_expire):
         """set symbol"""
