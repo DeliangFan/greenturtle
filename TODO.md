@@ -52,11 +52,14 @@
 - [P0][Done] [MySQL] Better validation and padding
 - [P0][Done] [MySQL] Delta continuous contract support
 - [P0][Done] [Serving] Attention for download the online data, test after close
-- [P0] Focus on CTA, remove stock part
-
+- [P0][Done] Focus on CTA, remove stock part
+- [P0][Done] Refactor, default backtrader to control complexity, including: strategy, indicators, simulator and analyzers
 
 ## TODO
 
+- [P0] Refactor, default future
+  - constant
+  - simulator
 - [P0] [Serving] Attention for download the data before close.
   - DCE download failed before close, skip it?
   - check the validation works or not.

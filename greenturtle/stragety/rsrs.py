@@ -16,8 +16,8 @@
 """ RSRS class strategy for backtrader"""
 
 
-from greenturtle.indicators.backtrader import rsrs
-from greenturtle.stragety.backtrader import base
+from greenturtle.indicators import rsrs
+from greenturtle.stragety import base
 
 
 class RSRSStrategy(base.BaseStrategy):

@@ -13,34 +13,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" MIM class strategy for backtrader"""
+""" Buy and hold strategy for backtrader"""
 
-from backtrader.indicators import MovAv
-from greenturtle.stragety.backtrader import base
+from greenturtle.stragety import base
 
 
-class MIMStrategy(base.BaseStrategy):
+class BuyHoldStrategy(base.BaseStrategy):
 
-    """ MIM class strategy for backtrader"""
+    """ Buy and hold class strategy for backtrader
 
-    def __init__(self, *args, period=100, **kwargs):
+    Always buy the asset and never sell.
+    """
+
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.movs = {}
-        for name in self.names:
-            data = self.getdatabyname(name)
-            self.movs[name] = MovAv.Exponential(data, period=period)
 
     def is_buy_to_open(self, name):
         """determine whether a position should buy to open or not."""
-        mov = self.movs[name]
-        data = self.symbols_data[name]
-        return data[0] > mov[0]
+        return True
 
     def is_sell_to_close(self, name):
         """determine whether a position should sell to close or not."""
-        mov = self.movs[name]
-        data = self.symbols_data[name]
-        return data[0] < mov[0]
+        return False
 
     def is_sell_to_open(self, name):
         """determine whether a position should sell to open or not."""

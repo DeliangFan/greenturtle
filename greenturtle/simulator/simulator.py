@@ -21,7 +21,7 @@ import math
 import backtrader as bt
 from backtrader import analyzers
 
-from greenturtle.analyzers.backtrader import position_pnl
+from greenturtle.analyzers import position_pnl
 from greenturtle.analyzers import summary
 from greenturtle.util.logging import logging
 

@@ -18,7 +18,7 @@
 import unittest
 
 from greenturtle import exception
-from greenturtle.simulator.backtrader import future_simulator
+from greenturtle.simulator import future_simulator
 from greenturtle.constants.future import varieties
 
 

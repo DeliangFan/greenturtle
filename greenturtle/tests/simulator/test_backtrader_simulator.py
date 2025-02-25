@@ -17,9 +17,9 @@
 
 import unittest
 
-from greenturtle.data.backtrader import future
-from greenturtle.simulator.backtrader import simulator
-from greenturtle.stragety.backtrader import ema
+from greenturtle.data.datafeed import future
+from greenturtle.simulator import simulator
+from greenturtle.stragety import ema
 
 
 class TestSimulator(unittest.TestCase):

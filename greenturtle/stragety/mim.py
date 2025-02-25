@@ -13,36 +13,34 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" RSI class strategy for backtrader"""
+""" MIM class strategy for backtrader"""
 
-import backtrader as bt
+from backtrader.indicators import MovAv
+from greenturtle.stragety import base
 
-from greenturtle.stragety.backtrader import base
 
+class MIMStrategy(base.BaseStrategy):
 
-class RSIStrategy(base.BaseStrategy):
+    """ MIM class strategy for backtrader"""
 
-    """ RSI class strategy for backtrader"""
-
-    def __init__(self, *args, rsi_period=14, upper=70, lower=30, **kwargs):
+    def __init__(self, *args, period=100, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.upper = upper
-        self.lower = lower
-        self.rsis = {}
+        self.movs = {}
         for name in self.names:
-            data = self.symbols_data[name]
-            self.rsis[name] = bt.indicators.RSI(data, period=rsi_period)
+            data = self.getdatabyname(name)
+            self.movs[name] = MovAv.Exponential(data, period=period)
 
     def is_buy_to_open(self, name):
         """determine whether a position should buy to open or not."""
-        rsi = self.rsis[name]
-        return rsi[0] < self.lower
+        mov = self.movs[name]
+        data = self.symbols_data[name]
+        return data[0] > mov[0]
 
     def is_sell_to_close(self, name):
         """determine whether a position should sell to close or not."""
-        rsi = self.rsis[name]
-        return rsi[0] > self.upper
+        mov = self.movs[name]
+        data = self.symbols_data[name]
+        return data[0] < mov[0]
 
     def is_sell_to_open(self, name):
         """determine whether a position should sell to open or not."""

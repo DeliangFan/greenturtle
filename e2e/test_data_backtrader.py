@@ -20,7 +20,7 @@ import os
 import unittest
 
 from greenturtle.constants.future import types
-import greenturtle.data.backtrader.future as future_data
+import greenturtle.data.datafeed.future as future_data
 from greenturtle.util.logging import logging
 
 

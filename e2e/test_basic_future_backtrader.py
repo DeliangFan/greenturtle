@@ -19,14 +19,14 @@ from datetime import datetime
 import unittest
 
 from greenturtle.constants.future import varieties
-import greenturtle.data.backtrader.future as future_data
-from greenturtle.simulator.backtrader import future_simulator
-from greenturtle.stragety.backtrader import buyhold
-from greenturtle.stragety.backtrader import channel
-from greenturtle.stragety.backtrader import ema
-from greenturtle.stragety.backtrader import macd
-from greenturtle.stragety.backtrader import mim
-from greenturtle.stragety.backtrader import rsi
+import greenturtle.data.datafeed.future as future_data
+from greenturtle.simulator import future_simulator
+from greenturtle.stragety import buyhold
+from greenturtle.stragety import channel
+from greenturtle.stragety import ema
+from greenturtle.stragety import macd
+from greenturtle.stragety import mim
+from greenturtle.stragety import rsi
 
 
 # pylint: disable=R0801
