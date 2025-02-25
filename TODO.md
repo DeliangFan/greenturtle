@@ -55,6 +55,7 @@
 - [P0][Done] Focus on CTA, remove stock part
 - [P0][Done] Refactor, default backtrader to control complexity, including: strategy, indicators, simulator and analyzers
 - [P0][Done] Refactor, default future to control complexity, constant and simulator
+- [P0][Done] Refactor, better datafeed directory
 
 ## TODO
 

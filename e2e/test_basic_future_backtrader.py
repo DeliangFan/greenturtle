@@ -19,7 +19,7 @@ from datetime import datetime
 import unittest
 
 from greenturtle.constants import varieties
-import greenturtle.data.datafeed.future as future_data
+from greenturtle.data.datafeed import yf
 from greenturtle.simulator import simulator
 from greenturtle.stragety import buyhold
 from greenturtle.stragety import channel
@@ -48,7 +48,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_buy_and_hold(self):
         """test buy and hold future."""
 
-        data = future_data.get_feed_from_yahoo_finance(
+        data = yf.get_feed_from_yahoo_finance(
                     self.yahoo_code,
                     name=self.name,
                     fromdate=self.fromdate,
@@ -75,7 +75,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_ema(self):
         """test trade future with ema strategy."""
 
-        data = future_data.get_feed_from_yahoo_finance(
+        data = yf.get_feed_from_yahoo_finance(
                     self.yahoo_code,
                     name=self.name,
                     fromdate=self.fromdate,
@@ -111,7 +111,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_mim(self):
         """test trade future with mim strategy."""
 
-        data = future_data.get_feed_from_yahoo_finance(
+        data = yf.get_feed_from_yahoo_finance(
                     self.yahoo_code,
                     name=self.name,
                     fromdate=self.fromdate,
@@ -143,7 +143,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_channel(self):
         """test trade future with channel strategy."""
 
-        data = future_data.get_feed_from_yahoo_finance(
+        data = yf.get_feed_from_yahoo_finance(
                     self.yahoo_code,
                     name=self.name,
                     fromdate=self.fromdate,
@@ -161,7 +161,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_macd(self):
         """test trade future with macd strategy."""
 
-        data = future_data.get_feed_from_yahoo_finance(
+        data = yf.get_feed_from_yahoo_finance(
                     self.yahoo_code,
                     name=self.name,
                     fromdate=self.fromdate,
@@ -179,7 +179,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_rsi(self):
         """test trade future with rsi strategy."""
 
-        data = future_data.get_feed_from_yahoo_finance(
+        data = yf.get_feed_from_yahoo_finance(
             self.yahoo_code,
             name=self.name,
             fromdate=self.fromdate,

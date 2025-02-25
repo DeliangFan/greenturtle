@@ -20,7 +20,8 @@ import os
 import unittest
 
 from greenturtle.constants import types
-import greenturtle.data.datafeed.future as future_data
+from greenturtle.data.datafeed import csv
+from greenturtle.data.datafeed import yf
 from greenturtle.util.logging import logging
 
 
@@ -43,7 +44,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
 
     def test_get_data_frame_from_yahoo_finance(self):
         """test get_data_frame_from_yahoo_finance"""
-        df = future_data.get_data_frame_from_yahoo_finance(self.yahoo_code)
+        df = yf.get_data_frame_from_yahoo_finance(self.yahoo_code)
 
         self.assertTrue(len(df) > 0)
         self.assertEqual(797, int(df.iloc[2000][types.CLOSE]))
@@ -57,7 +58,7 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
         fromdate = datetime.datetime(2004, 1, 1)
         todate = datetime.datetime(2005, 1, 1)
 
-        df = future_data.get_data_frame_from_yahoo_finance(
+        df = yf.get_data_frame_from_yahoo_finance(
             self.yahoo_code,
             fromdate=fromdate,
             todate=todate)
@@ -66,12 +67,12 @@ class TestFutureDataWithBackTrader(unittest.TestCase):
 
     def test_get_feed_from_yahoo_finance(self):
         """test get_feed_from_yahoo_finance"""
-        df = future_data.get_data_frame_from_yahoo_finance(
+        df = yf.get_data_frame_from_yahoo_finance(
             self.yahoo_code)
 
         df.to_csv(self.filename)
 
-        data = future_data.get_feed_from_csv_file(
+        data = csv.get_feed_from_csv_file(
             self.name,
             self.filename)
         data.start()
