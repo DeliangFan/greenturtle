@@ -15,7 +15,7 @@
 
 """future constants for varieties."""
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 
 
 DEFAULT_RISK_FACTOR = 0.002

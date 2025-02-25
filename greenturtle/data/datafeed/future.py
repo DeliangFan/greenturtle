@@ -45,7 +45,7 @@ import numpy as np
 from backtrader.feeds import GenericCSVData
 import yfinance as yf
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 
 
 # TODO(fixme), generate automatically

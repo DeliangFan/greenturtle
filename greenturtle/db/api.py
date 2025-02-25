@@ -19,7 +19,7 @@ import sqlalchemy
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 from greenturtle.db import models
 
 

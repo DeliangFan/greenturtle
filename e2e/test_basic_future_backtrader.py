@@ -18,9 +18,9 @@
 from datetime import datetime
 import unittest
 
-from greenturtle.constants.future import varieties
+from greenturtle.constants import varieties
 import greenturtle.data.datafeed.future as future_data
-from greenturtle.simulator import future_simulator
+from greenturtle.simulator import simulator
 from greenturtle.stragety import buyhold
 from greenturtle.stragety import channel
 from greenturtle.stragety import ema
@@ -42,7 +42,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.yahoo_code = "GC=F"
 
     def setUp(self):
-        self.s = future_simulator.FutureSimulator(
+        self.s = simulator.Simulator(
             varieties=varieties.US_VARIETIES)
 
     def test_future_with_buy_and_hold(self):

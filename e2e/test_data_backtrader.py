@@ -19,7 +19,7 @@ import datetime
 import os
 import unittest
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 import greenturtle.data.datafeed.future as future_data
 from greenturtle.util.logging import logging
 

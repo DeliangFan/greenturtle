@@ -15,14 +15,16 @@
 
 """Experiment to benchmark the MACD performance on cryptocurrencies."""
 
-import abc
 import math
 
 import backtrader as bt
 from backtrader import analyzers
+from backtrader import comminfo
 
 from greenturtle.analyzers import position_pnl
 from greenturtle.analyzers import summary
+from greenturtle.constants import types
+from greenturtle import exception
 from greenturtle.util.logging import logging
 
 
@@ -30,13 +32,14 @@ logger = logging.get_logger()
 
 
 # pylint: disable=too-many-instance-attributes
-class Simulator():
+class Simulator:
 
     """Basic analysis class for backtrader."""
 
-    def __init__(self, cash=1000000, slippage=0, plot=False):
+    def __init__(self, cash=1000000, slippage=0, plot=False, varieties=None):
 
         self.plot = plot
+        self.varieties = varieties
         self.summary = summary.Summary()
         self.cerebro = bt.Cerebro()
 
@@ -87,11 +90,6 @@ class Simulator():
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
 
-    @abc.abstractmethod
-    def set_commission(self, commission=0, margin=None, mult=1.0, name=None):
-        """set commission."""
-        raise NotImplementedError
-
     def add_strategy(self, strategy, *args, **kwargs):
         """add strategy to cerebro."""
         self.cerebro.addstrategy(strategy, *args, **kwargs)
@@ -141,6 +139,51 @@ class Simulator():
         logger.info("final Portfolio Value: %.2f", value)
 
         return result
+
+    def set_commission(self, commission=4, margin=None, mult=1.0, name=None):
+        """set commission for future by name."""
+        self.cerebro.broker.setcommission(
+            commission=commission,
+            margin=margin,
+            mult=mult,
+            commtype=comminfo.CommInfoBase.COMM_FIXED,
+            stocklike=False,
+            name=name,
+        )
+
+    def get_auto_margin(self, name):
+        """get auto margin for future by name."""
+        for group in self.varieties.values():
+            for future_name, future in group.items():
+                if future_name == name:
+                    return future[types.AUTO_MARGIN]
+
+        # raise exception if not found
+        raise exception.AutoMarginNotFound
+
+    def get_multiplier(self, name):
+        """get multiplier for future by name."""
+        for group in self.varieties.values():
+            for future_name, future in group.items():
+                if future_name == name:
+                    return future[types.MULTIPLIER]
+
+        # raise exception if not found
+        raise exception.MultiplierNotFound
+
+    def set_default_commission_by_name(self, name, commission=4):
+        """set default commission by name."""
+        multiplier = self.get_multiplier(name)
+        auto_margin = self.get_auto_margin(name)
+
+        self.cerebro.broker.setcommission(
+            commission=commission,
+            mult=multiplier,
+            commtype=comminfo.CommInfoBase.COMM_FIXED,
+            stocklike=False,
+            automargin=auto_margin,
+            name=name,
+        )
 
     def analysis_return(self, result):
         """analysis the return."""
