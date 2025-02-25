@@ -45,7 +45,7 @@ def contract_model_2_dataframe(model):
 
 def contract_dataframe_2_model():
     """contract dataframe tp model class."""
-    raise NotImplementedError("contract dataframe 2_model not implemented.")
+    raise NotImplementedError("contract dataframe_2_model not implemented.")
 
 
 def contract_model_2_continuous_contract_model(contract):
