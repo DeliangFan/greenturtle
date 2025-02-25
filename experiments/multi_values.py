@@ -20,9 +20,9 @@ import os
 
 import backtrader as bt
 
-from greenturtle.constants.future import varieties
+from greenturtle.constants import varieties
 import greenturtle.data.datafeed.future as future_data
-from greenturtle.simulator import future_simulator
+from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 
 
@@ -33,9 +33,7 @@ if __name__ == '__main__':
     group_risk_factors = varieties.DEFAULT_CN_GROUP_RISK_FACTORS
     varieties_map = varieties.CN_VARIETIES
 
-    s = future_simulator.FutureSimulator(
-        plot=True,
-        varieties=varieties_map)
+    s = simulator.Simulator(plot=True, varieties=varieties_map)
 
     s.add_strategy(
         ema.EMAEnhanced,

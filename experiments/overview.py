@@ -22,9 +22,9 @@ import backtrader as bt
 import pandas as pd
 
 from greenturtle.analyzers import correlation
-from greenturtle.constants.future import varieties
+from greenturtle.constants import varieties
 import greenturtle.data.datafeed.future as future_data
-from greenturtle.simulator import future_simulator
+from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 from greenturtle.util.logging import logging
 
@@ -48,8 +48,7 @@ if __name__ == '__main__':
             if not os.path.exists(filename):
                 continue
 
-            s = future_simulator.FutureSimulator(
-                varieties=varieties.US_VARIETIES)
+            s = simulator.Simulator(varieties=varieties.US_VARIETIES)
             s.set_default_commission_by_name(name)
             s.add_strategy(ema.EMA)
 

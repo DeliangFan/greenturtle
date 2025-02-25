@@ -17,7 +17,7 @@
 
 import datetime
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 from greenturtle.data import transform
 from greenturtle.data import validation
 from greenturtle import exception

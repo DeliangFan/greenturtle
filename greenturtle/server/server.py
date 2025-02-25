@@ -20,8 +20,8 @@ import time
 
 import pandas as pd
 
-from greenturtle.constants.future import types
-from greenturtle.constants.future import varieties
+from greenturtle.constants import types
+from greenturtle.constants import varieties
 from greenturtle.db import api as dbapi
 from greenturtle.data.download import future
 from greenturtle.data.preprocess import continuous_contract

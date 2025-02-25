@@ -24,7 +24,7 @@ import time
 import akshare as ak
 import pandas as pd
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 from greenturtle import exception
 from greenturtle.util.logging import logging
 

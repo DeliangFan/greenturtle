@@ -18,9 +18,9 @@
 import datetime
 import os
 
-from greenturtle.constants.future import varieties
+from greenturtle.constants import varieties
 import greenturtle.data.datafeed.future as future_data
-from greenturtle.simulator import future_simulator
+from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 
 
@@ -31,7 +31,7 @@ NAME = "GC"
 
 if __name__ == '__main__':
 
-    s = future_simulator.FutureSimulator(varieties=varieties.US_VARIETIES)
+    s = simulator.Simulator(varieties=varieties.US_VARIETIES)
     s.set_default_commission_by_name(NAME)
 
     # get the data

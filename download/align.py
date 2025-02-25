@@ -23,7 +23,7 @@ or the data from cn exchange.
 
 import os
 
-from greenturtle.constants.future import varieties
+from greenturtle.constants import varieties
 from greenturtle.data.preprocess import align
 from greenturtle.util.logging import logging
 

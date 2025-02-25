@@ -20,7 +20,7 @@ import os
 
 import pandas as pd
 
-from greenturtle.constants.future import types
+from greenturtle.constants import types
 
 
 class Align:
