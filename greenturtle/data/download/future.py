@@ -164,9 +164,9 @@ class FullCNFutureToFileFromAKShare(CNFutureFromAKShare):
     def download(self):
         """download all the data."""
         for exchange in self.exchanges:
-            logger.info("start to download exchange %s", exchange)
+            logger.info("start to download %s contracts", exchange)
             self.download_full_data_by_exchange(exchange)
-            logger.info("exchange %s download finished", exchange)
+            logger.info("%s contracts download finished", exchange)
 
 
 class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
@@ -176,13 +176,15 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
         super().__init__(exchanges)
         self.delta = delta
 
-    # TODO(attention), what if download the data before close
-    # At 15:00:
-    # At 17:00:
-    # At 20:00: it's able to download today's daily data within
-    # CFFEX, CZCE, DCE, GFEX, INE
+    # Attention for the data download in the day!
     #
-    # However, for zero volume contract
+    # At 13:00: the data in CFFEX, CZCE, DCE and GFEX it empty. However
+    # the data in SHFE, INE it not empty, only the close price is nan.
+    #
+    # At 18:00 & 20:00: it's able to download today's daily data within
+    # CFFEX, CZCE, DCE, GFEX, INE, SHFE
+    #
+    # Note, for zero volume contract
     # CZCE: open, high, low, close are 0
     # DCE/GFEX: open, high, low is 0, close is the same as yesterday.
     # INE/SHFE: open, high, low is nan, close is the same as yesterday.
@@ -215,16 +217,25 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
             df = self.download_data_by_period(start_date, end_date, exchange)
             dfs.append(df)
 
+        if len(dfs) == 0:
+            return None
+
         return pd.concat(dfs)
 
     def download(self):
         """download all the data."""
         dfs = []
         for exchange in self.exchanges:
-            logger.info("start to download exchange %s", exchange)
+            logger.info("start to download %s contracts", exchange)
             df = self.download_delta_data_by_exchange(exchange)
+            if df is None:
+                logger.warning("exchange %s empty contracts", exchange)
+                continue
             dfs.append(df)
-            logger.info("exchange %s download finished", exchange)
+            logger.info("%s contracts download finished", exchange)
+
+        if len(dfs) == 0:
+            return None
 
         return pd.concat(dfs)
 
@@ -238,13 +249,13 @@ class DeltaCNFutureSymbolsFromAKShare:
         """get all the symbols expire data."""
         ret = {}
         for exchange in self.exchanges:
-            logger.info("start to download %s symbols", exchange)
+            logger.info("start to download %s symbols details", exchange)
             df = self.get_symbol_details_by_exchange(exchange)
             symbols_expire = self.get_symbols_expire_from_df(df, exchange)
 
             for symbol, expire in symbols_expire.items():
                 ret[symbol] = expire
-            logger.info("finish download %s symbols", exchange)
+            logger.info("finish download %s symbols details", exchange)
 
         return ret
 
@@ -283,7 +294,8 @@ class DeltaCNFutureSymbolsFromAKShare:
             # pylint: disable=broad-except
             except Exception:
                 retry -= 1
-                logger.warning("failed download %s symbol, retry", exchange)
+                logger.warning("failed download %s symbol details, retry",
+                               exchange)
             # sleep a few seconds to avoid being blocked by server side.
             time.sleep(5)
 

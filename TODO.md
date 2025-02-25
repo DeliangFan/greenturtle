@@ -55,9 +55,11 @@
 
 ## TODO
 
+- [P0] [Serving] Attention for download the data before close.
+  - DCE download failed before close, skip it?
+  - check the validation works or not.
 - [P0] [Serving] Adaptor to the data stream
   - [MySQL] Datafeed adaptor mysql
-- [P0] [Serving] Attention for download the data before close.
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 

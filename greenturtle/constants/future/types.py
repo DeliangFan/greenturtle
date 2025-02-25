@@ -78,6 +78,14 @@ INE = "INE"
 SHFE = "SHFE"
 CN_EXCHANGES = (CFFEX, CZCE, DCE, GFEX, INE, SHFE)
 
+# Contract model columns
+DATE = "date"
+NAME = "name"
+SOURCE = "source"
+COUNTRY = "country"
+EXCHANGE = "exchange"
+GROUP = "group"
+
 # csv structure for contract
 CONTRACT_COLUMN = [
     CONTRACT,
