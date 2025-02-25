@@ -31,7 +31,7 @@ from greenturtle.util.logging import logging
 
 logger = logging.get_logger()
 # pylint: disable=R0801
-DATA_DIR = "../../download/future/continuous/us/csidata_adjusted_greenturtle"
+DATA_DIR = "../download/align/us"
 
 
 if __name__ == '__main__':

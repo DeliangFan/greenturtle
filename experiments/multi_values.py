@@ -28,7 +28,7 @@ from greenturtle.stragety.backtrader import ema
 
 if __name__ == '__main__':
 
-    DATA_DIR = "../../download/future/align/cn/"
+    DATA_DIR = "../download/align/cn/"
     RISK_FACTOR = 0.004
     group_risk_factors = varieties.DEFAULT_CN_GROUP_RISK_FACTORS
     varieties_map = varieties.CN_VARIETIES
