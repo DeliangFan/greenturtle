@@ -23,7 +23,7 @@ import pandas as pd
 
 from greenturtle.analyzers import correlation
 from greenturtle.constants import varieties
-import greenturtle.data.datafeed.future as future_data
+from greenturtle.data.datafeed import csv
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 from greenturtle.util.logging import logging
@@ -53,7 +53,7 @@ if __name__ == '__main__':
             s.add_strategy(ema.EMA)
 
             # get the data
-            data = future_data.get_feed_from_csv_file(
+            data = csv.get_feed_from_csv_file(
                 name,
                 filename,
                 timeframe=bt.TimeFrame.Days,

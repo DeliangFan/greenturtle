@@ -21,7 +21,7 @@ import os
 import backtrader as bt
 
 from greenturtle.constants import varieties
-import greenturtle.data.datafeed.future as future_data
+from greenturtle.data.datafeed import csv
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
             if not os.path.exists(filename):
                 continue
 
-            data = future_data.get_feed_from_csv_file(
+            data = csv.get_feed_from_csv_file(
                 name,
                 filename,
                 bt.TimeFrame.Days,

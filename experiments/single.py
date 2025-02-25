@@ -19,7 +19,7 @@ import datetime
 import os
 
 from greenturtle.constants import varieties
-import greenturtle.data.datafeed.future as future_data
+from greenturtle.data.datafeed import csv
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     todate = datetime.datetime(2024, 12, 31)
     filename = os.path.join(DATA_DIR, f"{NAME}.csv")
 
-    data = future_data.get_feed_from_csv_file(
+    data = csv.get_feed_from_csv_file(
         NAME,
         filename,
         fromdate=fromdate,

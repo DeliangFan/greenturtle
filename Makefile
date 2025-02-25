@@ -12,8 +12,8 @@ test: unittest e2etest
 
 
 experiment:
-	cd experiments/future && python single.py
-	cd experiments/future && python overview.py
-	cd experiments/future && python multi_values.py
+	cd experiments && python single.py
+	cd experiments && python overview.py
+	cd experiments && python multi_values.py
 
 all: fmt test
