@@ -10,16 +10,10 @@ e2etest:
 
 test: unittest e2etest
 
-stock_experiment:
-	cd experiments/stock && python overview.py
-	cd experiments/stock && python single.py
-	cd experiments/stock && python stock_bond.py
 
-future_experiment:
+experiment:
 	cd experiments/future && python single.py
 	cd experiments/future && python overview.py
 	cd experiments/future && python multi_values.py
-
-experiment: stock_experiment future_experiment
 
 all: fmt test

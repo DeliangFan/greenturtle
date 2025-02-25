@@ -15,30 +15,39 @@
 
 """Experiment to benchmark trending trading performance on single us future."""
 
-from datetime import datetime
+import datetime
+import os
 
-import greenturtle.constants.stock as stock_constants
-import greenturtle.data.backtrader.stock as stock_data
-from greenturtle.simulator.backtrader import stock_simulator
-from greenturtle.stragety.backtrader import mim
+from greenturtle.constants.future import varieties
+import greenturtle.data.backtrader.future as future_data
+from greenturtle.simulator.backtrader import future_simulator
+from greenturtle.stragety.backtrader import ema
+
+
+# pylint: disable=R0801
+DATA_DIR = "../download/align/us/"
+NAME = "GC"
 
 
 if __name__ == '__main__':
 
-    s = stock_simulator.StockSimulator()
-    s.set_commission()
+    s = future_simulator.FutureSimulator(varieties=varieties.US_VARIETIES)
+    s.set_default_commission_by_name(NAME)
 
-    fromdate = datetime(2000, 1, 1)
-    todate = datetime(2024, 1, 1)
+    # get the data
+    fromdate = datetime.datetime(2006, 1, 1)
+    todate = datetime.datetime(2024, 12, 31)
+    filename = os.path.join(DATA_DIR, f"{NAME}.csv")
 
-    # add the data.
-    data = stock_data.get_feed_from_yahoo_finance(
-        stock_constants.QQQ,
+    data = future_data.get_feed_from_csv_file(
+        NAME,
+        filename,
         fromdate=fromdate,
         todate=todate)
-    s.add_data(data, stock_constants.QQQ)
+    s.add_data(data, NAME)
 
     # add strategy
-    s.add_strategy(mim.MIMStrategy)
+    s.add_strategy(ema.EMA)
+
     # do simulate
     s.do_simulate()

@@ -52,6 +52,8 @@
 - [P0][Done] [MySQL] Better validation and padding
 - [P0][Done] [MySQL] Delta continuous contract support
 - [P0][Done] [Serving] Attention for download the online data, test after close
+- [P0] Focus on CTA, remove stock part
+
 
 ## TODO
 
@@ -69,7 +71,6 @@
 - [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
 - [P0] [Serving] Metrics and alarm for service availability
-- [P0] Focus on CTA, remove stock part
 - [P0] Refactor the e2etest according to local data
 - [P0] Refine the commission
 - [P0] Analysis the profit and losing

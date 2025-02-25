@@ -13,49 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""some basic e2e test for stock"""
+"""some basic e2e test for backtrader data"""
 
 import datetime
 import os
 import unittest
 
 from greenturtle.constants.future import types
-import greenturtle.data.backtrader.stock as stock_data
 import greenturtle.data.backtrader.future as future_data
 from greenturtle.util.logging import logging
 
 
 logging.set_log_error_level()
-
-
-class TestStockDataWithBackTrader(unittest.TestCase):
-    """test greenturtle.data.backtrader.stock file."""
-
-    def test_get_feed_from_yahoo_finance_with_max_period(self):
-        """test get_feed_from_yahoo_finance with max period"""
-        name = "TLT"
-
-        data = stock_data.get_feed_from_yahoo_finance(name)
-
-        # pylint: disable=no-member
-        length = len(data.p.dataname)
-        self.assertTrue(length > 0)
-
-    def test_get_feed_from_yahoo_finance_with_period(self):
-        """test get_feed_from_yahoo_finance with period"""
-
-        name = "QQQ"
-        fromdate = datetime.datetime(2004, 1, 1)
-        todate = datetime.datetime(2005, 1, 1)
-
-        data = stock_data.get_feed_from_yahoo_finance(
-            name,
-            fromdate=fromdate,
-            todate=todate)
-
-        # pylint: disable=no-member
-        length = len(data.p.dataname)
-        self.assertEqual(252, length)
 
 
 class TestFutureDataWithBackTrader(unittest.TestCase):
