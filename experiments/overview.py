@@ -23,9 +23,9 @@ import pandas as pd
 
 from greenturtle.analyzers import correlation
 from greenturtle.constants.future import varieties
-import greenturtle.data.backtrader.future as future_data
-from greenturtle.simulator.backtrader import future_simulator
-from greenturtle.stragety.backtrader import ema
+import greenturtle.data.datafeed.future as future_data
+from greenturtle.simulator import future_simulator
+from greenturtle.stragety import ema
 from greenturtle.util.logging import logging
 
 

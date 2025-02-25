@@ -19,7 +19,7 @@ from backtrader import comminfo
 
 from greenturtle.constants.future import types
 from greenturtle import exception
-from greenturtle.simulator.backtrader import simulator
+from greenturtle.simulator import simulator
 
 
 class FutureSimulator(simulator.Simulator):

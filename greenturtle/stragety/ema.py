@@ -16,7 +16,7 @@
 """Collection of EMA strategies for backtrader"""
 
 from backtrader.indicators import MovAv, Highest, Lowest
-from greenturtle.stragety.backtrader import base
+from greenturtle.stragety import base
 
 
 class EMA(base.BaseStrategy):

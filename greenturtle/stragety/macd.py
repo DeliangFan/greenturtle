@@ -17,7 +17,7 @@
 
 import backtrader as bt
 
-from greenturtle.stragety.backtrader import base
+from greenturtle.stragety import base
 
 
 # MACDWithATRStrategy is copied from backtrader/samples/macd-settings.py

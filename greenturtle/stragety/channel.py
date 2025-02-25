@@ -16,7 +16,7 @@
 """ Channel class strategy for backtrader"""
 
 from backtrader.indicators import Highest, Lowest
-from greenturtle.stragety.backtrader import base
+from greenturtle.stragety import base
 
 
 class DonchianChannel(base.BaseStrategy):

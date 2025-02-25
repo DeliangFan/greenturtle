@@ -13,28 +13,36 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" Buy and hold strategy for backtrader"""
+""" RSI class strategy for backtrader"""
 
-from greenturtle.stragety.backtrader import base
+import backtrader as bt
+
+from greenturtle.stragety import base
 
 
-class BuyHoldStrategy(base.BaseStrategy):
+class RSIStrategy(base.BaseStrategy):
 
-    """ Buy and hold class strategy for backtrader
+    """ RSI class strategy for backtrader"""
 
-    Always buy the asset and never sell.
-    """
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, rsi_period=14, upper=70, lower=30, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.upper = upper
+        self.lower = lower
+        self.rsis = {}
+        for name in self.names:
+            data = self.symbols_data[name]
+            self.rsis[name] = bt.indicators.RSI(data, period=rsi_period)
 
     def is_buy_to_open(self, name):
         """determine whether a position should buy to open or not."""
-        return True
+        rsi = self.rsis[name]
+        return rsi[0] < self.lower
 
     def is_sell_to_close(self, name):
         """determine whether a position should sell to close or not."""
-        return False
+        rsi = self.rsis[name]
+        return rsi[0] > self.upper
 
     def is_sell_to_open(self, name):
         """determine whether a position should sell to open or not."""
