@@ -56,12 +56,14 @@
 - [P0][Done] Refactor, default backtrader to control complexity, including: strategy, indicators, simulator and analyzers
 - [P0][Done] Refactor, default future to control complexity, constant and simulator
 - [P0][Done] Refactor, better datafeed directory
-- [P0] [Serving] datafeed adaptor mysql for continuous contract 
+- [P0][Done] [Serving] datafeed adaptor mysql for continuous contract 
+- [P0][Done] [Serving] continuous contract adjust price
 
 
 ## TODO
 
-- [P0] [Serving] continuous contract adjust capability and alignment.
+- [P0] [Serving] support for trading calender
+- [P0] [Serving] contract alignment.
 - [P0] [Serving] Attention for download the data before close.
   - DCE download failed before close, skip it?
   - check the validation works or not.
