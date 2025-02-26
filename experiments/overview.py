@@ -48,9 +48,12 @@ if __name__ == '__main__':
             if name in SKIP_LISTS:
                 continue
 
-            s = simulator.Simulator()
+            s = simulator.Simulator(varieties=varieties.CN_VARIETIES)
             s.set_default_commission_by_name(name)
-            s.add_strategy(ema.EMA, risk_factor=0.02)
+            s.add_strategy(ema.EMA,
+                           risk_factor=0.02,
+                           varieties=varieties.CN_VARIETIES,
+                           allow_short=True)
 
             data = db.ContinuousContractDB(db_conf=conf.db,
                                            variety=name,

@@ -38,6 +38,42 @@ class ContinuousContractDB(feed.DataBase):
         (types.END_DATE, None),
     )
 
+    @staticmethod
+    def _get_sort_dates(continuous_contracts):
+        """get sort date from the continuous contracts."""
+
+        date_set = set()
+        for continuous_contract in continuous_contracts:
+            if continuous_contract.date not in date_set:
+                date_set.add(continuous_contract.date)
+
+        dates = list(date_set)
+        dates.sort(reverse=True)
+        return dates
+
+    @staticmethod
+    def _get_continuous_contracts_dict(continuous_contracts):
+        """get continuous contracts dict."""
+        d = {}
+        for c in continuous_contracts:
+            d[c.date] = c
+        return d
+
+    def adjust_price(self, continuous_contracts):
+        """adjust price according to the adjust factor."""
+        dates = self._get_sort_dates(continuous_contracts)
+        continuous_contracts_dict = self._get_continuous_contracts_dict(
+            continuous_contracts)
+
+        adjust_factor = 1
+        for date in dates:
+            continuous_contract = continuous_contracts_dict[date]
+            continuous_contract.open *= adjust_factor
+            continuous_contract.high *= adjust_factor
+            continuous_contract.low *= adjust_factor
+            continuous_contract.close *= adjust_factor
+            adjust_factor = adjust_factor * continuous_contract.adjust_factor
+
     def start(self):
         """start the datafeed"""
         super().start()
@@ -52,6 +88,8 @@ class ContinuousContractDB(feed.DataBase):
                                       self.p.country,
                                       start_date=self.p.start_date,
                                       end_date=self.p.end_date)
+
+        self.adjust_price(continuous_contracts)
 
         # pylint: disable=attribute-defined-outside-init
         self.iter = iter(continuous_contracts)

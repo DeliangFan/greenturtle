@@ -18,6 +18,7 @@
 import datetime
 
 from greenturtle.constants import types
+from greenturtle.constants import varieties
 from greenturtle.data.datafeed import db
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
@@ -25,12 +26,12 @@ from greenturtle.util import config
 
 
 if __name__ == '__main__':
-    VARIETY = "CU"
-    s = simulator.Simulator()
+    VARIETY = "IF"
+    s = simulator.Simulator(varieties=varieties.CN_VARIETIES)
     s.set_default_commission_by_name(VARIETY)
 
     # get the data
-    start_date = datetime.datetime(2006, 1, 1)
+    start_date = datetime.datetime(2005, 1, 1)
     end_date = datetime.datetime(2024, 12, 31)
 
     conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
@@ -43,7 +44,9 @@ if __name__ == '__main__':
     s.add_data(data, VARIETY)
 
     # add strategy
-    s.add_strategy(ema.EMAEnhanced, risk_factor=0.02)
+    s.add_strategy(ema.EMAEnhanced,
+                   varieties=varieties.CN_VARIETIES,
+                   risk_factor=0.02)
 
     # do simulate
     s.do_simulate()
