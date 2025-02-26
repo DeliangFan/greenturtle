@@ -16,55 +16,54 @@
 """Experiment to benchmark the trending trading performance on us futures."""
 
 import datetime
-import os
 
-import backtrader as bt
 import pandas as pd
 
 from greenturtle.analyzers import correlation
+from greenturtle.constants import types
 from greenturtle.constants import varieties
-from greenturtle.data.datafeed import csv
+from greenturtle.data.datafeed import db
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
 from greenturtle.util.logging import logging
+from greenturtle.util import config
 
 
 logger = logging.get_logger()
-# pylint: disable=R0801
-DATA_DIR = "../download/align/us"
+
+SKIP_LISTS = ["PS"]
 
 
 if __name__ == '__main__':
 
-    c = correlation.Correlation()
+    conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
+    corr = correlation.Correlation()
     df = pd.DataFrame()
 
-    fromdate = datetime.datetime(2004, 1, 1)
-    todate = x = datetime.datetime(2024, 12, 31)
+    start_date = datetime.datetime(2004, 1, 1)
+    end_date = x = datetime.datetime(2024, 12, 31)
 
-    for group in varieties.US_VARIETIES.values():
+    for group in varieties.CN_VARIETIES.values():
         for name in group:
-            filename = os.path.join(DATA_DIR, f"{name}.csv")
-            if not os.path.exists(filename):
+            if name in SKIP_LISTS:
                 continue
 
-            s = simulator.Simulator(varieties=varieties.US_VARIETIES)
+            s = simulator.Simulator()
             s.set_default_commission_by_name(name)
-            s.add_strategy(ema.EMA)
+            s.add_strategy(ema.EMA, risk_factor=0.02)
 
-            # get the data
-            data = csv.get_feed_from_csv_file(
-                name,
-                filename,
-                timeframe=bt.TimeFrame.Days,
-                fromdate=fromdate,
-                todate=todate)
+            data = db.ContinuousContractDB(db_conf=conf.db,
+                                           variety=name,
+                                           source=types.AKSHARE,
+                                           country=types.CN,
+                                           start_date=start_date,
+                                           end_date=end_date)
             s.add_data(data, name)
 
             # do simulate
             s.do_simulate()
 
-            c.add_return_summary(name, s.summary.return_summary)
+            corr.add_return_summary(name, s.summary.return_summary)
 
             # construct the result and append it to the dataframe
             row = {
@@ -80,15 +79,17 @@ if __name__ == '__main__':
                 "max_draw_down": [
                     s.summary.max_draw_down_summary.max_draw_down],
             }
+
             if s.summary.trade_summary is not None:
                 row["trader_number"] = [
                     s.summary.trade_summary.trader_number]
                 row["win_trader_number"] = [
                     s.summary.trade_summary.win_trader_number]
+
             new_df = pd.DataFrame(row)
             df = pd.concat([df, new_df])
 
     logger.info("\n%s", df.to_string())
 
-    corr = c.compute_correlation()
-    logger.info("\n%s", corr.to_string())
+    result = corr.compute_correlation()
+    logger.info("\n%s", result.to_string())

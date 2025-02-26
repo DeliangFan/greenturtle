@@ -16,38 +16,34 @@
 """Experiment to benchmark trending trading performance on single us future."""
 
 import datetime
-import os
 
-from greenturtle.constants import varieties
-from greenturtle.data.datafeed import csv
+from greenturtle.constants import types
+from greenturtle.data.datafeed import db
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
-
-
-# pylint: disable=R0801
-DATA_DIR = "../download/align/us/"
-NAME = "GC"
+from greenturtle.util import config
 
 
 if __name__ == '__main__':
-
-    s = simulator.Simulator(varieties=varieties.US_VARIETIES)
-    s.set_default_commission_by_name(NAME)
+    VARIETY = "CU"
+    s = simulator.Simulator()
+    s.set_default_commission_by_name(VARIETY)
 
     # get the data
-    fromdate = datetime.datetime(2006, 1, 1)
-    todate = datetime.datetime(2024, 12, 31)
-    filename = os.path.join(DATA_DIR, f"{NAME}.csv")
+    start_date = datetime.datetime(2006, 1, 1)
+    end_date = datetime.datetime(2024, 12, 31)
 
-    data = csv.get_feed_from_csv_file(
-        NAME,
-        filename,
-        fromdate=fromdate,
-        todate=todate)
-    s.add_data(data, NAME)
+    conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
+    data = db.ContinuousContractDB(db_conf=conf.db,
+                                   variety=VARIETY,
+                                   source=types.AKSHARE,
+                                   country=types.CN,
+                                   start_date=start_date,
+                                   end_date=end_date)
+    s.add_data(data, VARIETY)
 
     # add strategy
-    s.add_strategy(ema.EMA)
+    s.add_strategy(ema.EMAEnhanced, risk_factor=0.02)
 
     # do simulate
     s.do_simulate()
