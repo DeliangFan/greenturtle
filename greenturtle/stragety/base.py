@@ -39,7 +39,7 @@ class BaseStrategy(bt.Strategy):
                  risk_factor=0.002,
                  atr_period=100,
                  leverage_limit=0.95,
-                 portfolio_type=None,
+                 portfolio_type=types.PORTFOLIO_TYPE_ATR,
                  varieties=None,
                  group_risk_factors=None):
 
@@ -130,7 +130,7 @@ class BaseStrategy(bt.Strategy):
         """validate all the data in data feed."""
         for name in self.names:
             data = self.getdatabyname(name)
-            self._do_validate_data(data)
+            self._do_validate_one(data)
 
     def _is_valid(self, name):
         """is variety data valid."""
@@ -140,7 +140,7 @@ class BaseStrategy(bt.Strategy):
         return True
 
     @staticmethod
-    def _do_validate_data(data):
+    def _do_validate_one(data):
         """valid the single data."""
         validation.validate_price(data.open[0],
                                   data.high[0],
@@ -153,7 +153,6 @@ class BaseStrategy(bt.Strategy):
         cash = self.broker.get_cash()
 
         if total_value <= 0 and cash <= 0:
-
             logger.error("bankruptcy, stop backtest!!!")
             self.bankruptcy = True
 

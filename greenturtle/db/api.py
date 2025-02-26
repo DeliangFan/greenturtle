@@ -264,6 +264,34 @@ class DBAPI:
             return query.first()
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def continuous_contract_get_by_variety_source_country_start_end_date(
+            self, variety, source, country, start_date=None, end_date=None):
+
+        """
+        get the continuous contract from the database by variety, source,
+        country, start date and end date.
+        """
+        with Session(self.engine) as session:
+            query = session.query(models.ContinuousContract)
+
+            if start_date is not None:
+                query = query.filter(
+                    models.ContinuousContract.date >= start_date)
+            if end_date is not None:
+                query = query.filter(
+                    models.ContinuousContract.date <= end_date)
+
+            query = query.filter(
+                models.ContinuousContract.variety == variety,
+                models.ContinuousContract.source == source,
+                models.ContinuousContract.country == country
+            ).order_by(
+                models.ContinuousContract.date
+            )
+
+            return query.all()
+
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def continuous_contract_get_all_by_name_source_country(self,
                                                            name,
                                                            source,

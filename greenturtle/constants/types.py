@@ -85,6 +85,8 @@ SOURCE = "source"
 COUNTRY = "country"
 EXCHANGE = "exchange"
 GROUP = "group"
+START_DATE = "start_date"
+END_DATE = "end_date"
 
 # csv structure for contract
 CONTRACT_COLUMN = [
