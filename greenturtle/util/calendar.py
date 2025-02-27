@@ -77,6 +77,9 @@ def is_cn_trading_day(date):
 def get_cn_trading_days(start_date, end_date):
     """get the china trading days between start_date and end_date."""
 
+    if start_date > end_date:
+        raise exception.ValidateTradingDayError
+
     validate_cn_date(start_date)
     validate_cn_date(end_date)
 

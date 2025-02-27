@@ -55,12 +55,14 @@ if __name__ == '__main__':
                            varieties=varieties.CN_VARIETIES,
                            allow_short=True)
 
+            # pylint: disable=R0801
             data = db.ContinuousContractDB(db_conf=conf.db,
                                            variety=name,
                                            source=types.AKSHARE,
                                            country=types.CN,
                                            start_date=start_date,
-                                           end_date=end_date)
+                                           end_date=end_date,
+                                           padding=True)
             s.add_data(data, name)
 
             # do simulate

@@ -16,23 +16,22 @@
 """Experiment to benchmark the trending trading performance on us futures."""
 
 import datetime
-import os
 
-import backtrader as bt
-
+from greenturtle.constants import types
 from greenturtle.constants import varieties
-from greenturtle.data.datafeed import csv
+from greenturtle.data.datafeed import db
 from greenturtle.simulator import simulator
 from greenturtle.stragety import ema
+from greenturtle.util import config
 
 
 if __name__ == '__main__':
 
-    DATA_DIR = "../download/align/cn/"
-    RISK_FACTOR = 0.004
+    RISK_FACTOR = 0.002
     group_risk_factors = varieties.DEFAULT_CN_GROUP_RISK_FACTORS
     varieties_map = varieties.CN_VARIETIES
 
+    conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
     s = simulator.Simulator(plot=True, varieties=varieties_map)
 
     s.add_strategy(
@@ -44,24 +43,27 @@ if __name__ == '__main__':
         risk_factor=RISK_FACTOR,
         varieties=varieties_map,
         group_risk_factors=group_risk_factors,
+        allow_short=True,
     )
 
-    fromdate = datetime.datetime(2006, 1, 1)
-    todate = datetime.datetime(2024, 12, 31)
+    start_date = datetime.datetime(2006, 1, 1)
+    end_date = datetime.datetime(2024, 12, 31)
 
     # add all data to simulator
     for group in varieties_map.values():
         for name in group:
-            filename = os.path.join(DATA_DIR, f"{name}.csv")
-            if not os.path.exists(filename):
+
+            if name not in conf.whitelist:
                 continue
 
-            data = csv.get_feed_from_csv_file(
-                name,
-                filename,
-                bt.TimeFrame.Days,
-                fromdate=fromdate,
-                todate=todate)
+            data = db.ContinuousContractDB(db_conf=conf.db,
+                                           variety=name,
+                                           source=types.AKSHARE,
+                                           country=types.CN,
+                                           start_date=start_date,
+                                           end_date=end_date,
+                                           plot=False,
+                                           padding=True)
 
             # add the data to simulator
             s.add_data(data, name)
