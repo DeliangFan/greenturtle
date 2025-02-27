@@ -26,7 +26,10 @@ from greenturtle.util import config
 
 
 if __name__ == '__main__':
+
     VARIETY = "IF"
+    conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
+
     s = simulator.Simulator(varieties=varieties.CN_VARIETIES)
     s.set_default_commission_by_name(VARIETY)
 
@@ -34,13 +37,14 @@ if __name__ == '__main__':
     start_date = datetime.datetime(2005, 1, 1)
     end_date = datetime.datetime(2024, 12, 31)
 
-    conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
+    # pylint: disable=R0801
     data = db.ContinuousContractDB(db_conf=conf.db,
                                    variety=VARIETY,
                                    source=types.AKSHARE,
                                    country=types.CN,
                                    start_date=start_date,
-                                   end_date=end_date)
+                                   end_date=end_date,
+                                   padding=True)
     s.add_data(data, VARIETY)
 
     # add strategy
