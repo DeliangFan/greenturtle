@@ -127,3 +127,8 @@ class ContinuousContractOrderAbnormalError(GreenTurtleBaseException):
 class ContinuousContractNotFound(GreenTurtleBaseException):
     """Continuous contract not found error."""
     msg_fmt = "Continuous contract not found error."
+
+
+class ValidateTradingDayError(GreenTurtleBaseException):
+    """Validate trading day error"""
+    msg_fmt = "Validate trading day error."
