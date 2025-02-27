@@ -480,20 +480,10 @@ CN_METALS = {
         types.AUTO_MARGIN: 0.1,
         types.DESCRIPTION: "锡",
     },
-    "SI": {
-        types.MULTIPLIER: 5,
-        types.AUTO_MARGIN: 0.5,
-        types.DESCRIPTION: "工业硅",
-    },
     "AO": {
         types.MULTIPLIER: 20,
         types.AUTO_MARGIN: 2,
         types.DESCRIPTION: "氧化铝",
-    },
-    "LC": {
-        types.MULTIPLIER: 1,
-        types.AUTO_MARGIN: 0.1,
-        types.DESCRIPTION: "碳酸锂",
     },
     "PS": {
         types.MULTIPLIER: 3,
@@ -706,6 +696,8 @@ CN_INDICES = {
 # For china future, these data are from
 # https://www.cfachina.org/servicesupport/sspz/
 # Due to the data quality and low volume, these varieties will be skipped.
+#
+# 成交量低
 # - WR(线材)
 # - BC(国际铜)
 # - LG(原木)
@@ -722,7 +714,13 @@ CN_INDICES = {
 # - JR(粳稻)
 # - SC(国际原油)
 # - CY(棉纱)
+#
+# 数据缺失
 # - SF(硅铁)
+#
+# 数据交易日不完整
+# - LC(碳酸锂)
+# - SI(工业硅)
 CN_VARIETIES = {
     "agriculture": CN_AGRICULTURE,
     "metal": CN_METALS,

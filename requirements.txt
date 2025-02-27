@@ -4,6 +4,7 @@ SQLAlchemy==2.0.38
 akshare==1.15.64
 backtrader==1.9.78.123
 baostock==0.8.9
+chinese_calendar==1.10.0
 matplotlib==3.9.4
 munch==4.0.0
 numpy==1.26.4
