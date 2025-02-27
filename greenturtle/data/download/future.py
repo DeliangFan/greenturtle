@@ -71,9 +71,9 @@ class CNFutureFromAKShare(CNFuture):
         please refer the following link for more details
         https://akshare.akfamily.xyz/data/futures/futures.html#id53
         """
-        retry = 5
+        retry = 0
 
-        while retry > 0:
+        while retry <= 5:
             try:
                 df = ak.get_futures_daily(
                     start_date=start_date,
@@ -83,13 +83,16 @@ class CNFutureFromAKShare(CNFuture):
                 return df
             # pylint: disable=broad-except
             except Exception:
-                retry -= 1
-                msg = f"failed download {exchange} {start_date}-{end_date}"
+                retry += 1
+                msg = (f"failed download {exchange} {start_date}" +
+                       f"-{end_date}, retry {retry} times")
                 logger.warning(msg)
 
             # sleep a few seconds to avoid being blocked by server side.
             time.sleep(10)
 
+        msg = f"failed download {exchange} {start_date}-{end_date}"
+        logger.error(msg)
         # raise exception after 5 times retry
         raise exception.DownloadDataError
 

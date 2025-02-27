@@ -58,15 +58,13 @@
 - [P0][Done] Refactor, better datafeed directory
 - [P0][Done] [Serving] datafeed adaptor mysql for continuous contract 
 - [P0][Done] [Serving] continuous contract adjust price
-
+- [P0][Done] [Data] DCE download failed before close, just raise exception and block the following progress; 
+- [P0][Done] [Data] Check the validation works or not, and it work for the delta contracts
 
 ## TODO
 
 - [P0] [Serving] support for trading calender
 - [P0] [Serving] contract alignment.
-- [P0] [Serving] Attention for download the data before close.
-  - DCE download failed before close, skip it?
-  - check the validation works or not.
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 
