@@ -416,6 +416,9 @@ class BaseStrategy(bt.Strategy):
         for k, v in portfolios.items():
             if self._is_valid(k):
                 filtered[k] = v
+            else:
+                logger.warning("%s skip trading hold %s since invalid data",
+                               self.datas[0].datetime.date(0), k)
         return filtered
 
     def execute(self, current_portfolios, desired_portfolios):
