@@ -62,9 +62,13 @@
 - [P0][Done] [Data] Check the validation works or not, and it work for the delta contracts
 - [P0][Done] [Data] support for trading calender
 - [P0][Done] [Serving] contract alignment.
+- [P0][Done] [Data] Add logger when padding
+- [P0][Done] [Data] Add logger when skip invalid data
 
 ## TODO
 
+- [P0] [Data] Validate the diff price between the days
+- [P0] [Backtesting] figure out the bump and spider total values
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 

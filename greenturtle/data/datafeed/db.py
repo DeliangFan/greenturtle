@@ -132,10 +132,15 @@ class ContinuousContractDB(feed.DataBase):
                                                     datetime.min.time())
                     padding.adjust_factor = 1
                     padding.valid = 0
+
                     # add padding to continuous_contracts and
                     # continuous_contracts_dict
                     continuous_contracts_dict[trading_date] = padding
                     continuous_contracts.append(padding)
+                    logger.warning("padding %s %s from %s",
+                                   self.p.variety,
+                                   padding.date,
+                                   prev.date)
                     # set prev
                     prev = padding
             else:
@@ -214,7 +219,6 @@ class ContinuousContractDB(feed.DataBase):
         self.l.volume[0] = continuous_contract.volume
         self.l.valid[0] = 1
         if hasattr(continuous_contract, "valid"):
-            if continuous_contract.valid:
-                self.l.valid[0] = continuous_contract.valid
+            self.l.valid[0] = continuous_contract.valid
 
         return True
