@@ -15,6 +15,7 @@
 
 """validation for data"""
 
+from greenturtle.constants import varieties
 from greenturtle import exception
 
 
@@ -66,3 +67,11 @@ def validate_positive_price(price):
 
     if price <= 0:
         raise exception.DataPriceNonPositiveError
+
+
+def validate_price_daily_limit(prev_price,
+                               price,
+                               daily_limit=varieties.DEFAULT_CN_DAILY_LIMIT):
+    """validate data price daily limit"""
+    if abs((price - prev_price) * 1.0 / prev_price) > daily_limit:
+        raise exception.DataPriceExceedDailyLimitError

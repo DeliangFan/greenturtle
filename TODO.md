@@ -64,16 +64,18 @@
 - [P0][Done] [Serving] contract alignment.
 - [P0][Done] [Data] Add logger when padding
 - [P0][Done] [Data] Add logger when skip invalid data
+- [P0][Done] [Data] Validate the diff price between the days
+
 
 ## TODO
 
-- [P0] [Data] Validate the diff price between the days
 - [P0] [Backtesting] figure out the bump and spider total values
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 
 - [P0] [Serving] Abstract for broker
 - [P0] [Serving] Refactor according to training or online serving
+- [P0] [Serving] Better validation for daily price according to different varieties
 - [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
