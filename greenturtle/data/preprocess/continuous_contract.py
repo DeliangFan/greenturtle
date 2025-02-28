@@ -18,6 +18,7 @@
 import datetime
 
 from greenturtle.constants import types
+from greenturtle.constants import varieties
 from greenturtle.data import transform
 from greenturtle.data import validation
 from greenturtle import exception
@@ -243,6 +244,9 @@ class ContinuousContract:
         # validate and fix the price field
         self._validate_and_fix_price(dates, continuous_contracts, online)
 
+        # validate price between days
+        self._validate_prices_between_days(dates, continuous_contracts)
+
         # pay attention to the low volume and open interest
         self._validate_volume_and_open_interest(dates, continuous_contracts)
 
@@ -330,6 +334,18 @@ class ContinuousContract:
                     raise exc
 
             prev = contract
+
+    @staticmethod
+    def _validate_prices_between_days(dates, continuous_contracts):
+        """validate prices between days."""
+        pre = continuous_contracts[dates[0]]
+        for date in dates[1:]:
+            cur = continuous_contracts[date]
+            validation.validate_price_daily_limit(pre.close, cur.close)
+            validation.validate_price_daily_limit(
+                cur.high,
+                cur.low,
+                2 * varieties.DEFAULT_CN_DAILY_LIMIT)
 
     def _validate_volume_and_open_interest(self, dates, continuous_contracts):
         """

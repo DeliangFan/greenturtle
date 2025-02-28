@@ -106,3 +106,13 @@ class TestValidation(unittest.TestCase):
             exception.DataPriceLowAbnormalError,
             validation.validate_price, 100, 102, 99, 98
         )
+
+    def test_validate_price_daily_limit(self):
+        """"test validate_price_daily_limit."""
+        self.assertRaises(
+            exception.DataPriceExceedDailyLimitError,
+            validation.validate_price_daily_limit,
+            10, 5
+        )
+
+        validation.validate_price_daily_limit(10, 10.01)

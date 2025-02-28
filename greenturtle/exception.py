@@ -89,6 +89,11 @@ class DataPriceNonPositiveError(GreenTurtleBaseException):
     msg_fmt = "Data price non positive error."
 
 
+class DataPriceExceedDailyLimitError(GreenTurtleBaseException):
+    """Data price exceed daily limit error."""
+    msg_fmt = "Data price exceed daily limit error."
+
+
 class DataPriceInvalidTypeError(GreenTurtleBaseException):
     """Data price invalid type error."""
     msg_fmt = "Data price invalid type error."

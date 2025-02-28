@@ -25,6 +25,8 @@ from backtrader import feed
 from backtrader import date2num
 
 from greenturtle.constants import types
+from greenturtle.constants import varieties
+from greenturtle.data import validation
 from greenturtle.db import api
 from greenturtle import exception
 from greenturtle.util import calendar
@@ -92,6 +94,8 @@ class ContinuousContractDB(feed.DataBase):
             continuous_contract.high *= adjust_factor
             continuous_contract.low *= adjust_factor
             continuous_contract.close *= adjust_factor
+            continuous_contract.pre_settle *= adjust_factor
+            continuous_contract.settle *= adjust_factor
             adjust_factor = adjust_factor * continuous_contract.adjust_factor
 
     @staticmethod
@@ -169,6 +173,23 @@ class ContinuousContractDB(feed.DataBase):
             else:
                 prev = continuous_contracts_dict[trading_date]
 
+    @staticmethod
+    def validate(continuous_contracts):
+        """validate before feed"""
+        pre = None
+        for cur in continuous_contracts:
+            if pre is None:
+                pre = cur
+                continue
+            # pylint: disable=R0801
+            validation.validate_price_daily_limit(pre.close, cur.close)
+            validation.validate_price_daily_limit(
+                cur.high,
+                cur.low,
+                2 * varieties.DEFAULT_CN_DAILY_LIMIT)
+
+            pre = cur
+
     def start(self):
         """start the datafeed"""
         super().start()
@@ -199,6 +220,9 @@ class ContinuousContractDB(feed.DataBase):
 
         # sort the continuous contracts
         continuous_contracts.sort(key=lambda x: x.date)
+
+        # validation before feed
+        self.validate(continuous_contracts)
 
         # pylint: disable=attribute-defined-outside-init
         self.iter = iter(continuous_contracts)
