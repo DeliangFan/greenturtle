@@ -728,11 +728,30 @@ CN_VARIETIES = {
     "indices": CN_INDICES,
 }
 
+# Pay more attention to the risk management since many spider comes
+# from some high volatility varieties. At first, I think it's the
+# bugs about logic or abnormal data. And then I realise that everything
+# looks good, and the prices are as they are.
+#
+# Such as.
+# 2022-03-09 NI excite daily limit for more than 3 days
+# - NI: increase 50% with in 8 days, decrease 30% with in 10 days, and bring
+#      15% volatility in the total assets
+#
+# 2021-10-20, High volatility at metal group ZN, AL, UR, SA, PG, L, J
+# - ZN: increase 30% within 10 days and decrease 25% within 10 days.
+# - AL: decrease 25% within 10 days
+# - UR: decrease 30% within 10 days
+# - SA: decrease 30% within 10 days
+# - J: decrease 30% within 10 days
+# heavily hold without lost stop will result in game over.
+#
+#
 DEFAULT_CN_GROUP_RISK_FACTORS = {
-    "agriculture": 0.05,
-    "metal": 0.05,
-    "energy": 0.05,
-    "indices": 0.04,
+    "agriculture": 0.015,
+    "metal": 0.02,
+    "energy": 0.02,
+    "indices": 0.015,
 }
 
 # TODO(fixme)

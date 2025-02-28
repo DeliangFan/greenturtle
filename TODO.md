@@ -65,28 +65,25 @@
 - [P0][Done] [Data] Add logger when padding
 - [P0][Done] [Data] Add logger when skip invalid data
 - [P0][Done] [Data] Validate the diff price between the days
-
+- [P0][Done] [Backtesting] figure out the bump and spider total values
 
 ## TODO
 
-- [P0] [Backtesting] figure out the bump and spider total values
 - [P0] [Serving] Adapter to the ctp API
 - [P0] [Serving] Trading strategy for backtest and server 
 - [P0] [Serving] Portfolio management strategy for backtest and server 
 - [P0] [Serving] Abstract for broker
-- [P0] [Serving] Refactor according to training or online serving
+- [P0] [Backtesting] Analysis the profit and losing
 - [P0] [Serving] Better validation for daily price according to different varieties
 - [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
 - [P0] [Serving] Metrics and alarm for service availability
 - [P0] Refactor the e2etest according to local data
-- [P0] Refine the commission
-- [P0] Analysis the profit and losing
-- [P0] Evaluate the CTA factors
-- [P1] Refactor, abstract the balance for stock and bond with buy one.
+- [P1] Refine the commission according to the varieties
+- [P1] Evaluate the CTA factors
 - [P1] Add more unittest(data, strategy, simulator)
-- [P1] [Serving] Add support for multi account, support for both CN and US.
+- [P2] [Serving] Add support for multi account, support for both CN and US.
 - [P2] Add pyfolio
 
 
