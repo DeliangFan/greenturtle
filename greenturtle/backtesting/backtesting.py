@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""Experiment to benchmark the MACD performance on cryptocurrencies."""
+"""Benchmark performance according to historical data."""
 
 import math
 
@@ -32,7 +32,7 @@ logger = logging.get_logger()
 
 
 # pylint: disable=too-many-instance-attributes
-class Simulator:
+class BackTesting:
 
     """Basic analysis class for backtrader."""
 
@@ -98,8 +98,8 @@ class Simulator:
         """add data to cerebro."""
         self.cerebro.adddata(data, name=name)
 
-    def do_simulate(self):
-        """perform simulation including run and analysis."""
+    def do_backtesting(self):
+        """perform backtesting including run and analysis."""
 
         result = self.run()
 

@@ -20,7 +20,7 @@ import unittest
 
 from greenturtle.constants import varieties
 from greenturtle.data.datafeed import yf
-from greenturtle.simulator import simulator
+from greenturtle.backtesting import backtesting
 from greenturtle.stragety import buyhold
 from greenturtle.stragety import channel
 from greenturtle.stragety import ema
@@ -42,8 +42,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.yahoo_code = "GC=F"
 
     def setUp(self):
-        self.s = simulator.Simulator(
-            varieties=varieties.US_VARIETIES)
+        self.s = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
 
     def test_future_with_buy_and_hold(self):
         """test buy and hold future."""
@@ -56,7 +55,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.s.add_data(data, self.name)
         self.s.add_strategy(buyhold.BuyHoldStrategy, leverage_limit=0.2)
         self.s.set_default_commission_by_name(self.name)
-        self.s.do_simulate()
+        self.s.do_backtesting()
 
         return_summary = self.s.summary.return_summary
         self.assertEqual(7, int(return_summary.total_return))
@@ -83,7 +82,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.s.add_data(data, self.name)
         self.s.add_strategy(ema.EMA, leverage_limit=0.2, atr_period=99)
         self.s.set_default_commission_by_name(self.name)
-        self.s.do_simulate()
+        self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
@@ -119,7 +118,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.s.add_data(data, self.name)
         self.s.add_strategy(mim.MIMStrategy, leverage_limit=0.2)
         self.s.set_default_commission_by_name(self.name)
-        self.s.do_simulate()
+        self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
@@ -151,7 +150,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.s.add_data(data, self.name)
         self.s.add_strategy(channel.DonchianChannel, leverage_limit=0.2)
         self.s.set_default_commission_by_name(self.name)
-        self.s.do_simulate()
+        self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
@@ -169,7 +168,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.s.add_data(data, self.name)
         self.s.add_strategy(macd.MACDWithATRStrategy, leverage_limit=0.2)
         self.s.set_default_commission_by_name(self.name)
-        self.s.do_simulate()
+        self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
@@ -187,7 +186,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
         self.s.add_data(data, self.name)
         self.s.add_strategy(rsi.RSIStrategy, leverage_limit=0.2)
         self.s.set_default_commission_by_name(self.name)
-        self.s.do_simulate()
+        self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary

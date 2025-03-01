@@ -66,6 +66,7 @@
 - [P0][Done] [Data] Add logger when skip invalid data
 - [P0][Done] [Data] Validate the diff price between the days
 - [P0][Done] [Backtesting] figure out the bump and spider total values
+- [P0][Done] [Refactor] Rename simulator to backtesting
 
 ## TODO
 

@@ -20,7 +20,7 @@ import datetime
 from greenturtle.constants import types
 from greenturtle.constants import varieties
 from greenturtle.data.datafeed import db
-from greenturtle.simulator import simulator
+from greenturtle.backtesting import backtesting
 from greenturtle.stragety import ema
 from greenturtle.util import config
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     VARIETY = "IF"
     conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
 
-    s = simulator.Simulator(varieties=varieties.CN_VARIETIES)
+    s = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
     s.set_default_commission_by_name(VARIETY)
 
     # get the data
@@ -52,5 +52,5 @@ if __name__ == '__main__':
                    varieties=varieties.CN_VARIETIES,
                    risk_factor=0.02)
 
-    # do simulate
-    s.do_simulate()
+    # do backtesting
+    s.do_backtesting()
