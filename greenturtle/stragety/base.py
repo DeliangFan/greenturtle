@@ -16,6 +16,7 @@
 """ Base strategy class for backtrader which implements some basic interface"""
 
 import abc
+from datetime import date as datetime_date
 
 import backtrader as bt
 
@@ -41,7 +42,9 @@ class BaseStrategy(bt.Strategy):
                  leverage_limit=0.95,
                  portfolio_type=types.PORTFOLIO_TYPE_ATR,
                  varieties=None,
-                 group_risk_factors=None):
+                 group_risk_factors=None,
+                 inference=False,
+                 trading_date=datetime_date.today()):
 
         super().__init__()
         self.allow_short = allow_short
@@ -50,6 +53,8 @@ class BaseStrategy(bt.Strategy):
         self.portfolio_type = portfolio_type
         self.varieties = varieties
         self.group_risk_factors = group_risk_factors
+        self.inference = inference
+        self.trading_date = trading_date
         self.order = None
         self.bankruptcy = False
         self._init_others(atr_period)
@@ -87,7 +92,16 @@ class BaseStrategy(bt.Strategy):
               |                ^   ^                  |
               +--sell_to_close-+   +-- buy_to_close ---
         """
+
         self._validate_all_data()
+
+        # In the inference model, only perform a trade with the same date.
+        # TODO(wsfdl), more strict validation for online trading data.
+        if self.inference:
+            data_date = self.datas[0].datetime.date(0)
+            if self.trading_date != data_date:
+                logger.info("skip trading %s in inference model", data_date)
+                return
 
         if self.order or self.bankruptcy:
             return

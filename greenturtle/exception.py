@@ -137,3 +137,13 @@ class ContinuousContractNotFound(GreenTurtleBaseException):
 class ValidateTradingDayError(GreenTurtleBaseException):
     """Validate trading day error"""
     msg_fmt = "Validate trading day error."
+
+
+class ValidateRiskFactorError(GreenTurtleBaseException):
+    """Validate risk factor error"""
+    msg_fmt = "Validate risk factor error."
+
+
+class ValidateGroupRiskFactorError(GreenTurtleBaseException):
+    """Validate group risk factor error"""
+    msg_fmt = "Validate group risk factor error."
