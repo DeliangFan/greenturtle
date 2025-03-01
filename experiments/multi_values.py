@@ -20,7 +20,7 @@ import datetime
 from greenturtle.constants import types
 from greenturtle.constants import varieties
 from greenturtle.data.datafeed import db
-from greenturtle.simulator import simulator
+from greenturtle.backtesting import backtesting
 from greenturtle.stragety import ema
 from greenturtle.util import config
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     varieties_map = varieties.CN_VARIETIES
 
     conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
-    s = simulator.Simulator(plot=True, varieties=varieties_map)
+    s = backtesting.BackTesting(plot=True, varieties=varieties_map)
 
     s.add_strategy(
         ema.EMAEnhanced,
@@ -71,5 +71,5 @@ if __name__ == '__main__':
             # set the commission according to name
             s.set_default_commission_by_name(name)
 
-    # do simulate
-    s.do_simulate()
+    # do backtesting
+    s.do_backtesting()

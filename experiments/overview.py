@@ -23,7 +23,7 @@ from greenturtle.analyzers import correlation
 from greenturtle.constants import types
 from greenturtle.constants import varieties
 from greenturtle.data.datafeed import db
-from greenturtle.simulator import simulator
+from greenturtle.backtesting import backtesting
 from greenturtle.stragety import ema
 from greenturtle.util.logging import logging
 from greenturtle.util import config
@@ -48,7 +48,7 @@ if __name__ == '__main__':
             if name in SKIP_LISTS:
                 continue
 
-            s = simulator.Simulator(varieties=varieties.CN_VARIETIES)
+            s = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
             s.set_default_commission_by_name(name)
             s.add_strategy(ema.EMA,
                            risk_factor=0.02,
@@ -65,8 +65,8 @@ if __name__ == '__main__':
                                            padding=True)
             s.add_data(data, name)
 
-            # do simulate
-            s.do_simulate()
+            # do backtesting
+            s.do_backtesting()
 
             corr.add_return_summary(name, s.summary.return_summary)
 
