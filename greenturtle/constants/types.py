@@ -88,6 +88,9 @@ GROUP = "group"
 START_DATE = "start_date"
 END_DATE = "end_date"
 
+# Inference constants
+TRADING_DATE = "trading_date"
+
 # csv structure for contract
 CONTRACT_COLUMN = [
     CONTRACT,
