@@ -15,18 +15,22 @@
 
 """online trading server"""
 
+from datetime import date as datetime_date
 from datetime import datetime
 import time
 
 import pandas as pd
+import schedule
 
 from greenturtle.constants import types
 from greenturtle.constants import varieties
-from greenturtle.db import api as dbapi
+from greenturtle.db import api
 from greenturtle.data.download import future
 from greenturtle.data.preprocess import continuous_contract
 from greenturtle.data import transform
 from greenturtle import exception
+from greenturtle.inference import inference
+from greenturtle.util import calendar
 from greenturtle.util.logging import logging
 from greenturtle.util import util
 
@@ -35,19 +39,76 @@ logger = logging.get_logger()
 
 
 class Server:
-    """online trading server"""
+    """
+    Online trading server
+
+    Initiate Step
+    - start synchronize the delta contract
+    - start synchronize the delta continuous contract
+    - initiate the inference, show currently hold position and orders
+
+    Enter to a cronjob runs at every 8PM for a trading day
+    - synchronize the delta contract
+    - synchronize the delta continuous contract
+    - initiate the inference and computing the desired holds
+    - execute the orders
+    - send the trading status including positions, orders.
+    """
+
     def __init__(self, conf):
         self.conf = conf
-        self.dbapi = dbapi.DBAPI(self.conf.db)
+        self.dbapi = api.DBAPI(self.conf.db)
+        self.delta_data_syncer = DeltaDataSyncer(self.conf, self.dbapi)
 
-    def start(self):
-        """start server"""
-        self.synchronize_delta_contracts()
-        self.synchronize_delta_continuous_contracts()
+    def initialize(self):
+        """initialize the server"""
+        logger.info("Initializing with syncing delta data")
+        self.delta_data_syncer.synchronize_delta_contracts()
+        self.delta_data_syncer.synchronize_delta_continuous_contracts()
+        infer = inference.Inference()
+        infer.show_position()
+        logger.info("Initializing syncing delta data success")
 
+    def trading(self):
+        """do trading"""
+
+        today = datetime_date.today()
+        if not calendar.is_cn_trading_day(today):
+            logger.info("skip trading since %s is not a trading day", today)
+            return
+
+        logger.info("Trading, prepare syncing the delta data")
+        self.delta_data_syncer.synchronize_delta_contracts()
+        self.delta_data_syncer.synchronize_delta_continuous_contracts()
+        logger.info("Trading, syncing the delta data success")
+
+        infer = inference.Inference()
+        infer.run()
+
+    def run(self):
+        """run server"""
+        logger.info("Server is start running.")
+
+        self.initialize()
+
+        # Every day at 12am or 00:00 time bedtime() is called.
+        schedule.every().day.at("16:46").do(self.trading)
+        # Loop so that the scheduling task keeps on running all time.
         while True:
-            print("I am serving, heartbeat!")
+            # Checks whether a scheduled task is pending to run or not
+            schedule.run_pending()
+            logger.info("Greenturtle is swimming, heartbeat...")
             time.sleep(60)
+
+
+class DeltaDataSyncer:
+    """
+    synchronize delta data including contracts and continuous contracts
+    """
+
+    def __init__(self, conf, dbapi):
+        self.conf = conf
+        self.dbapi = dbapi
 
     def synchronize_delta_contracts(self):
         """synchronize delta data."""
@@ -98,7 +159,7 @@ class Server:
         # exceptions will be raised.
         for exchange in exchanges:
             # load data by exchange
-            loader = future.DeltaCNFutureFromAKShare([exchange], 1)
+            loader = future.DeltaCNFutureFromAKShare([exchange], 7)
             df_map[exchange] = loader.download()
 
         logger.info("get contracts success")
@@ -263,12 +324,3 @@ class Server:
                 c = continuous_contract.DeltaContinuousContract(
                     variety, self.conf.source, self.conf.country, self.dbapi)
                 c.generate()
-
-    def initialize_broker(self):
-        """initialize broker"""
-
-    def initialize_strategy(self):
-        """initialize strategy"""
-
-    def initialize_datafeed(self):
-        """initialize datafeed"""

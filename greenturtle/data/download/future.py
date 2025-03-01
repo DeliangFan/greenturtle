@@ -288,17 +288,18 @@ class DeltaCNFutureSymbolsFromAKShare:
     @staticmethod
     def do_getter(getter, exchange):
         """get the symbol without date parameter."""
-        retry = 5
+        retry = 1
 
-        while retry > 0:
+        while retry < 5:
             try:
                 df = getter()
                 return df
             # pylint: disable=broad-except
             except Exception:
-                retry -= 1
-                logger.warning("failed download %s symbol details, retry",
-                               exchange)
+                logger.warning(
+                    "failed download %s symbol details, retry %d times",
+                    exchange, retry)
+                retry += 1
             # sleep a few seconds to avoid being blocked by server side.
             time.sleep(5)
 
@@ -309,18 +310,20 @@ class DeltaCNFutureSymbolsFromAKShare:
         """get the symbol with date parameter."""
         # set a larger retry time due to the long holiday like
         # spring festival and cn national day.
-        retry = 15
+        retry = 1
         t = datetime.datetime.now()
-        while retry > 0:
+        while retry < 15:
             try:
                 date = f"{t.year}{t.month:02d}{t.day:02d}"
                 df = getter(date=date)
                 return df
             # pylint: disable=broad-except
             except Exception:
-                retry -= 1
-                logger.warning("failed download %s symbol, retry", exchange)
+                logger.warning(
+                    "failed download %s symbol details, retry %d times",
+                    exchange, retry)
                 t = t + datetime.timedelta(days=-1)
+                retry += 1
             # sleep a few seconds to avoid being blocked by server side.
             time.sleep(5)
 

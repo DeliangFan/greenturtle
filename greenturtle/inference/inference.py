@@ -15,6 +15,8 @@
 
 """Inference for online trading."""
 
+from datetime import datetime
+
 import backtrader as bt
 
 from greenturtle.constants import types
@@ -29,7 +31,7 @@ class Inference:
 
     """Inference for online trading based on backtrader."""
 
-    def __init__(self, trading_date, varieties=None):
+    def __init__(self, trading_date=datetime.today(), varieties=None):
         self.varieties = varieties
         self.trading_date = trading_date
         self.cerebro = bt.Cerebro()
@@ -44,7 +46,8 @@ class Inference:
         self.cerebro.adddata(data, name=name)
 
     def run(self):
-        """run the cerebro to perform backtesting."""
+        """
+        run the cerebro to perform backtesting.
 
         # Print out the starting conditions
         value = self.cerebro.broker.getvalue()
@@ -56,3 +59,8 @@ class Inference:
         # Print out the final result
         value = self.cerebro.broker.getvalue()
         logger.info("final Portfolio Value: %.2f", value)
+        """
+        logger.info("run today's trading")
+
+    def show_position(self):
+        """show position."""

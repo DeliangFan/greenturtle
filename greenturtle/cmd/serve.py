@@ -41,4 +41,4 @@ if __name__ == "__main__":
 
     # serving
     s = server.Server(conf)
-    s.start()
+    s.run()
