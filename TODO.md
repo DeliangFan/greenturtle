@@ -67,12 +67,12 @@
 - [P0][Done] [Data] Validate the diff price between the days
 - [P0][Done] [Backtesting] figure out the bump and spider total values
 - [P0][Done] [Refactor] Rename simulator to backtesting
+- [P0][Done] [Serving] Trading strategy for backtest and server
+- [P0][Done] [Serving] Portfolio management strategy for backtest and server
 
 ## TODO
 
 - [P0] [Serving] Adapter to the ctp API
-- [P0] [Serving] Trading strategy for backtest and server 
-- [P0] [Serving] Portfolio management strategy for backtest and server 
 - [P0] [Serving] Abstract for broker
 - [P0] [Backtesting] Analysis the profit and losing
 - [P0] [Serving] Better validation for daily price according to different varieties

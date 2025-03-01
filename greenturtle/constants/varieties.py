@@ -745,8 +745,6 @@ CN_VARIETIES = {
 # - SA: decrease 30% within 10 days
 # - J: decrease 30% within 10 days
 # heavily hold without lost stop will result in game over.
-#
-#
 DEFAULT_CN_GROUP_RISK_FACTORS = {
     "agriculture": 0.015,
     "metal": 0.02,

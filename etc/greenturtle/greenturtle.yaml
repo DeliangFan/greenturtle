@@ -3,9 +3,77 @@ source: akshare
 db:
   database: greenturtle
   username: greenturtle
-  password: 123456
+  password: passport
   host: localhost
   port: 3306
+risk_factor: 0.002
+group_risk_factors:
+  agriculture: 0.015
+  metal: 0.02
+  energy: 0.02
+  indices: 0.015
+allow_short: true
 whitelist:
+  - A
+  - AG
+  - AL
+  - AO
+  - AP
+  - AU
+  - BR
+  - BU
   - C
+  - CF
+  - CJ
+  - CS
+  - CU
+  - EB
+  - EC
+  - EG
+  - FG
+  - FU
+  - HC
+  - I
+  - IC
   - IF
+  - IH
+  - IM
+  - J
+  - JD
+  - JM
+  - L
+  - LH
+  - LU
+  - M
+  - MA
+  - NI
+  - NR
+  - OI
+  - P
+  - PB
+  - PF
+  - PG
+  - PK
+  - PP
+  - PS
+  - PX
+  - RB
+  - RM
+  - RR
+  - RU
+  - SA
+  - SH
+  - SM
+  - SN
+  - SP
+  - SR
+  - SS
+  - T
+  - TA
+  - TF
+  - TL
+  - TS
+  - UR
+  - V
+  - Y
+  - ZN
