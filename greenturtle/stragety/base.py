@@ -93,20 +93,31 @@ class BaseStrategy(bt.Strategy):
               +--sell_to_close-+   +-- buy_to_close ---
         """
 
+        data_date = self.datas[0].datetime.date(0)
+
         self._validate_all_data()
 
         # In the inference model, only perform a trade with the same date.
         # TODO(wsfdl), more strict validation for online trading data.
         if self.inference:
-            data_date = self.datas[0].datetime.date(0)
             if self.trading_date != data_date:
-                logger.info("skip trading %s in inference model", data_date)
+                logger.info("%s skip trading since not match inference date",
+                            data_date)
                 return
 
-        if self.order or self.bankruptcy:
+        if self.order:
+            return
+
+        if self.inference and self.broker.get_orders_open():
+            logger("%s skip trading with open order", data_date)
+            return
+
+        if self.bankruptcy:
+            logger.error("%s skip trading due to bankruptcy", data_date)
             return
 
         if self._check_bankruptcy():
+            logger.error("%s skip trading due to bankruptcy", data_date)
             return
 
         # 1. get the long and short hold position

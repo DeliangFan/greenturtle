@@ -147,3 +147,8 @@ class ValidateRiskFactorError(GreenTurtleBaseException):
 class ValidateGroupRiskFactorError(GreenTurtleBaseException):
     """Validate group risk factor error"""
     msg_fmt = "Validate group risk factor error."
+
+
+class BrokerNotSupportedError(GreenTurtleBaseException):
+    """broker not supported error"""
+    msg_fmt = "broker not supported error."
