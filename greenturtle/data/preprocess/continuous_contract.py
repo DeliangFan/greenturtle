@@ -370,6 +370,7 @@ class ContinuousContract:
 
     def write_to_db(self, continuous_contracts):
         """write to database."""
+        count = 0
         for c in continuous_contracts.values():
             # only insert if not exist
             found = self.dbapi.continuous_contract_get_by_constraint(
@@ -378,11 +379,13 @@ class ContinuousContract:
                 logger.info("%s %s already exist, skip", c.variety, c.date)
                 continue
 
+            count += 1
             self.dbapi.continuous_contract_create(
                 c.date, c.name, c.variety, c.source, c.country,
                 c.exchange, c.group, c.to_dict())
-
             logger.info("insert %s %s to db success", c.variety, c.date)
+
+        logger.info("insert %d row for %s to db success", count, self.variety)
 
 
 class DeltaContinuousContract(ContinuousContract):
