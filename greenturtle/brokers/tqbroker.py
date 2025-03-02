@@ -21,13 +21,20 @@ import time
 import backtrader as bt
 import tqsdk
 
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
+
 
 class TQBroker(bt.BrokerBase):
     """tq broker class"""
 
     def __init__(self, conf=None):
         super().__init__()
+
         self.validate_config(conf)
+
         self.conf = conf
         self.api = self.get_api()
 
@@ -44,36 +51,42 @@ class TQBroker(bt.BrokerBase):
     @staticmethod
     def validate_config(conf):
         """validate config"""
+
+        logger.info("start validating tq config")
+
         if not hasattr(conf, "tq_broker"):
-            raise ValueError("TQBroker is not configured")
+            raise ValueError("tq_broker is not configured")
 
         tq_broker = conf.tq_broker
         if not hasattr(tq_broker, "tq_username"):
-            raise ValueError("TQBroker's username is not configured")
+            raise ValueError("tq_broker's username is not configured")
         if not hasattr(tq_broker, "tq_password"):
-            raise ValueError("TQBroker's password is not configured")
+            raise ValueError("tq_broker's password is not configured")
 
         simulate = True
         if hasattr(tq_broker, "simulate"):
             simulate = tq_broker.simulate
-        if isinstance(simulate, bool):
-            raise ValueError("Simulator must bee boolean")
-
-        if simulate:
-            return
+        if not isinstance(simulate, bool):
+            raise ValueError("simulate must be boolean")
 
         # for real trading, validate the account and password
-        if not hasattr(tq_broker, "broker_id"):
-            raise ValueError("TQBroker's future broker id is not configured")
+        if not simulate:
+            if not hasattr(tq_broker, "broker_id"):
+                raise ValueError("tq broker's broker id not configured")
 
-        if not hasattr(tq_broker, "account_id"):
-            raise ValueError("TQBroker's future account id is not configured")
+            if not hasattr(tq_broker, "account_id"):
+                raise ValueError("tq broker's account id not configured")
 
-        if not hasattr(tq_broker, "password"):
-            raise ValueError("TQBroker's future password is not configured")
+            if not hasattr(tq_broker, "password"):
+                raise ValueError("tq broker's password not configured")
+
+        logger.info("validate tq config success")
 
     def get_api(self):
         """initiate the api client to access the tq server."""
+
+        logger.info("start getting tq api client")
+
         tq_broker = self.conf.tq_broker
 
         # for tq auth
@@ -82,13 +95,13 @@ class TQBroker(bt.BrokerBase):
         auth = tqsdk.TqAuth(user_name=tq_username, password=tq_password)
 
         # for future company account
-        simulator = True
-        if hasattr(tq_broker, "simulator"):
-            simulator = tq_broker.simulator
+        simulate = True
+        if hasattr(tq_broker, "simulate"):
+            simulate = tq_broker.simulate
 
         # default using kq simulator account
         account = tqsdk.TqKq()
-        if not simulator:
+        if not simulate:
             # for real online trading account, and this account is from
             # future company.
             broker_id = tq_broker.broker_id
@@ -99,6 +112,8 @@ class TQBroker(bt.BrokerBase):
                                       password=password)
 
         api = tqsdk.TqApi(account=account, auth=auth)
+
+        logger.info("get tq api client success")
 
         return api
 
@@ -198,20 +213,38 @@ class TQBroker(bt.BrokerBase):
 
     def _get_account_from_tq(self):
         """get account from tq broker"""
+        logger.info("start get account from tq broker")
+
         account = self.api.get_account()
+        # TODO(fixme), make it as decorator
         self._wait_update()
+
+        logger.info("get account %s from tq broker success", account)
+
         return account
 
     def _get_orders_from_tq(self):
         """get open orders from tq broker"""
+        logger.info("start get order from tq broker")
+
         orders = self.api.get_order()
+        # TODO(fixme), make it as decorator
         self._wait_update()
+
+        logger.info("get order %s from tq broker success", orders)
+
         return orders
 
     def _get_positions_from_tq(self):
         """get positions from tq broker"""
+        logger.info("start get positions from tq broker")
+
         positions = self.api.get_position()
+        # TODO(fixme), make it as decorator
         self._wait_update()
+
+        logger.info("get positions %s from tq broker success", positions)
+
         return positions
 
     def account_overview(self):
@@ -225,7 +258,7 @@ class TQBroker(bt.BrokerBase):
         margin = account["margin"]
 
         # account information
-        txt = f"Back broker: value {value}, cash {cash}"
+        txt = f"TQ broker: value {value}, cash {cash}"
         txt += f", float_profit {float_profit}"
         txt += f", position_profit {position_profit}"
         txt += f", margin {margin}"
@@ -245,3 +278,8 @@ class TQBroker(bt.BrokerBase):
             txt += f", order {order.order_id}, status {order.status}"
 
         return txt
+
+    def close(self):
+        """close broker"""
+        self.api.close()
+        logger.info("tq broker closed.")

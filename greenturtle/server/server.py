@@ -62,19 +62,14 @@ class Server:
 
     def initialize(self):
         """initialize the server"""
-        logger.info("initializing with syncing delta data")
+        infer = inference.Inference(conf=self.conf)
+        infer.account_overview()
+        infer.close()
 
+        logger.info("initializing with syncing delta data")
         self.delta_data_syncer.synchronize_delta_contracts()
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
-
         logger.info("initializing syncing delta data success")
-
-        logger.info("initializing inference and get account overview")
-
-        infer = inference.Inference()
-        infer.account_overview()
-
-        logger.info("initializing inference and get account overview success")
 
     def trading(self):
         """do trading"""
@@ -91,9 +86,11 @@ class Server:
 
         infer = inference.Inference(conf=self.conf, trading_date=today)
         infer.run()
+        infer.close()
 
     def run(self):
         """run server"""
+
         logger.info("Server is start running.")
         self.initialize()
 
