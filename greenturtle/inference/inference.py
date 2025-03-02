@@ -20,6 +20,8 @@ from datetime import date as datetime_date
 
 import backtrader as bt
 
+from greenturtle.brokers import backbroker
+from greenturtle.brokers import tqbroker
 from greenturtle.constants import types
 from greenturtle.constants import varieties
 from greenturtle.data.datafeed import db
@@ -44,6 +46,8 @@ class Inference:
         self.varieties = varieties.CN_VARIETIES
 
         self.cerebro = bt.Cerebro()
+        # Add a FixedSize sizer according to the stake
+        self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
 
         self.set_broker()
         self.add_strategy()
@@ -51,14 +55,21 @@ class Inference:
 
     def set_broker(self):
         """set broker"""
-        # Set our desired cash start
-        self.cerebro.broker.setcash(1000000)
-        # Set short cash
-        self.cerebro.broker.set_shortcash(False)
-        # Disable cheat on close
-        self.cerebro.broker.set_coc(False)
-        # Add a FixedSize sizer according to the stake
-        self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
+
+        name = "back_broker"
+        if hasattr(self.conf, 'broker'):
+            name = self.conf.broker
+
+        broker = None
+        if name == "back_broker":
+            broker = backbroker.BackBroker()
+        if name == "tq_broker":
+            broker = tqbroker.TQBroker(conf=self.conf)
+
+        if broker is None:
+            raise exception.BrokerNotSupportedError
+
+        self.cerebro.setbroker(broker)
 
     # TODO(fixme), better abstraction for broker
     # pylint: disable=R0801
@@ -194,6 +205,7 @@ class Inference:
         value = self.cerebro.broker.getvalue()
         logger.info("finish trading with value: %.1f", value)
 
-    def show_position(self):
-        """show position."""
-        logger.info("show position")
+    def account_overview(self):
+        """account_overview return the account status."""
+        txt = self.cerebro.broker.account_overview()
+        logger.info(txt)

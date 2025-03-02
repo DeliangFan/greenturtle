@@ -42,6 +42,7 @@ class BackTesting:
         self.varieties = varieties
         self.summary = summary.Summary()
         self.cerebro = bt.Cerebro()
+        self.set_broker(slippage, cash)
 
         # add analyzer
         self.cerebro.addanalyzer(
@@ -75,20 +76,22 @@ class BackTesting:
             position_pnl.PositionPNL,
             _name="PositionPNL")
 
-        # set slippage
-        self.cerebro.broker.set_slippage_perc(perc=slippage)
-
-        # Set our desired cash start
-        self.cerebro.broker.setcash(cash)
-
-        # Set short cash
-        self.cerebro.broker.set_shortcash(False)
-
-        # Disable cheat on close
-        self.cerebro.broker.set_coc(False)
-
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
+
+    def set_broker(self, slippage, cash):
+        """set the broker for cerebro"""
+        broker = bt.brokers.BackBroker()
+        # set slippage
+        broker.set_slippage_perc(perc=slippage)
+        # Set our desired cash start
+        broker.setcash(cash)
+        # Set short cash
+        broker.set_shortcash(False)
+        # Disable cheat on close
+        broker.set_coc(False)
+
+        self.cerebro.setbroker(broker)
 
     def add_strategy(self, strategy, *args, **kwargs):
         """add strategy to cerebro."""

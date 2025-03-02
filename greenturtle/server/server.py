@@ -62,12 +62,19 @@ class Server:
 
     def initialize(self):
         """initialize the server"""
-        logger.info("Initializing with syncing delta data")
+        logger.info("initializing with syncing delta data")
+
         self.delta_data_syncer.synchronize_delta_contracts()
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
+
+        logger.info("initializing syncing delta data success")
+
+        logger.info("initializing inference and get account overview")
+
         infer = inference.Inference()
-        infer.show_position()
-        logger.info("Initializing syncing delta data success")
+        infer.account_overview()
+
+        logger.info("initializing inference and get account overview success")
 
     def trading(self):
         """do trading"""
@@ -88,7 +95,6 @@ class Server:
     def run(self):
         """run server"""
         logger.info("Server is start running.")
-
         self.initialize()
 
         # Every day at 12am or 00:00 time bedtime() is called.

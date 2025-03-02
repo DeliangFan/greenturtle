@@ -1,8 +1,8 @@
 country: CN
 source: akshare
 db:
-  database: greenturtle
-  username: greenturtle
+  database: database
+  username: username
   password: passport
   host: localhost
   port: 3306
@@ -13,6 +13,14 @@ group_risk_factors:
   energy: 0.02
   indices: 0.015
 allow_short: true
+broker: tq_broker
+tq_broker:
+  tq_username: tq_username
+  tq_password: tq_password
+  simulate: True
+  broker_id: broker_id
+  account_id: account_id
+  password: password
 whitelist:
   - A
   - AG

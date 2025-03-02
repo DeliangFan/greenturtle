@@ -69,24 +69,27 @@
 - [P0][Done] [Refactor] Rename simulator to backtesting
 - [P0][Done] [Serving] Trading strategy for backtest and server
 - [P0][Done] [Serving] Portfolio management strategy for backtest and server
+- [P0] [Serving] Abstract for broker
+- [P0] [Serving] Adapter to the ctp API
 
 ## TODO
 
-- [P0] [Serving] Adapter to the ctp API
-- [P0] [Serving] Abstract for broker
-- [P0] [Backtesting] Analysis the profit and losing
+- [P1] [Data] add insert number for delta data
+- [P0] [Serving] Support buy and sell
+- [P0] [Meta]    Symbol and varieties mapping
 - [P0] [Serving] Better validation for daily price according to different varieties
 - [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
+- [P0] [Serving] Contract rolling
 - [P0] [Serving] Metrics and alarm for service availability
-- [P0] Refactor the e2etest according to local data
+- [P1] [Backtesting] Analysis the profit and losing
+- [P1] Refactor the e2etest according to local data
 - [P1] Refine the commission according to the varieties
 - [P1] Evaluate the CTA factors
 - [P1] Add more unittest(data, strategy, simulator)
 - [P2] [Serving] Add support for multi account, support for both CN and US.
 - [P2] Add pyfolio
-
 
 # Issues
 

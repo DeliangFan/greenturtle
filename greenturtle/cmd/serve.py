@@ -17,6 +17,10 @@
 
 import argparse
 
+# stupid tqsdk must be import first, otherwise it will flush the logs
+# pylint: disable=unused-import
+import tqsdk  # noqa F401
+
 from greenturtle.util import config
 from greenturtle.server import server
 
