@@ -220,6 +220,7 @@ class DeltaDataSyncer:
 
         logger.info("start write contracts to database")
 
+        count = 0
         for contract in contracts:
             date = contract[types.DATE]
             name = contract[types.NAME]
@@ -237,6 +238,7 @@ class DeltaDataSyncer:
                 continue
 
             # insert to database
+            count += 1
             logger.info("insert %s %s to database", date, name)
             self.dbapi.contract_create(date,
                                        name,
@@ -247,7 +249,7 @@ class DeltaDataSyncer:
                                        group,
                                        contract)
 
-        logger.info("write contracts to database success")
+        logger.info("write %d contracts to database success", count)
 
     @staticmethod
     def _validate_contracts(contracts):

@@ -69,12 +69,12 @@
 - [P0][Done] [Refactor] Rename simulator to backtesting
 - [P0][Done] [Serving] Trading strategy for backtest and server
 - [P0][Done] [Serving] Portfolio management strategy for backtest and server
+- [P1][Done] [Data] add insert number for delta data
 - [P0] [Serving] Abstract for broker
 - [P0] [Serving] Adapter to the ctp API
 
 ## TODO
 
-- [P1] [Data] add insert number for delta data
 - [P0] [Serving] Support buy and sell
 - [P0] [Meta]    Symbol and varieties mapping
 - [P0] [Serving] Better validation for daily price according to different varieties
