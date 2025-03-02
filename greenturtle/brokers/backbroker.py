@@ -17,6 +17,8 @@
 
 from backtrader import brokers
 
+from greenturtle.data.download.future import logger
+
 
 class BackBroker(brokers.BackBroker):
     """back broker."""
@@ -39,3 +41,7 @@ class BackBroker(brokers.BackBroker):
             txt += f", {symbol}: {position.size}"
 
         return txt
+
+    def close(self):
+        """close"""
+        logger.info("back broker closed.")

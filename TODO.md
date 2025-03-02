@@ -70,8 +70,8 @@
 - [P0][Done] [Serving] Trading strategy for backtest and server
 - [P0][Done] [Serving] Portfolio management strategy for backtest and server
 - [P1][Done] [Data] add insert number for delta data
-- [P0] [Serving] Abstract for broker
-- [P0] [Serving] Adapter to the ctp API
+- [P0][Done] [Serving] Abstract for broker
+- [P0][Done] [Serving] Adapter to the trading API with get account/position/orders
 
 ## TODO
 

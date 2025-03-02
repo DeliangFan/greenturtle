@@ -46,12 +46,18 @@ class Inference:
         self.varieties = varieties.CN_VARIETIES
 
         self.cerebro = bt.Cerebro()
+        self.set_broker()
+
         # Add a FixedSize sizer according to the stake
         self.cerebro.addsizer(bt.sizers.FixedSize, stake=1)
 
-        self.set_broker()
+    def initiate_data_and_strategy(self):
+        """initiate all"""
+
+        logger.info("start initializing data and strategy")
         self.add_strategy()
         self.add_data()
+        logger.info("initializing data and strategy success")
 
     def set_broker(self):
         """set broker"""
@@ -69,7 +75,9 @@ class Inference:
         if broker is None:
             raise exception.BrokerNotSupportedError
 
+        logger.info("start adding %s broker", name)
         self.cerebro.setbroker(broker)
+        logger.info("add %s broker success", name)
 
     # TODO(fixme), better abstraction for broker
     # pylint: disable=R0801
@@ -107,6 +115,9 @@ class Inference:
     @staticmethod
     def validate_config(conf):
         """Validate config."""
+
+        logger.info("start validating inference config")
+
         if hasattr(conf, "risk_factor"):
             risk_factor = conf.risk_factor
             if risk_factor <= 0 or risk_factor > 0.005:
@@ -130,6 +141,8 @@ class Inference:
             whitelist = conf.whitelist
             if not isinstance(whitelist, (list, tuple)):
                 raise ValueError("whitelist must be a list or tuple")
+
+        logger.info("validate inference config success")
 
     def add_strategy(self):
         """add strategy to cerebro."""
@@ -194,6 +207,9 @@ class Inference:
 
     def run(self):
         """run the cerebro to perform really trading."""
+        # initiate adding the data feed and strategy
+        self.initiate_data_and_strategy()
+
         # Print out the starting conditions
         value = self.cerebro.broker.getvalue()
         logger.info("starting trading with value: %.1f", value)
@@ -209,3 +225,8 @@ class Inference:
         """account_overview return the account status."""
         txt = self.cerebro.broker.account_overview()
         logger.info(txt)
+
+    def close(self):
+        """close the cerebro."""
+        logger.info("close the broker")
+        self.cerebro.broker.close()
