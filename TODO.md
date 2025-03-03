@@ -77,6 +77,7 @@
 
 - [P0] [Serving] Support buy and sell
 - [P0] [Meta]    Symbol and varieties mapping
+- [P0] [Serving] Care about the limit price
 - [P0] [Serving] Better validation for daily price according to different varieties
 - [P0] [Serving] Notification message for transaction
 - [P0] [Serving] Persistence logs
