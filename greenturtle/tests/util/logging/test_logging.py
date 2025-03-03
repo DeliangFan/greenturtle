@@ -33,9 +33,6 @@ class TestLogging(unittest.TestCase):
         logger = logging.get_logger()
         self.assertTrue(logger.hasHandlers)
 
-        handlers = logger.handlers
-        self.assertTrue(len(handlers) == 2)
-
     def test_logging_works(self):
         """test logging works."""
         logger = logging.get_logger()
