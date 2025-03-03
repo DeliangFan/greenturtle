@@ -21,6 +21,7 @@ from datetime import date as datetime_date
 import backtrader as bt
 
 from greenturtle.constants import types
+from greenturtle.data.datafeed import db
 from greenturtle.data import validation
 from greenturtle.util.logging import logging
 from greenturtle import exception
@@ -183,15 +184,23 @@ class BaseStrategy(bt.Strategy):
 
         return self.bankruptcy
 
+    def _get_name_from_position_key(self, key):
+        """get name from position key."""
+        if isinstance(key, str):
+            return key
+
+        if isinstance(key, db.ContinuousContractDB):
+            return key.p.variety
+
+        raise ValueError("unknown position key")
+
     def get_hold_symbols(self):
         """get symbols in hold."""
         symbols = set()
         positions = self.getpositions()
 
-        for k in positions:
-            # pylint: disable=protected-access
-            name = k._name
-            position = positions[k]
+        for key, position in positions.items():
+            name = self._get_name_from_position_key(key)
             if position.size > 0 or position.size < 0:
                 symbols.add(name)
 
@@ -202,10 +211,8 @@ class BaseStrategy(bt.Strategy):
         symbols = set()
         positions = self.getpositions()
 
-        for k in positions:
-            # pylint: disable=protected-access
-            name = k._name
-            position = positions[k]
+        for key, position in positions.items():
+            name = self._get_name_from_position_key(key)
             if position.size > 0:
                 symbols.add(name)
 
@@ -216,10 +223,8 @@ class BaseStrategy(bt.Strategy):
         symbols = set()
         positions = self.getpositions()
 
-        for k in positions:
-            # pylint: disable=protected-access
-            name = k._name
-            position = positions[k]
+        for key, position in positions.items():
+            name = self._get_name_from_position_key(key)
             if position.size < 0:
                 symbols.add(name)
 
@@ -311,11 +316,11 @@ class BaseStrategy(bt.Strategy):
         portfolios = {}
         positions = self.getpositions()
 
-        for k in positions:
-            position = positions[k]
+        for key, position in positions.items():
+            name = self._get_name_from_position_key(key)
             if position.size != 0:
                 # pylint: disable=protected-access
-                portfolios[k._name] = position.size
+                portfolios[name] = position.size
 
         return portfolios
 
@@ -524,7 +529,9 @@ class BaseStrategy(bt.Strategy):
         self.log(f"try to adjust {name} size from {original_size} to" +
                  f" {size} with price {close:.3f}")
 
-        self.order_target_size(data=data, target=size)
+        # desired is the same as target to pass to tq broker.
+        kwargs = {"desired": size}
+        self.order_target_size(data=data, target=size, **kwargs)
 
     def notify_order(self, order):
         """

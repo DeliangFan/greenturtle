@@ -107,15 +107,10 @@ class TQBroker(bt.BrokerBase):
         self.convert = SymbolConvert(dbapi)
 
         # initiate other attributes
-        self.cash = 0.0
-        self.value = 0.0
-        self.positions = collections.defaultdict(bt.position.Position)
-
-    def initiate(self):
-        """initiate broker"""
-        self.get_value()
-        self.get_cash()
-        self.get_all_positions()
+        account = self._get_account_from_tq()
+        self.cash = account["available"]
+        self.value = account["balance"]
+        self.positions = self.get_all_positions()
 
     @staticmethod
     def validate_config(conf):
@@ -203,8 +198,6 @@ class TQBroker(bt.BrokerBase):
 
         可用资金（可用资金 = 账户权益 - 冻结保证金 - 保证金 - 冻结权利金 - 冻结手续费 - 期权市值）
         """
-        account = self._get_account_from_tq()
-        self.cash = account["available"]
         return self.cash
 
     def get_cash(self):
@@ -221,8 +214,6 @@ class TQBroker(bt.BrokerBase):
 
         账户权益 （账户权益 = 动态权益 = 静态权益 + 平仓盈亏 + 持仓盈亏 - 手续费 + 权利金 + 期权市值）
         """
-        account = self._get_account_from_tq()
-        self.value = account["balance"]
         return self.value
 
     def get_value(self, datas=None):
@@ -243,7 +234,7 @@ class TQBroker(bt.BrokerBase):
         """
         get all positions, for self.tq_api.get_position(), the return Position
         """
-        positions = {}
+        positions = collections.defaultdict(bt.position.Position)
         tp_positions = self._get_positions_from_tq()
         for quote, p in tp_positions.items():
             # get the variety
@@ -254,7 +245,11 @@ class TQBroker(bt.BrokerBase):
             else:
                 positions[variety].size += p.pos
 
-        self.positions = positions
+        return positions
+
+    def get_notification(self):
+        """get notification"""
+        return None
 
     def submit(self, order):
         raise NotImplementedError
@@ -268,7 +263,27 @@ class TQBroker(bt.BrokerBase):
             exectype=None, valid=None, tradeid=0, oco=None,
             trailamount=None, trailpercent=None,
             **kwargs):
+        """
+        execute the buy by tq broker
 
+        args:
+            owner: useless parameter
+            data: greenturtle.data.datafeed.db.ContinuousContractDB, only
+                  object.p.variety matters.
+            size: always positive
+            kwargs: only desired maters
+
+        buy steps:
+            1. check if there are any remaining orders for the variety. if
+                there are remaining orders for the variety, skip it
+            2. get the currently position quote from tq server
+            3. check if the current + size = desired, if it's not equal,
+                than skip
+            4. then perform buying
+            4.1 if rolling is not needed, just buy
+            4.2 rolling the contract if needed, first close the contract and
+                open with the desired size
+        """
         raise NotImplementedError
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -276,7 +291,26 @@ class TQBroker(bt.BrokerBase):
              exectype=None, valid=None, tradeid=0, oco=None,
              trailamount=None, trailpercent=None,
              **kwargs):
+        """
+        execute the sell by tq broker
 
+        args:
+            owner: useless parameter
+            data: <greenturtle.data.datafeed.db.ContinuousContractDB object>
+            size: always positive
+            kwargs: only desired maters
+
+        sell steps:
+            1. check if there are any remaining orders for the variety. if
+                there are remaining orders for the variety, skip it
+            2. get the currently position quote from tq server
+            3. check if the current + size = desired, if it's not equal,
+                than skip
+            4. then perform selling
+            4.1 if rolling is not needed, just sell
+            4.2 rolling the contract if needed, first close the contract and
+                open with the desired size
+        """
         raise NotImplementedError
 
     def get_orders_open(self):
