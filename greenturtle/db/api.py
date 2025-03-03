@@ -191,6 +191,15 @@ class DBAPI:
             )
             return query.all()
 
+    def contract_get_one_by_name_exchange(self, name, exchange):
+        """get all contracts by exchange from akshare and country cn."""
+        with Session(self.engine) as session:
+            query = session.query(models.Contract).filter(
+                models.Contract.name == name,
+                models.Contract.exchange == exchange,
+            )
+            return query.first()
+
     def contract_get_all_by_name_from_csi_us(self, name):
         """get all contracts by name from csi data and country us."""
         return self.contract_get_all_by_name_source_country(

@@ -72,11 +72,12 @@
 - [P1][Done] [Data] add insert number for delta data
 - [P0][Done] [Serving] Abstract for broker
 - [P0][Done] [Serving] Adapter to the trading API with get account/position/orders
+- [P0][Done] [Meta] Symbol and varieties mapping in position
 
 ## TODO
 
+- [P0] [Serving] Mapping varieties to symbol during buy and sell
 - [P0] [Serving] Support buy and sell
-- [P0] [Meta]    Symbol and varieties mapping
 - [P0] [Serving] Care about the limit price
 - [P0] [Serving] Better validation for daily price according to different varieties
 - [P0] [Serving] Notification message for transaction

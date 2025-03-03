@@ -21,41 +21,92 @@ import time
 import backtrader as bt
 import tqsdk
 
+from greenturtle.constants import types
+from greenturtle.db import api
+from greenturtle import exception
 from greenturtle.util.logging import logging
 
 
 logger = logging.get_logger()
 
 
+class SymbolConvert:
+    """
+    convert symbol between greenturtle and tq broker, for more details,
+    please refer to https://doc.shinnytech.com/tqsdk/latest/usage/mddatas.html
+
+    1. the exchange code are same between tq and db
+            DEC  SHFE  CZCE  CFFEX  INE  GFEX
+        db  DEC  SHFE  CZCE  CFFEX  INE  GFEX
+        tq  DEC  SHFE  CZCE  CFFEX  INE  GFEX
+
+    2. the contract name are different between exchanges
+            DEC    SHFE   CZCE   CFFEX  INE    GFEX
+        db  lower  upper  upper  upper  upper  upper
+        tq  lower  lower  upper  upper  lower  lower
+
+      for example
+            DEC         SHFE         CZCE        CFFEX         INE         GFEX
+        db  pg2602      SP2601       UR601       IF2504        SC2601      SI2601
+        tq  DEC.pg2602  SHFE.sp2601  CZCE.UR601  CFFEX.IF2504  INE.sc2601  GFEX.si2601
+    """  # noqa E501
+
+    def __init__(self, dbapi):
+        self.dbapi = dbapi
+
+    @staticmethod
+    def tq_symbol_2_db_symbol(symbol, exchange):
+        """tq symbol to db symbol"""
+        if exchange in [types.SHFE, types.INE, types.GFEX]:
+            return symbol.upper()
+        if exchange in [types.DCE, types.CZCE, types.CFFEX]:
+            return symbol
+        raise exception.ExchangeNotSupportedError
+
+    @staticmethod
+    def db_symbol_2_tq_symbol(symbol, exchange):
+        """db symbol to tq symbol"""
+        if exchange in [types.SHFE, types.INE, types.GFEX]:
+            return symbol.lower()
+        if exchange in [types.DCE, types.CZCE, types.CFFEX]:
+            return symbol
+        raise exception.ExchangeNotSupportedError
+
+    def tq_quote_2_db_variety(self, quote):
+        """tq quote to variety"""
+        cols = quote.split(".")
+        if len(cols) != 2:
+            raise ValueError("quote must be exchange.symbol like")
+
+        exchange = cols[0]
+        tq_symbol = cols[1]
+        symbol = self.tq_symbol_2_db_symbol(tq_symbol, exchange)
+
+        contract = self.dbapi.contract_get_one_by_name_exchange(symbol,
+                                                                exchange)
+        if not contract:
+            raise exception.ContractNotFound
+
+        return contract.variety
+
+
 class TQBroker(bt.BrokerBase):
     """tq broker class"""
 
-    # TODO(fixme), symbol convertion
-    # https://doc.shinnytech.com/tqsdk/latest/usage/mddatas.html
-    #
-    # 1. the exchange code are same between tq and db
-    #       DEC  SHFE  CZCE  CFFEX  INE  GFEX
-    #   db  DEC  SHFE  CZCE  CFFEX  INE  GFEX
-    #   tq  DEC  SHFE  CZCE  CFFEX  INE  GFEX
-    #
-    # 2. the contract name are different between exchanges
-    #       DEC    SHFE   CZCE   CFFEX  INE    GFEX
-    #   db  lower  upper  upper  upper  upper  upper
-    #   tq  lower  lower  upper  upper  lower  lower
-    # for example
-    #       DEC         SHFE         CZCE        CFFEX         INE         GFEX
-    #   db  pg2602      SP2601       UR601       IF2504        SC2601      SI2601
-    #   tq  DEC.pg2602  SHFE.sp2601  CZCE.UR601  CFFEX.IF2504  INE.sc2601  GFEX.si2601
-    #
-
     def __init__(self, conf=None):
         super().__init__()
-
+        # validate the config
         self.validate_config(conf)
 
+        # initiate the tq client api
         self.conf = conf
-        self.api = self.get_api()
+        self.tq_api = self.get_tq_api()
 
+        # initiate the db qpi
+        dbapi = api.DBAPI(conf.db)
+        self.convert = SymbolConvert(dbapi)
+
+        # initiate other attributes
         self.cash = 0.0
         self.value = 0.0
         self.positions = collections.defaultdict(bt.position.Position)
@@ -100,7 +151,7 @@ class TQBroker(bt.BrokerBase):
 
         logger.info("validate tq config success")
 
-    def get_api(self):
+    def get_tq_api(self):
         """initiate the api client to access the tq server."""
 
         logger.info("start getting tq api client")
@@ -129,11 +180,11 @@ class TQBroker(bt.BrokerBase):
                                       account_id=account_id,
                                       password=password)
 
-        api = tqsdk.TqApi(account=account, auth=auth)
+        tq_api = tqsdk.TqApi(account=account, auth=auth)
 
         logger.info("get tq api client success")
 
-        return api
+        return tq_api
 
     @staticmethod
     def _get_deadline(second):
@@ -142,9 +193,9 @@ class TQBroker(bt.BrokerBase):
         return deadline
 
     def _wait_update(self, second=60):
-        """wait execute self.api.wait_update()"""
+        """wait execute self.tq_api.wait_update()"""
         deadline = self._get_deadline(second)
-        self.api.wait_update(deadline=deadline)
+        self.tq_api.wait_update(deadline=deadline)
 
     def getcash(self):
         """
@@ -190,14 +241,20 @@ class TQBroker(bt.BrokerBase):
 
     def get_all_positions(self):
         """
-        get all positions, for self.api.get_position(), the return Position
+        get all positions, for self.tq_api.get_position(), the return Position
         """
+        positions = {}
         tp_positions = self._get_positions_from_tq()
-        for p in tp_positions:
-            # TODO(fixme), data name and symbol name
-            # need return a map[variety] = Position like
-            self.positions[p.instrument_id] = bt.position.Position(
-                size=p.pos, price=float("nan"))
+        for quote, p in tp_positions.items():
+            # get the variety
+            variety = self.convert.tq_quote_2_db_variety(quote)
+            if variety not in positions:
+                positions[variety] = bt.position.Position(size=p.pos,
+                                                          price=p.last_price)
+            else:
+                positions[variety].size += p.pos
+
+        self.positions = positions
 
     def submit(self, order):
         raise NotImplementedError
@@ -226,7 +283,7 @@ class TQBroker(bt.BrokerBase):
         """get open orders"""
         orders_open = []
         orders = self._get_orders_from_tq()
-        for name, order in orders.items():
+        for order in orders.values():
             if order.status == "ALIVE":
                 orders_open.append(order)
         return orders_open
@@ -235,7 +292,7 @@ class TQBroker(bt.BrokerBase):
         """get account from tq broker"""
         logger.info("start get account from tq broker")
 
-        account = self.api.get_account()
+        account = self.tq_api.get_account()
         # TODO(fixme), make it as decorator
         self._wait_update()
 
@@ -247,7 +304,7 @@ class TQBroker(bt.BrokerBase):
         """get open orders from tq broker"""
         logger.info("start get order from tq broker")
 
-        orders = self.api.get_order()
+        orders = self.tq_api.get_order()
         # TODO(fixme), make it as decorator
         self._wait_update()
 
@@ -259,7 +316,7 @@ class TQBroker(bt.BrokerBase):
         """get positions from tq broker"""
         logger.info("start get positions from tq broker")
 
-        positions = self.api.get_position()
+        positions = self.tq_api.get_position()
         # TODO(fixme), make it as decorator
         self._wait_update()
 
@@ -285,7 +342,7 @@ class TQBroker(bt.BrokerBase):
 
         # position information
         tp_positions = self._get_positions_from_tq()
-        for name, p in tp_positions.items():
+        for p in tp_positions.values():
             txt += f" {p.instrument_id}: value {p.market_value:.0f}"
             txt += f" size {p.pos}"
             txt += f" float_profit {p.float_profit:.0f}"
@@ -301,5 +358,5 @@ class TQBroker(bt.BrokerBase):
 
     def close(self):
         """close broker"""
-        self.api.close()
+        self.tq_api.close()
         logger.info("tq broker closed.")
