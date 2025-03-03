@@ -30,6 +30,24 @@ logger = logging.get_logger()
 class TQBroker(bt.BrokerBase):
     """tq broker class"""
 
+    # TODO(fixme), symbol convertion
+    # https://doc.shinnytech.com/tqsdk/latest/usage/mddatas.html
+    #
+    # 1. the exchange code are same between tq and db
+    #       DEC  SHFE  CZCE  CFFEX  INE  GFEX
+    #   db  DEC  SHFE  CZCE  CFFEX  INE  GFEX
+    #   tq  DEC  SHFE  CZCE  CFFEX  INE  GFEX
+    #
+    # 2. the contract name are different between exchanges
+    #       DEC    SHFE   CZCE   CFFEX  INE    GFEX
+    #   db  lower  upper  upper  upper  upper  upper
+    #   tq  lower  lower  upper  upper  lower  lower
+    # for example
+    #       DEC         SHFE         CZCE        CFFEX         INE         GFEX
+    #   db  pg2602      SP2601       UR601       IF2504        SC2601      SI2601
+    #   tq  DEC.pg2602  SHFE.sp2601  CZCE.UR601  CFFEX.IF2504  INE.sc2601  GFEX.si2601
+    #
+
     def __init__(self, conf=None):
         super().__init__()
 
@@ -166,7 +184,6 @@ class TQBroker(bt.BrokerBase):
 
     def getposition(self, data):
         """get position by name"""
-        # TODO(fixme), data name and symbol name
         # pylint: disable=protected-access
         position = self.positions[data._name]
         return position
@@ -177,6 +194,8 @@ class TQBroker(bt.BrokerBase):
         """
         tp_positions = self._get_positions_from_tq()
         for p in tp_positions:
+            # TODO(fixme), data name and symbol name
+            # need return a map[variety] = Position like
             self.positions[p.instrument_id] = bt.position.Position(
                 size=p.pos, price=float("nan"))
 
@@ -186,6 +205,7 @@ class TQBroker(bt.BrokerBase):
     def cancel(self, order):
         raise NotImplementedError
 
+    # https://doc.shinnytech.com/tqsdk/latest/usage/trade.html
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def buy(self, owner, data, size, price=None, plimit=None,
             exectype=None, valid=None, tradeid=0, oco=None,
@@ -206,7 +226,7 @@ class TQBroker(bt.BrokerBase):
         """get open orders"""
         orders_open = []
         orders = self._get_orders_from_tq()
-        for order in orders:
+        for name, order in orders.items():
             if order.status == "ALIVE":
                 orders_open.append(order)
         return orders_open
@@ -258,24 +278,24 @@ class TQBroker(bt.BrokerBase):
         margin = account["margin"]
 
         # account information
-        txt = f"TQ broker: value {value}, cash {cash}"
-        txt += f", float_profit {float_profit}"
-        txt += f", position_profit {position_profit}"
-        txt += f", margin {margin}"
+        txt = f"TQ broker: value {value:.0f}, cash {cash:.0f}"
+        txt += f", float_profit {float_profit:.0f}"
+        txt += f", position_profit {position_profit:.0f}"
+        txt += f", margin {margin:.0f}."
 
         # position information
         tp_positions = self._get_positions_from_tq()
-        for p in tp_positions:
-            txt += f", {p.instrument_id}: value {p.market_value}"
-            txt += f", size {p.pos}"
-            txt += f", float_profit {p.float_profit}"
-            txt += f", position_profit {p.position_profit}"
-            txt += f", margin {p.margin}"
+        for name, p in tp_positions.items():
+            txt += f" {p.instrument_id}: value {p.market_value:.0f}"
+            txt += f" size {p.pos}"
+            txt += f" float_profit {p.float_profit:.0f}"
+            txt += f" position_profit {p.position_profit:.0f}"
+            txt += f" margin {p.margin:.0f};"
 
         # order information
         orders_open = self.get_orders_open()
         for order in orders_open:
-            txt += f", order {order.order_id}, status {order.status}"
+            txt += f"; order {order.order_id}, status {order.status}"
 
         return txt
 
