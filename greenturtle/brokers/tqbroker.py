@@ -74,6 +74,11 @@ class SymbolConvert:
             return symbol
         raise exception.ExchangeNotSupportedError
 
+    def db_symbol_2_tq_quote(self, symbol, exchange):
+        """db symbol to tq quote"""
+        tq_symbol = self.db_symbol_2_tq_symbol(symbol, exchange)
+        return f"{exchange}.{tq_symbol}"
+
     def tq_quote_2_db_variety(self, quote):
         """tq quote to variety"""
         cols = quote.split(".")
@@ -92,6 +97,7 @@ class SymbolConvert:
         return contract.variety
 
 
+# pylint: disable=too-many-instance-attributes,
 class TQBroker(bt.BrokerBase):
     """tq broker class"""
 
@@ -99,6 +105,10 @@ class TQBroker(bt.BrokerBase):
         super().__init__()
         # validate the config
         self.validate_config(conf)
+
+        # initiate source and country
+        self.source = conf.source
+        self.country = conf.country
 
         # initiate the tq client api
         self.conf = conf
@@ -113,6 +123,9 @@ class TQBroker(bt.BrokerBase):
         self.cash = account["available"]
         self.value = account["balance"]
         self.positions = self.get_all_positions()
+        # used in backtrader
+        self.startingcash = self.cash
+
 
     @staticmethod
     def validate_config(conf):
@@ -295,13 +308,26 @@ class TQBroker(bt.BrokerBase):
             logger.warning("skip buying %s due to remaining orders", variety)
             return
 
+        # in the caller in strategy.py
+        # if target > possize:
+        #   return self.buy(data=data, size=target - possize, **kwargs)
         current_size = self._get_position_size_from_tq_by_variety(variety)
         if current_size + size != desired_size:
             logger.error("current %d + buy %d != desired %d",
                          current_size, size, desired_size)
             raise exception.BuyOrSellSizeAbnormalError
 
-        raise NotImplementedError
+        quote_name = self._get_tq_quote_from_db_by_variety(variety)
+        quote = self._get_quote_from_tq(quote_name)
+        if desired_size > 0:
+            offset = "OPEN"
+        else:
+            offset = "CLOSE"
+        self._insert_order_to_tq(symbol=quote_name,
+                                 direction="BUY",
+                                 offset=offset,
+                                 limit_price=quote.ask_price1,
+                                 volume=size)
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     # pylint: disable=too-many-locals
@@ -338,13 +364,26 @@ class TQBroker(bt.BrokerBase):
             logger.info("skip selling %s due to remaining orders", variety)
             return
 
+        # in the caller in strategy.py
+        # if target < possize:
+        #   return self.sell(data=data, size=possize - target, **kwargs)
         current_size = self._get_position_size_from_tq_by_variety(variety)
-        if current_size + size != desired_size:
-            logger.error("current %d + sell %d != desired %d",
+        if current_size != desired_size + size:
+            logger.error("current %d != sell %d + desired %d",
                          current_size, size, desired_size)
             raise exception.BuyOrSellSizeAbnormalError
 
-        raise NotImplementedError
+        quote_name = self._get_tq_quote_from_db_by_variety(variety)
+        quote = self._get_quote_from_tq(quote_name)
+        if desired_size < 0:
+            offset = "OPEN"
+        else:
+            offset = "CLOSE"
+        self._insert_order_to_tq(symbol=quote_name,
+                                 direction="SELL",
+                                 offset=offset,
+                                 limit_price=quote.bid_price1,
+                                 volume=size)
 
     @staticmethod
     def _validate_trading_parameters(kwargs):
@@ -359,6 +398,7 @@ class TQBroker(bt.BrokerBase):
 
     def _has_open_order(self, variety):
         """check whether there are open orders for the variety"""
+
         orders = self._get_orders_from_tq()
         for order in orders.values():
             # get the exchange and tq symbol from oder
@@ -381,8 +421,10 @@ class TQBroker(bt.BrokerBase):
 
     def _get_position_size_from_tq_by_variety(self, variety):
         """get positions size from tq by variety"""
+
         positions = []
         tp_positions = self._get_positions_from_tq()
+
         for quote, p in tp_positions.items():
             # get the variety
             db_variety = self.convert.tq_quote_2_db_variety(quote)
@@ -399,6 +441,19 @@ class TQBroker(bt.BrokerBase):
             return 0
 
         return positions[0].size
+
+    def _get_tq_quote_from_db_by_variety(self, variety):
+        """get symbol from db by variety"""
+        one = self.dbapi.continuous_contract_get_latest_by_variety_source_country(  # noqa: E501
+            variety, self.source, self.country)
+
+        if one is None:
+            logger.error("contract %s not found in db", variety)
+            raise exception.ContractNotFound
+
+        tq_quote = self.convert.db_symbol_2_tq_symbol(one.name, one.exchange)
+
+        return tq_quote
 
     def get_orders_open(self):
         """get open orders"""
@@ -444,6 +499,35 @@ class TQBroker(bt.BrokerBase):
         logger.info("get positions %s from tq broker success", positions)
 
         return positions
+
+    def _get_quote_from_tq(self, quote_name):
+        """get quote from tq broker"""
+        logger.info("start get quote from tq broker")
+
+        quote = self.tq_api.get_quote(quote_name)
+        self._wait_update()
+
+        logger.info("get quote %s from tq broker success", quote)
+
+        return quote
+
+    def _insert_order_to_tq(self,
+                            symbol=None,
+                            direction=None,
+                            offset=None,
+                            limit_price=None,
+                            volume=0):
+        """insert order to tq broker"""
+        logger.info("start insert order %s %s %s %f %d to tq broker",
+                    symbol, direction, offset, limit_price, volume)
+        self.tq_api.insert_order(symbol=symbol,
+                                 direction=direction,
+                                 offset=offset,
+                                 limit_price=limit_price,
+                                 volume=volume)
+        self._wait_update()
+        logger.info("insert order %s %s %s %f %d from tq broker success",
+                    symbol, direction, offset, limit_price, volume)
 
     def account_overview(self):
         """Return account overview."""
