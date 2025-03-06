@@ -28,6 +28,8 @@ from greenturtle.util.logging import logging
 
 
 logger = logging.get_logger()
+# order status
+ORDER_ALIVE = "ALIVE"
 
 
 class SymbolConvert:
@@ -103,8 +105,8 @@ class TQBroker(bt.BrokerBase):
         self.tq_api = self.get_tq_api()
 
         # initiate the db qpi
-        dbapi = api.DBAPI(conf.db)
-        self.convert = SymbolConvert(dbapi)
+        self.dbapi = api.DBAPI(conf.db)
+        self.convert = SymbolConvert(self.dbapi)
 
         # initiate other attributes
         account = self._get_account_from_tq()
@@ -259,6 +261,7 @@ class TQBroker(bt.BrokerBase):
 
     # https://doc.shinnytech.com/tqsdk/latest/usage/trade.html
     # pylint: disable=too-many-arguments,too-many-positional-arguments
+    # pylint: disable=too-many-locals
     def buy(self, owner, data, size, price=None, plimit=None,
             exectype=None, valid=None, tradeid=0, oco=None,
             trailamount=None, trailpercent=None,
@@ -267,11 +270,11 @@ class TQBroker(bt.BrokerBase):
         execute the buy by tq broker
 
         args:
-            owner: useless parameter
             data: greenturtle.data.datafeed.db.ContinuousContractDB, only
                   object.p.variety matters.
             size: always positive
             kwargs: only desired maters
+            others: for other parameters, they are not used yet
 
         buy steps:
             1. check if there are any remaining orders for the variety. if
@@ -284,9 +287,24 @@ class TQBroker(bt.BrokerBase):
             4.2 rolling the contract if needed, first close the contract and
                 open with the desired size
         """
+        self._validate_trading_parameters(kwargs)
+        variety = kwargs[types.VARIETY]
+        desired_size = kwargs[types.DESIRED_SIZE]
+
+        if self._has_open_order(variety):
+            logger.warning("skip buying %s due to remaining orders", variety)
+            return
+
+        current_size = self._get_position_size_from_tq_by_variety(variety)
+        if current_size + size != desired_size:
+            logger.error("current %d + buy %d != desired %d",
+                         current_size, size, desired_size)
+            raise exception.BuyOrSellSizeAbnormalError
+
         raise NotImplementedError
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
+    # pylint: disable=too-many-locals
     def sell(self, owner, data, size, price=None, plimit=None,
              exectype=None, valid=None, tradeid=0, oco=None,
              trailamount=None, trailpercent=None,
@@ -299,6 +317,7 @@ class TQBroker(bt.BrokerBase):
             data: <greenturtle.data.datafeed.db.ContinuousContractDB object>
             size: always positive
             kwargs: only desired maters
+            others: for other parameters, they are not used yet
 
         sell steps:
             1. check if there are any remaining orders for the variety. if
@@ -311,14 +330,82 @@ class TQBroker(bt.BrokerBase):
             4.2 rolling the contract if needed, first close the contract and
                 open with the desired size
         """
+        self._validate_trading_parameters(kwargs)
+        variety = kwargs[types.VARIETY]
+        desired_size = kwargs[types.DESIRED_SIZE]
+
+        if self._has_open_order(variety):
+            logger.info("skip selling %s due to remaining orders", variety)
+            return
+
+        current_size = self._get_position_size_from_tq_by_variety(variety)
+        if current_size + size != desired_size:
+            logger.error("current %d + sell %d != desired %d",
+                         current_size, size, desired_size)
+            raise exception.BuyOrSellSizeAbnormalError
+
         raise NotImplementedError
+
+    @staticmethod
+    def _validate_trading_parameters(kwargs):
+        """validate trading parameters"""
+        if types.VARIETY not in kwargs:
+            logger.error("variety not found")
+            raise exception.VarietyNotFound
+
+        if types.DESIRED_SIZE not in kwargs:
+            logger.error("desired size not found")
+            raise exception.DesiredSizeNotFound
+
+    def _has_open_order(self, variety):
+        """check whether there are open orders for the variety"""
+        orders = self._get_orders_from_tq()
+        for order in orders.values():
+            # get the exchange and tq symbol from oder
+            tq_symbol = order.instrument_id
+            exchange = order.exchange_id
+
+            # convert to greenturtle and try to find it from database
+            symbol = self.convert.tq_symbol_2_db_symbol(tq_symbol, exchange)
+            one = self.dbapi.contract_get_one_by_name_exchange(symbol,
+                                                               exchange)
+            if one is None:
+                logger.error("contract %s not found in db", symbol)
+                raise exception.ContractNotFound
+
+            if one.variety == variety and order.status == ORDER_ALIVE:
+                logger.info("find existing open order for %s", symbol)
+                return True
+
+        return False
+
+    def _get_position_size_from_tq_by_variety(self, variety):
+        """get positions size from tq by variety"""
+        positions = []
+        tp_positions = self._get_positions_from_tq()
+        for quote, p in tp_positions.items():
+            # get the variety
+            db_variety = self.convert.tq_quote_2_db_variety(quote)
+            if db_variety == variety:
+                positions.append(bt.position.Position(size=p.pos,
+                                                      price=p.last_price))
+
+        if len(positions) > 1:
+            logger.error("% has many position %s, expected 0 or 1",
+                         variety, positions)
+            raise exception.VarietyMultiSymbolsError
+
+        if len(positions) == 0:
+            return 0
+
+        return positions[0].size
 
     def get_orders_open(self):
         """get open orders"""
         orders_open = []
         orders = self._get_orders_from_tq()
         for order in orders.values():
-            if order.status == "ALIVE":
+            if order.status == ORDER_ALIVE:
                 orders_open.append(order)
         return orders_open
 
