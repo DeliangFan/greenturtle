@@ -530,7 +530,7 @@ class BaseStrategy(bt.Strategy):
                  f" {size} with price {close:.3f}")
 
         # desired is the same as target to pass to tq broker.
-        kwargs = {"desired": size}
+        kwargs = {types.DESIRED_SIZE: size, types.VARIETY: name}
         self.order_target_size(data=data, target=size, **kwargs)
 
     def notify_order(self, order):

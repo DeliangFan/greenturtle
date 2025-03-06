@@ -90,6 +90,7 @@ END_DATE = "end_date"
 
 # Inference constants
 TRADING_DATE = "trading_date"
+DESIRED_SIZE = "desired_size"
 
 # csv structure for contract
 CONTRACT_COLUMN = [

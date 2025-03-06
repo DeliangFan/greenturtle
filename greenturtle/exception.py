@@ -64,6 +64,16 @@ class AutoMarginNotFound(GreenTurtleBaseException):
     msg_fmt = "auto margin not found error."
 
 
+class VarietyNotFound(GreenTurtleBaseException):
+    """Variety margin not found error."""
+    msg_fmt = "variety not found error."
+
+
+class DesiredSizeNotFound(GreenTurtleBaseException):
+    """Desired size not found error."""
+    msg_fmt = "desired size not found error."
+
+
 class MultiplierNotFound(GreenTurtleBaseException):
     """multiplier not found error."""
     msg_fmt = "multiplier not found error."
@@ -152,3 +162,13 @@ class ValidateGroupRiskFactorError(GreenTurtleBaseException):
 class BrokerNotSupportedError(GreenTurtleBaseException):
     """broker not supported error"""
     msg_fmt = "broker not supported error."
+
+
+class VarietyMultiSymbolsError(GreenTurtleBaseException):
+    """variety has more than one symbol error"""
+    msg_fmt = "variety has more than one symbol error."
+
+
+class BuyOrSellSizeAbnormalError(GreenTurtleBaseException):
+    """buy or sell size abnormal error"""
+    msg_fmt = "buy or sell size abnormal error."
