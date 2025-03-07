@@ -38,7 +38,7 @@ class BackBroker(brokers.BackBroker):
         txt = f"Back broker: value: {value}, cash: {cash}"
 
         for symbol, position in self.positions.items():
-            txt += f", {symbol}: {position.size}"
+            txt += f"\n{symbol}: {position.size}"
 
         return txt
 

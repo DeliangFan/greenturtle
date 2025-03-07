@@ -109,10 +109,6 @@ class BaseStrategy(bt.Strategy):
         if self.order:
             return
 
-        if self.inference and self.broker.get_orders_open():
-            logger("%s skip trading with open order", data_date)
-            return
-
         if self.bankruptcy:
             logger.error("%s skip trading due to bankruptcy", data_date)
             return
@@ -120,6 +116,9 @@ class BaseStrategy(bt.Strategy):
         if self._check_bankruptcy():
             logger.error("%s skip trading due to bankruptcy", data_date)
             return
+
+        if self.inference and self.broker.get_orders_open():
+            logger.warning("%s trading with open order", data_date)
 
         # 1. get the long and short hold position
         hold = self.get_hold_symbols()

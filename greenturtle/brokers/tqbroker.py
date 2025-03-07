@@ -123,9 +123,9 @@ class TQBroker(bt.BrokerBase):
         self.cash = account["available"]
         self.value = account["balance"]
         self.positions = self.get_all_positions()
+
         # used in backtrader
         self.startingcash = self.cash
-
 
     @staticmethod
     def validate_config(conf):
@@ -202,10 +202,11 @@ class TQBroker(bt.BrokerBase):
         deadline = time.time() + second
         return deadline
 
-    def _wait_update(self, second=60):
+    def _wait_update(self, second=30):
         """wait execute self.tq_api.wait_update()"""
         deadline = self._get_deadline(second)
-        self.tq_api.wait_update(deadline=deadline)
+        updated = self.tq_api.wait_update(deadline=deadline)
+        return updated
 
     def getcash(self):
         """
@@ -326,6 +327,7 @@ class TQBroker(bt.BrokerBase):
         self._insert_order_to_tq(symbol=quote_name,
                                  direction="BUY",
                                  offset=offset,
+                                 # TODO(fixme), nan price
                                  limit_price=quote.ask_price1,
                                  volume=size)
 
@@ -426,6 +428,8 @@ class TQBroker(bt.BrokerBase):
         tp_positions = self._get_positions_from_tq()
 
         for quote, p in tp_positions.items():
+            if p.pos == 0 and p.pos_long == 0 and p.pos_short == 0:
+                continue
             # get the variety
             db_variety = self.convert.tq_quote_2_db_variety(quote)
             if db_variety == variety:
@@ -451,7 +455,7 @@ class TQBroker(bt.BrokerBase):
             logger.error("contract %s not found in db", variety)
             raise exception.ContractNotFound
 
-        tq_quote = self.convert.db_symbol_2_tq_symbol(one.name, one.exchange)
+        tq_quote = self.convert.db_symbol_2_tq_quote(one.name, one.exchange)
 
         return tq_quote
 
@@ -466,25 +470,43 @@ class TQBroker(bt.BrokerBase):
 
     def _get_account_from_tq(self):
         """get account from tq broker"""
-        logger.info("start get account from tq broker")
+        logger.info("start get_account from tq broker")
 
         account = self.tq_api.get_account()
-        # TODO(fixme), make it as decorator
-        self._wait_update()
+        updated = self._wait_update()
 
-        logger.info("get account %s from tq broker success", account)
+        logger.info("get_account _wait_update: %s", updated)
+
+        msg = f"get account from tq broker success" + \
+              f"\nbalance: {account.balance:.0f}" + \
+              f"\navailable: {account.available:.0f}" + \
+              f"\nmargin: {account.margin:.0f}" + \
+              f"\nfloat_profit: {account.float_profit:.0f}" + \
+              f"\nposition_profit: {account.position_profit:.0f}"
+        logger.info(msg)
 
         return account
 
     def _get_orders_from_tq(self):
         """get open orders from tq broker"""
-        logger.info("start get order from tq broker")
+        logger.info("start get_order from tq broker")
 
         orders = self.tq_api.get_order()
-        # TODO(fixme), make it as decorator
-        self._wait_update()
+        updated = self._wait_update()
 
-        logger.info("get order %s from tq broker success", orders)
+        logger.info("get_order _wait_update: %s", updated)
+
+        msg = f"get {len(orders)} orders from tq broker success"
+        for order in orders.values():
+            if order.status == ORDER_ALIVE:
+                msg += f"\n{order.exchange_id}.{order.instrument_id}" + \
+                       f" {order.direction} to {order.offset}" + \
+                       f" with size={order.volume_orign}" + \
+                       f" at price={order.limit_price:.2f}," + \
+                       f" the status is {order.status}," + \
+                       f" the last message is {order.last_msg}, " + \
+                       f" error {order.is_error}"
+        logger.info(msg)
 
         return orders
 
@@ -493,21 +515,47 @@ class TQBroker(bt.BrokerBase):
         logger.info("start get positions from tq broker")
 
         positions = self.tq_api.get_position()
-        # TODO(fixme), make it as decorator
-        self._wait_update()
+        updated = self._wait_update()
 
-        logger.info("get positions %s from tq broker success", positions)
+        logger.info("get_position _wait_update: %s", updated)
+
+        msg = f"get {len(positions)} positions from tq broker success"
+        for p in positions.values():
+            if p.pos_long > 0:
+                value = p.open_cost_long / p.open_price_long * p.last_price
+                msg += f"\n[long] {p.exchange_id}.{p.instrument_id}:" + \
+                       f" size={p.pos_long}" + \
+                       f" price={p.last_price:.2f}" + \
+                       f" open={p.open_price_long:.2f}" + \
+                       f" value={value:.0f}" + \
+                       f" cost={p.open_cost_long:.0f}" + \
+                       f" profit={p.float_profit_long:.0f}" + \
+                       f" margin={p.margin_long:.0f}"
+
+        for p in positions.values():
+            if p.pos_short > 0:
+                value = p.open_cost_short / p.open_price_short * p.last_price
+                msg += f"\n[short] {p.exchange_id}.{p.instrument_id}:" + \
+                       f" size={p.pos_short}" + \
+                       f" price={p.last_price:.2f}" + \
+                       f" open={p.open_price_short:.2f}" + \
+                       f" value={value:.0f}" + \
+                       f" cost={p.open_cost_short:.0f}" + \
+                       f" profit={p.float_profit_short:.0f}" + \
+                       f" margin={p.margin_short:.0f}"
+        logger.info(msg)
 
         return positions
 
     def _get_quote_from_tq(self, quote_name):
         """get quote from tq broker"""
-        logger.info("start get quote from tq broker")
+        logger.info("start get_quote %s from tq broker", quote_name)
 
         quote = self.tq_api.get_quote(quote_name)
-        self._wait_update()
+        updated = self._wait_update()
 
-        logger.info("get quote %s from tq broker success", quote)
+        logger.info("get_quote %s success with _wait_update: %s",
+                    quote_name, updated)
 
         return quote
 
@@ -518,14 +566,16 @@ class TQBroker(bt.BrokerBase):
                             limit_price=None,
                             volume=0):
         """insert order to tq broker"""
-        logger.info("start insert order %s %s %s %f %d to tq broker",
+        logger.info("start insert_order %s %s %s %f %d to tq broker",
                     symbol, direction, offset, limit_price, volume)
         self.tq_api.insert_order(symbol=symbol,
                                  direction=direction,
                                  offset=offset,
                                  limit_price=limit_price,
                                  volume=volume)
-        self._wait_update()
+        updated = self._wait_update()
+        logger.info("insert_order _wait_update: %s", updated)
+
         logger.info("insert order %s %s %s %f %d from tq broker success",
                     symbol, direction, offset, limit_price, volume)
 
@@ -548,7 +598,7 @@ class TQBroker(bt.BrokerBase):
         # position information
         tp_positions = self._get_positions_from_tq()
         for p in tp_positions.values():
-            txt += f" {p.instrument_id}: value {p.market_value:.0f}"
+            txt += f"\n{p.exchange_id}.{p.instrument_id}:"
             txt += f" size {p.pos}"
             txt += f" float_profit {p.float_profit:.0f}"
             txt += f" position_profit {p.position_profit:.0f}"
@@ -557,7 +607,7 @@ class TQBroker(bt.BrokerBase):
         # order information
         orders_open = self.get_orders_open()
         for order in orders_open:
-            txt += f"; order {order.order_id}, status {order.status}"
+            txt += f"\norder {order.order_id}, status {order.status}"
 
         return txt
 
