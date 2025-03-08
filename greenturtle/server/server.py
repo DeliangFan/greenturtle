@@ -88,7 +88,9 @@ class Server:
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
         logger.info("Trading, syncing the delta data success")
 
-        infer = inference.Inference(conf=self.conf, trading_date=today)
+        infer = inference.Inference(conf=self.conf,
+                                    notifier=self.notifier,
+                                    trading_date=today)
         infer.run()
         infer.close()
 

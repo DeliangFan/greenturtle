@@ -77,7 +77,10 @@
 - [P0][Done] [Serving] Support buy and sell
 - [P0][Done] [Serving] Care about the limit price
 - [P0][Done] [Serving] Notification message for transaction
-- [P1] [Config] Refactor the config file
+- [P1][Done] [Config] Refactor the config file
+- [P1][Done] [Notifier] Refine order information with more details
+- [P0][Done] [Test] make sure the strategy parameters works as expected
+
 
 ## TODO
 
@@ -85,15 +88,14 @@
 - [P0] [Serving] Decoupling the executing order
 - [P0] [Serving] Contract rolling
 - [P0] [Serving] Deployment
-- [P0] [Serving] Metrics and alarm for service availability
 - [P1] [Serving] Better validation for daily price according to different varieties
-- [P1] [Serving] Persistence logs
 - [P1] [Backtesting] Analysis the profit and losing
 - [P1] Refactor the e2etest according to local data
 - [P1] Refine the commission according to the varieties
 - [P1] Evaluate the CTA factors
 - [P1] Add more unittest(data, strategy, simulator)
 - [P2] [Serving] Add support for multi account, support for both CN and US.
+- [P2] [Serving] Persistence logs
 - [P2] Add pyfolio
 
 # Issues
