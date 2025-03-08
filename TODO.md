@@ -81,10 +81,10 @@
 - [P1][Done] [Notifier] Refine order information with more details
 - [P0][Done] [Test] make sure the strategy parameters works as expected
 - [P1][Done] [Data] check before download to save time
+- [P0][Done] [Serving] Contract rolling
 
 ## TODO
 
-- [P0] [Serving] Contract rolling
 - [P0] [Serving] Trading validation including margin ratio, trading price
 - [P1] [Serving] Deployment
 - [P1] [Backtesting] Analysis the profit and losing

@@ -106,6 +106,8 @@ class Server:
                                     trading_date=trading_day)
         infer.account_overview()
         infer.run()
+        time.sleep(888)
+        infer.rolling()
         infer.close()
 
     def run(self):
@@ -116,7 +118,7 @@ class Server:
 
         # Every day at 12am or 00:00 time bedtime() is called.
         schedule.every().day.at("08:00").do(self.heartbeat)
-        schedule.every().day.at("20:00").do(self.trading)
+        schedule.every().day.at("09:31").do(self.trading)
         schedule.every().day.at("21:00").do(self.heartbeat)
         # Loop so that the scheduling task keeps on running all time.
         while True:
