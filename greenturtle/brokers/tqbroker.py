@@ -104,6 +104,8 @@ class TQBroker(bt.BrokerBase):
 
     def __init__(self, conf=None, notifier=None):
         super().__init__()
+        self.name = "tq_broker"
+
         # validate the config
         self.validate_config(conf)
 
@@ -137,10 +139,7 @@ class TQBroker(bt.BrokerBase):
 
         logger.info("start validating tq config")
 
-        if not hasattr(conf, "tq_broker"):
-            raise ValueError("tq_broker is not configured")
-
-        tq_broker = conf.tq_broker
+        tq_broker = conf.broker.tq_broker
         if not hasattr(tq_broker, "tq_username"):
             raise ValueError("tq_broker's username is not configured")
         if not hasattr(tq_broker, "tq_password"):
@@ -170,7 +169,7 @@ class TQBroker(bt.BrokerBase):
 
         logger.info("start getting tq api client")
 
-        tq_broker = self.conf.tq_broker
+        tq_broker = self.conf.broker.tq_broker
 
         # for tq auth
         tq_username = tq_broker.tq_username

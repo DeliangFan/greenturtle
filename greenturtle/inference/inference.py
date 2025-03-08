@@ -67,22 +67,17 @@ class Inference:
     def set_broker(self):
         """set broker"""
 
-        name = "back_broker"
+        broker_conf = None
         if hasattr(self.conf, 'broker'):
-            name = self.conf.broker
+            broker_conf = self.conf.broker
 
-        broker = None
-        if name == "back_broker":
-            broker = backbroker.BackBroker()
-        if name == "tq_broker":
+        broker = backbroker.BackBroker()
+        if hasattr(broker_conf, 'tq_broker'):
             broker = tqbroker.TQBroker(conf=self.conf)
 
-        if broker is None:
-            raise exception.BrokerNotSupportedError
-
-        logger.info("start adding %s broker", name)
+        logger.info("start adding %s broker", broker.name)
         self.cerebro.setbroker(broker)
-        logger.info("add %s broker success", name)
+        logger.info("add %s broker success", broker.name)
 
     # TODO(fixme), better abstraction for broker
     # pylint: disable=R0801
@@ -123,22 +118,26 @@ class Inference:
 
         logger.info("start validating inference config")
 
-        if hasattr(conf, "risk_factor"):
-            risk_factor = conf.risk_factor
+        strategy_conf = None
+        if hasattr(conf, 'strategy'):
+            strategy_conf = conf.strategy
+
+        if hasattr(strategy_conf, "risk_factor"):
+            risk_factor = strategy_conf.risk_factor
             if risk_factor <= 0 or risk_factor > 0.005:
                 raise exception.ValidateRiskFactorError
 
-        if hasattr(conf, "group_risk_factors"):
+        if hasattr(strategy_conf, "group_risk_factors"):
             total_risk_factor = 0
-            for factor in conf.group_risk_factors.values():
+            for factor in strategy_conf.group_risk_factors.values():
                 if factor <= 0 or factor > 0.02:
                     raise exception.ValidateGroupRiskFactorError
                 total_risk_factor += factor
             if total_risk_factor <= 0 or total_risk_factor > 0.08:
                 raise exception.ValidateGroupRiskFactorError
 
-        if hasattr(conf, "allow_short"):
-            allow_short = conf.allow_short
+        if hasattr(strategy_conf, "allow_short"):
+            allow_short = strategy_conf.allow_short
             if allow_short not in [True, False]:
                 raise ValueError("allow_short must be True or False")
 
@@ -152,17 +151,21 @@ class Inference:
     def add_strategy(self):
         """add strategy to cerebro."""
 
+        strategy_conf = None
+        if hasattr(self.conf, 'strategy'):
+            strategy_conf = self.conf.strategy
+
         risk_factor = varieties.DEFAULT_RISK_FACTOR
-        if hasattr(self.conf, "risk_factor"):
-            risk_factor = self.conf.risk_factor
+        if hasattr(strategy_conf, "risk_factor"):
+            risk_factor = strategy_conf.risk_factor
 
         group_risk_factors = varieties.DEFAULT_CN_GROUP_RISK_FACTORS
-        if hasattr(self.conf, "group_risk_factors"):
-            group_risk_factors = self.conf.group_risk_factors
+        if hasattr(strategy_conf, "group_risk_factors"):
+            group_risk_factors = strategy_conf.group_risk_factors
 
         allow_short = True
-        if hasattr(self.conf, "allow_short"):
-            allow_short = self.conf.allow_short
+        if hasattr(strategy_conf, "allow_short"):
+            allow_short = strategy_conf.allow_short
 
         logger.info("add strategy to cerebro with risk_factor: %s, "
                     "group_risk_factors: %s, allow_short: %s",
