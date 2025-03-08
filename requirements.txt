@@ -10,6 +10,7 @@ munch==4.0.0
 numpy==1.26.4
 pandas==2.2.0
 pymysql==1.1.1
+pyTelegramBotAPI==4.26.0
 pyyaml==6.0.2
 schedule==1.2.2
 yfinance==0.2.50

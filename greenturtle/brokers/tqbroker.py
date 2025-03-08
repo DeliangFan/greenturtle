@@ -16,6 +16,7 @@
 """tq broker"""
 
 import collections
+import math
 import time
 
 import backtrader as bt
@@ -101,7 +102,7 @@ class SymbolConvert:
 class TQBroker(bt.BrokerBase):
     """tq broker class"""
 
-    def __init__(self, conf=None):
+    def __init__(self, conf=None, notifier=None):
         super().__init__()
         # validate the config
         self.validate_config(conf)
@@ -117,6 +118,9 @@ class TQBroker(bt.BrokerBase):
         # initiate the db qpi
         self.dbapi = api.DBAPI(conf.db)
         self.convert = SymbolConvert(self.dbapi)
+
+        # notifier
+        self.notifier = notifier
 
         # initiate other attributes
         account = self._get_account_from_tq()
@@ -306,7 +310,8 @@ class TQBroker(bt.BrokerBase):
         desired_size = kwargs[types.DESIRED_SIZE]
 
         if self._has_open_order(variety):
-            logger.warning("skip buying %s due to remaining orders", variety)
+            msg = f"skip buying {variety} due to remaining orders"
+            self._logger_and_notifier(msg)
             return
 
         # in the caller in strategy.py
@@ -320,6 +325,11 @@ class TQBroker(bt.BrokerBase):
 
         quote_name = self._get_tq_quote_from_db_by_variety(variety)
         quote = self._get_quote_from_tq(quote_name)
+        if math.isnan(quote.ask_price1):
+            msg = f"skip buy {variety} due to nan ask_price"
+            self._logger_and_notifier(msg)
+            return
+
         if desired_size > 0:
             offset = "OPEN"
         else:
@@ -363,7 +373,8 @@ class TQBroker(bt.BrokerBase):
         desired_size = kwargs[types.DESIRED_SIZE]
 
         if self._has_open_order(variety):
-            logger.info("skip selling %s due to remaining orders", variety)
+            msg = f"skip selling {variety} due to remaining orders"
+            self._logger_and_notifier(msg)
             return
 
         # in the caller in strategy.py
@@ -377,6 +388,11 @@ class TQBroker(bt.BrokerBase):
 
         quote_name = self._get_tq_quote_from_db_by_variety(variety)
         quote = self._get_quote_from_tq(quote_name)
+        if math.isnan(quote.bid_price1):
+            msg = f"skip sell {variety} due to nan bid_price"
+            self._logger_and_notifier(msg)
+            return
+
         if desired_size < 0:
             offset = "OPEN"
         else:
@@ -477,7 +493,7 @@ class TQBroker(bt.BrokerBase):
 
         logger.info("get_account _wait_update: %s", updated)
 
-        msg = f"get account from tq broker success" + \
+        msg = "get account from tq broker success" + \
               f"\nbalance: {account.balance:.0f}" + \
               f"\navailable: {account.available:.0f}" + \
               f"\nmargin: {account.margin:.0f}" + \
@@ -566,8 +582,11 @@ class TQBroker(bt.BrokerBase):
                             limit_price=None,
                             volume=0):
         """insert order to tq broker"""
-        logger.info("start insert_order %s %s %s %f %d to tq broker",
-                    symbol, direction, offset, limit_price, volume)
+
+        msg = f"start insert_order {symbol} {direction} {offset}" + \
+              f" {limit_price:0.2f} {volume} to tq broker"
+        self._logger_and_notifier(msg)
+
         self.tq_api.insert_order(symbol=symbol,
                                  direction=direction,
                                  offset=offset,
@@ -576,6 +595,7 @@ class TQBroker(bt.BrokerBase):
         updated = self._wait_update()
         logger.info("insert_order _wait_update: %s", updated)
 
+        # TODO(fixeme), need to improve this step with asynchronize step.
         logger.info("insert order %s %s %s %f %d from tq broker success",
                     symbol, direction, offset, limit_price, volume)
 
@@ -615,3 +635,8 @@ class TQBroker(bt.BrokerBase):
         """close broker"""
         self.tq_api.close()
         logger.info("tq broker closed.")
+
+    def _logger_and_notifier(self, msg):
+        """logger and notifier the message"""
+        logger.info(msg)
+        self.notifier.send_message(msg)

@@ -38,10 +38,15 @@ class Inference:
 
     """Inference for online trading based on backtrader."""
 
-    def __init__(self, conf=None, trading_date=datetime_date.today()):
+    def __init__(self,
+                 conf=None,
+                 notifier=None,
+                 trading_date=datetime_date.today()):
         self.validate_config(conf)
 
         self.conf = conf
+        self.notifier = notifier
+
         self.trading_date = trading_date
         self.varieties = varieties.CN_VARIETIES
 
@@ -223,8 +228,9 @@ class Inference:
 
     def account_overview(self):
         """account_overview return the account status."""
-        txt = self.cerebro.broker.account_overview()
-        logger.info(txt)
+        msg = self.cerebro.broker.account_overview()
+        self.notifier.send_message(msg)
+        logger.info(msg)
 
     def close(self):
         """close the cerebro."""
