@@ -304,39 +304,50 @@ class TQBroker(bt.BrokerBase):
             4.2 rolling the contract if needed, first close the contract and
                 open with the desired size
         """
+
+        # validate parameters
         self._validate_trading_parameters(kwargs)
         variety = kwargs[types.VARIETY]
         desired_size = kwargs[types.DESIRED_SIZE]
 
+        # check if have open order
         if self._has_open_order(variety):
             msg = f"skip buying {variety} due to remaining orders"
             self._logger_and_notifier(msg)
             return
 
-        # in the caller in strategy.py
-        # if target > possize:
-        #   return self.buy(data=data, size=target - possize, **kwargs)
-        current_size = self._get_position_size_from_tq_by_variety(variety)
+        # get the position by variety
+        position = self._get_position_from_tq_by_variety(variety)
+
+        # check if the size are expected
+        current_size = 0
+        if position:
+            current_size = position.pos
         if current_size + size != desired_size:
-            logger.error("current %d + buy %d != desired %d",
-                         current_size, size, desired_size)
+            msg = f"{variety} skip due to current {current_size}" + \
+                  f" + buy {size} != desired {desired_size}"
+            self._logger_and_notifier(msg)
             raise exception.BuyOrSellSizeAbnormalError
 
-        quote_name = self._get_tq_quote_from_db_by_variety(variety)
+        # determine the offset and quote_name
+        if desired_size > 0:
+            offset = "OPEN"
+            quote_name = self._get_tq_quote_from_db_by_variety(variety)
+        else:
+            offset = "CLOSE"
+            quote_name = f"{position.exchange_id}.{position.instrument_id}"
+
+        # get the quote and check
         quote = self._get_quote_from_tq(quote_name)
         if math.isnan(quote.ask_price1):
             msg = f"skip buy {variety} due to nan ask_price"
             self._logger_and_notifier(msg)
             return
 
-        if desired_size > 0:
-            offset = "OPEN"
-        else:
-            offset = "CLOSE"
+        # do insert order
         self._insert_order_to_tq(symbol=quote_name,
                                  direction="BUY",
                                  offset=offset,
-                                 # TODO(fixme), nan price
                                  limit_price=quote.ask_price1,
                                  volume=size)
 
@@ -367,35 +378,47 @@ class TQBroker(bt.BrokerBase):
             4.2 rolling the contract if needed, first close the contract and
                 open with the desired size
         """
+
+        # validate parameters
         self._validate_trading_parameters(kwargs)
         variety = kwargs[types.VARIETY]
         desired_size = kwargs[types.DESIRED_SIZE]
 
+        # check if have open order
         if self._has_open_order(variety):
             msg = f"skip selling {variety} due to remaining orders"
             self._logger_and_notifier(msg)
             return
 
-        # in the caller in strategy.py
-        # if target < possize:
-        #   return self.sell(data=data, size=possize - target, **kwargs)
-        current_size = self._get_position_size_from_tq_by_variety(variety)
+        # get the position by variety
+        position = self._get_position_from_tq_by_variety(variety)
+
+        # check if the size are expected
+        current_size = 0
+        if position:
+            current_size = position.pos
         if current_size != desired_size + size:
-            logger.error("current %d != sell %d + desired %d",
-                         current_size, size, desired_size)
+            msg = f"{variety} skip due to current {current_size}" + \
+                  f" != sell {size} + desired {desired_size}"
+            self._logger_and_notifier(msg)
             raise exception.BuyOrSellSizeAbnormalError
 
-        quote_name = self._get_tq_quote_from_db_by_variety(variety)
+        # determine the offset and quote_name
+        if desired_size < 0:
+            offset = "OPEN"
+            quote_name = self._get_tq_quote_from_db_by_variety(variety)
+        else:
+            offset = "CLOSE"
+            quote_name = f"{position.exchange_id}.{position.instrument_id}"
+
+        # get the quote and check
         quote = self._get_quote_from_tq(quote_name)
         if math.isnan(quote.bid_price1):
             msg = f"skip sell {variety} due to nan bid_price"
             self._logger_and_notifier(msg)
             return
 
-        if desired_size < 0:
-            offset = "OPEN"
-        else:
-            offset = "CLOSE"
+        # do insert order
         self._insert_order_to_tq(symbol=quote_name,
                                  direction="SELL",
                                  offset=offset,
@@ -436,8 +459,8 @@ class TQBroker(bt.BrokerBase):
 
         return False
 
-    def _get_position_size_from_tq_by_variety(self, variety):
-        """get positions size from tq by variety"""
+    def _get_position_from_tq_by_variety(self, variety):
+        """get positions from tq by variety"""
 
         positions = []
         tp_positions = self._get_positions_from_tq()
@@ -448,8 +471,7 @@ class TQBroker(bt.BrokerBase):
             # get the variety
             db_variety = self.convert.tq_quote_2_db_variety(quote)
             if db_variety == variety:
-                positions.append(bt.position.Position(size=p.pos,
-                                                      price=p.last_price))
+                positions.append(p)
 
         if len(positions) > 1:
             logger.error("% has many position %s, expected 0 or 1",
@@ -457,9 +479,9 @@ class TQBroker(bt.BrokerBase):
             raise exception.VarietyMultiSymbolsError
 
         if len(positions) == 0:
-            return 0
+            return None
 
-        return positions[0].size
+        return positions[0]
 
     def _get_tq_quote_from_db_by_variety(self, variety):
         """get symbol from db by variety"""
@@ -640,6 +662,98 @@ class TQBroker(bt.BrokerBase):
         """close broker"""
         self.tq_api.close()
         logger.info("tq broker closed.")
+
+    def rolling(self):
+        """rolling contracts"""
+        positions = self._get_positions_from_tq()
+        for p in positions.values():
+            # skip the position with 0 size
+            if p.pos == 0 and p.pos_long == 0 and p.pos_short == 0:
+                continue
+
+            # compare the actual and desired quote name
+            actual = f"{p.exchange_id}.{p.instrument_id}"
+            variety = self.convert.tq_quote_2_db_variety(actual)
+            desired = self._get_tq_quote_from_db_by_variety(variety)
+            if actual == desired:
+                logger.info("%s no need to rolling", variety)
+                continue
+
+            msg = f"{variety} need to rolling from {actual} to {desired}"
+            self._logger_and_notifier(msg)
+
+            if self._has_open_order(variety):
+                msg = f"skip rolling {variety} due to open order"
+                self._logger_and_notifier(msg)
+                continue
+
+            # for the long position, sell to close and then buy to open
+            if p.pos_long > 0:
+                self.rolling_long(p, variety, actual, desired)
+
+            # for the short position, buy to close and then sell to open
+            if p.pos_short > 0:
+                self.rolling_short(p, variety, actual, desired)
+
+    def rolling_long(self, position, variety, actual, desired):
+        """rolling long contracts"""
+        # prepare closing the actual contract
+        quote = self._get_quote_from_tq(actual)
+        if math.isnan(quote.bid_price1):
+            msg = f"skip rolling {variety} due to nan bid_price"
+            self._logger_and_notifier(msg)
+            return
+
+        # close the actual contract
+        self._insert_order_to_tq(symbol=actual,
+                                 direction="SELL",
+                                 offset="CLOSE",
+                                 limit_price=quote.bid_price1,
+                                 volume=position.pos_long)
+
+        # prepare opening new contract
+        quote = self._get_quote_from_tq(desired)
+        if math.isnan(quote.ask_price1):
+            msg = f"skip rolling {variety} due to nan ask_price1"
+            self._logger_and_notifier(msg)
+            return
+
+        # open the desired contract
+        self._insert_order_to_tq(symbol=desired,
+                                 direction="BUY",
+                                 offset="OPEN",
+                                 limit_price=quote.ask_price1,
+                                 volume=position.pos_long)
+
+    def rolling_short(self, position, variety, actual, desired):
+        """rolling short contracts"""
+        # prepare closing the actual contract
+        quote = self._get_quote_from_tq(actual)
+        if math.isnan(quote.ask_price1):
+            msg = f"skip rolling {variety} due to nan ask_price1"
+            self._logger_and_notifier(msg)
+            return
+
+        # close the actual contract by opening
+        self._insert_order_to_tq(symbol=actual,
+                                 direction="BUY",
+                                 offset="CLOSE",
+                                 limit_price=quote.ask_price1,
+                                 volume=position.pos_short)
+
+        # prepare opening new contract
+        quote = self._get_quote_from_tq(desired)
+        if math.isnan(quote.bid_price1):
+            msg = f"skip rolling {variety} due to nan bid_price1"
+            self._logger_and_notifier(msg)
+            return
+
+        # open the desired contract
+        self._insert_order_to_tq(symbol=desired,
+                                 direction="SELL",
+                                 offset="OPEN",
+                                 limit_price=quote.bid_price1,
+                                 volume=position.pos_short)
 
     def _logger_and_notifier(self, msg):
         """logger and notifier the message"""

@@ -229,6 +229,12 @@ class Inference:
         value = self.cerebro.broker.getvalue()
         logger.info("finish trading with value: %.1f", value)
 
+    def rolling(self):
+        """rolling the contract which is going to be expired."""
+        logger.info("start rolling contract")
+        self.cerebro.broker.rolling()
+        logger.info("finish rolling contract")
+
     def account_overview(self):
         """account_overview return the account status."""
         msg = self.cerebro.broker.account_overview()

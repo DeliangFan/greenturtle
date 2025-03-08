@@ -43,6 +43,10 @@ class BackBroker(brokers.BackBroker):
 
         return txt
 
+    def rolling(self):
+        """rolling contract."""
+        logger.info("rolling in back broker, do nothing.")
+
     def close(self):
         """close"""
         logger.info("back broker closed.")
