@@ -34,7 +34,9 @@ parser.add_argument(
 )
 
 
-if __name__ == "__main__":
+def main():
+    """main function"""
+
     # load config
     args = parser.parse_args()
     conf = config.load_config(args.conf)
@@ -42,3 +44,7 @@ if __name__ == "__main__":
     # do create database tables
     manager = api.DBManager(conf.db)
     manager.create_all()
+
+
+if __name__ == "__main__":
+    main()

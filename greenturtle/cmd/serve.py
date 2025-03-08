@@ -38,7 +38,8 @@ parser.add_argument(
 )
 
 
-if __name__ == "__main__":
+def main():
+    """main function"""
     # load config
     args = parser.parse_args()
     conf = config.load_config(args.conf)
@@ -46,3 +47,7 @@ if __name__ == "__main__":
     # serving
     s = server.Server(conf)
     s.run()
+
+
+if __name__ == "__main__":
+    main()
