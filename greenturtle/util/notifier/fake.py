@@ -13,22 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""get notifier"""
-
-from greenturtle.util.notifier import fake
-from greenturtle.util.notifier import telegram
+"""fake notifier."""
 
 
-def get_notifier(conf):
-    """get notifier according to conf"""
+# pylint: disable=too-few-public-methods
+class FakeNotifier:
+    """fake notifier."""
 
-    if not hasattr(conf, 'notifier'):
-        raise ValueError("notifier not found")
-
-    notifier_conf = conf.notifier
-    if hasattr(notifier_conf, 'telegram'):
-        notifier = telegram.TelegramNotifier(notifier_conf.telegram)
-    else:
-        notifier = fake.FakeNotifier()
-
-    return notifier
+    def send_message(self, message):
+        """send message, do nothing."""

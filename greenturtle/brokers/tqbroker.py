@@ -205,7 +205,7 @@ class TQBroker(bt.BrokerBase):
         deadline = time.time() + second
         return deadline
 
-    def _wait_update(self, second=30):
+    def _wait_update(self, second=15):
         """wait execute self.tq_api.wait_update()"""
         deadline = self._get_deadline(second)
         updated = self.tq_api.wait_update(deadline=deadline)
@@ -609,26 +609,32 @@ class TQBroker(bt.BrokerBase):
         margin = account["margin"]
 
         # account information
-        txt = f"TQ broker: value {value:.0f}, cash {cash:.0f}"
-        txt += f", float_profit {float_profit:.0f}"
-        txt += f", position_profit {position_profit:.0f}"
-        txt += f", margin {margin:.0f}."
+        msg = f"TQ broker: value {value:.0f}, cash {cash:.0f}"
+        msg += f", float_profit {float_profit:.0f}"
+        msg += f", position_profit {position_profit:.0f}"
+        msg += f", margin {margin:.0f}."
 
         # position information
         tp_positions = self._get_positions_from_tq()
         for p in tp_positions.values():
-            txt += f"\n{p.exchange_id}.{p.instrument_id}:"
-            txt += f" size {p.pos}"
-            txt += f" float_profit {p.float_profit:.0f}"
-            txt += f" position_profit {p.position_profit:.0f}"
-            txt += f" margin {p.margin:.0f};"
+            msg += f"\n{p.exchange_id}.{p.instrument_id}:"
+            msg += f" size {p.pos}"
+            msg += f" float_profit {p.float_profit:.0f}"
+            msg += f" position_profit {p.position_profit:.0f}"
+            msg += f" margin {p.margin:.0f};"
 
         # order information
         orders_open = self.get_orders_open()
         for order in orders_open:
-            txt += f"\norder {order.order_id}, status {order.status}"
+            msg += f"\n{order.exchange_id}.{order.instrument_id}" + \
+                   f" {order.direction} to {order.offset}" + \
+                   f" with size={order.volume_orign}" + \
+                   f" at price={order.limit_price:.2f}," + \
+                   f" the status is {order.status}," + \
+                   f" the last message is {order.last_msg}, " + \
+                   f" error {order.is_error}"
 
-        return txt
+        return msg
 
     def close(self):
         """close broker"""
