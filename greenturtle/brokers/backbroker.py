@@ -24,6 +24,7 @@ class BackBroker(brokers.BackBroker):
     """back broker."""
     def __init__(self):
         super().__init__()
+        self.name = "back_broker"
         # Set our desired cash start
         self.setcash(1000000)
         # Set short cash

@@ -6,21 +6,22 @@ db:
   password: passport
   host: localhost
   port: 3306
-risk_factor: 0.002
-group_risk_factors:
-  agriculture: 0.015
-  metal: 0.02
-  energy: 0.02
-  indices: 0.015
-allow_short: true
-broker: tq_broker
-tq_broker:
-  tq_username: tq_username
-  tq_password: tq_password
-  simulate: True
-  broker_id: broker_id
-  account_id: account_id
-  password: password
+strategy:
+  risk_factor: 0.002
+  group_risk_factors:
+    agriculture: 0.015
+    metal: 0.02
+    energy: 0.02
+    indices: 0.015
+  allow_short: true
+broker:
+  tq_broker:
+    tq_username: tq_username
+    tq_password: tq_password
+    simulate: True
+    broker_id: broker_id
+    account_id: account_id
+    password: password
 notifier:
   telegram:
     chat_id: chat_id

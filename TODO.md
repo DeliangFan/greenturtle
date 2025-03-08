@@ -77,9 +77,11 @@
 - [P0][Done] [Serving] Support buy and sell
 - [P0][Done] [Serving] Care about the limit price
 - [P0][Done] [Serving] Notification message for transaction
+- [P1] [Config] Refactor the config file
 
 ## TODO
 
+- [P1] [Data] check before download to save time
 - [P0] [Serving] Decoupling the executing order
 - [P0] [Serving] Contract rolling
 - [P0] [Serving] Deployment
