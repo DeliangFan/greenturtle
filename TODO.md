@@ -80,16 +80,15 @@
 - [P1][Done] [Config] Refactor the config file
 - [P1][Done] [Notifier] Refine order information with more details
 - [P0][Done] [Test] make sure the strategy parameters works as expected
-
+- [P1][Done] [Data] check before download to save time
 
 ## TODO
 
-- [P1] [Data] check before download to save time
-- [P0] [Serving] Decoupling the executing order
 - [P0] [Serving] Contract rolling
-- [P0] [Serving] Deployment
-- [P1] [Serving] Better validation for daily price according to different varieties
+- [P0] [Serving] Trading validation including margin ratio, trading price
+- [P1] [Serving] Deployment
 - [P1] [Backtesting] Analysis the profit and losing
+- [P1] [Serving] Decoupling the executing order
 - [P1] Refactor the e2etest according to local data
 - [P1] Refine the commission according to the varieties
 - [P1] Evaluate the CTA factors

@@ -411,8 +411,8 @@ class DeltaContinuousContract(ContinuousContract):
         contracts = self.get_all_contracts_since_date(
             continuous_contract.date)
         if len(contracts) == 0:
-            logger.warning("no contract found since %s for %s",
-                           continuous_contract.date, self.variety)
+            logger.info("no contract found since %s for %s",
+                        continuous_contract.date, self.variety)
             return
 
         dates = self.get_sorted_dates(contracts)
