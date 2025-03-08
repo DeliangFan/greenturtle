@@ -172,3 +172,8 @@ class VarietyMultiSymbolsError(GreenTurtleBaseException):
 class BuyOrSellSizeAbnormalError(GreenTurtleBaseException):
     """buy or sell size abnormal error"""
     msg_fmt = "buy or sell size abnormal error."
+
+
+class NotifierNotSupportedError(GreenTurtleBaseException):
+    """notifier not supported error"""
+    msg_fmt = "notifier not supported error."

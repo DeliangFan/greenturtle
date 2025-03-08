@@ -76,15 +76,16 @@
 - [P0][Done] [Serving] Mapping varieties to symbol during buy and sell
 - [P0][Done] [Serving] Support buy and sell
 - [P0][Done] [Serving] Care about the limit price
+- [P0][Done] [Serving] Notification message for transaction
 
 ## TODO
 
+- [P0] [Serving] Decoupling the executing order
 - [P0] [Serving] Contract rolling
-- [P0] [Serving] Notification message for transaction
-- [P0] [Serving] Persistence logs
 - [P0] [Serving] Deployment
 - [P0] [Serving] Metrics and alarm for service availability
 - [P1] [Serving] Better validation for daily price according to different varieties
+- [P1] [Serving] Persistence logs
 - [P1] [Backtesting] Analysis the profit and losing
 - [P1] Refactor the e2etest according to local data
 - [P1] Refine the commission according to the varieties

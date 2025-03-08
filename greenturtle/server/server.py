@@ -32,6 +32,7 @@ from greenturtle import exception
 from greenturtle.inference import inference
 from greenturtle.util import calendar
 from greenturtle.util.logging import logging
+from greenturtle.util.notifier import notifier
 from greenturtle.util import util
 
 
@@ -59,10 +60,11 @@ class Server:
         self.conf = conf
         self.dbapi = api.DBAPI(self.conf.db)
         self.delta_data_syncer = DeltaDataSyncer(self.conf, self.dbapi)
+        self.notifier = notifier.get_notifier(conf)
 
     def initialize(self):
         """initialize the server"""
-        infer = inference.Inference(conf=self.conf)
+        infer = inference.Inference(conf=self.conf, notifier=self.notifier)
         infer.account_overview()
         infer.close()
 
@@ -76,7 +78,9 @@ class Server:
 
         today = datetime_date.today()
         if not calendar.is_cn_trading_day(today):
-            logger.info("skip trading since %s is not a trading day", today)
+            msg = f"skip trading since {today} is not a trading day"
+            self.notifier.send_message(msg)
+            logger.info(msg)
             return
 
         logger.info("Trading, prepare syncing the delta data")
@@ -95,13 +99,21 @@ class Server:
         self.initialize()
 
         # Every day at 12am or 00:00 time bedtime() is called.
-        schedule.every().day.at("16:46").do(self.trading)
+        schedule.every().day.at("08:00").do(self.heartbeat)
+        schedule.every().day.at("20:00").do(self.trading)
+        schedule.every().day.at("21:00").do(self.heartbeat)
         # Loop so that the scheduling task keeps on running all time.
         while True:
             # Checks whether a scheduled task is pending to run or not
             schedule.run_pending()
-            logger.info("Greenturtle is swimming, heartbeat...")
+            logger.info("Greenturtle is swimming, breath every minute")
             time.sleep(60)
+
+    def heartbeat(self):
+        """heartbeat"""
+        msg = "Little greenturtle is busy in making money," + \
+              " only take a break for two times everyday"
+        self.notifier.send_message(msg)
 
 
 class DeltaDataSyncer:

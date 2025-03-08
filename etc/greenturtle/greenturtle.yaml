@@ -21,6 +21,10 @@ tq_broker:
   broker_id: broker_id
   account_id: account_id
   password: password
+notifier:
+  telegram:
+    chat_id: chat_id
+    bot_token: bot_token
 whitelist:
   - A
   - AG
