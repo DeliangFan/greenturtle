@@ -149,6 +149,11 @@ class ValidateTradingDayError(GreenTurtleBaseException):
     msg_fmt = "Validate trading day error."
 
 
+class TradingDayNotFoundError(GreenTurtleBaseException):
+    """Trading day not found error"""
+    msg_fmt = "Trading day not found error."
+
+
 class ValidateRiskFactorError(GreenTurtleBaseException):
     """Validate risk factor error"""
     msg_fmt = "Validate risk factor error."

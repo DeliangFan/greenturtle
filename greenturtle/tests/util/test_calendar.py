@@ -84,3 +84,17 @@ class TestCalendar(unittest.TestCase):
             calendar.get_cn_trading_days,
             start_date, end_date,
         )
+
+    def test_get_cn_last_trading_day(self):
+        """test get_cn_last_trading_day"""
+        date = datetime.date(2025, 3, 8)
+        actual = calendar.get_cn_last_trading_day(date)
+        expect = datetime.date(2025, 3, 7)
+        self.assertEqual(expect, actual)
+
+    def test_get_cn_next_trading_day(self):
+        """test get_cn_next_trading_day"""
+        date = datetime.date(2025, 3, 8)
+        actual = calendar.get_cn_next_trading_day(date)
+        expect = datetime.date(2025, 3, 10)
+        self.assertEqual(expect, actual)

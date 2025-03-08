@@ -30,6 +30,7 @@ from greenturtle import exception
 
 START_DATE = datetime.date(year=2004, month=1, day=1)
 END_DATE = datetime.date(year=2025, month=12, day=31)
+RETRY = 30
 
 # special days
 SPECIAL_DATES = [
@@ -92,3 +93,39 @@ def get_cn_trading_days(start_date, end_date):
         date += datetime.timedelta(days=1)
 
     return trading_days
+
+
+def get_cn_last_trading_day(date):
+    """get cn last trading day before date"""
+    # we must find the trading date within 30 days
+    retry = RETRY
+    date += datetime.timedelta(days=-1)
+
+    while retry > 0:
+        validate_cn_date(date)
+
+        if is_cn_trading_day(date):
+            return date
+
+        date += datetime.timedelta(days=-1)
+        retry = retry - 1
+
+    raise exception.TradingDayNotFoundError
+
+
+def get_cn_next_trading_day(date):
+    """get cn next trading day after the date"""
+    # we must find the trading date within 30 days
+    retry = RETRY
+    date += datetime.timedelta(days=1)
+
+    while retry > 0:
+        validate_cn_date(date)
+
+        if is_cn_trading_day(date):
+            return date
+
+        date += datetime.timedelta(days=1)
+        retry = retry - 1
+
+    raise exception.TradingDayNotFoundError

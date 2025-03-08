@@ -15,8 +15,7 @@
 
 """online trading server"""
 
-from datetime import date as datetime_date
-from datetime import datetime
+import datetime
 import time
 
 import pandas as pd
@@ -37,6 +36,23 @@ from greenturtle.util import util
 
 
 logger = logging.get_logger()
+
+
+def decision_regard_date():
+    """return the date when making decision regard to"""
+    today = datetime.date.today()
+
+    # get the last trading day before today
+    decision_date = calendar.get_cn_last_trading_day(today)
+
+    # determine the decision date, and it's decided by the data
+    if calendar.is_cn_trading_day(today):
+        now = datetime.datetime.now().time()
+        # check if it's closed time
+        if now > datetime.time(15, 30):
+            decision_date = today
+
+    return decision_date
 
 
 class Server:
@@ -64,10 +80,6 @@ class Server:
 
     def initialize(self):
         """initialize the server"""
-        infer = inference.Inference(conf=self.conf, notifier=self.notifier)
-        infer.account_overview()
-        infer.close()
-
         logger.info("initializing with syncing delta data")
         self.delta_data_syncer.synchronize_delta_contracts()
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
@@ -76,21 +88,23 @@ class Server:
     def trading(self):
         """do trading"""
 
-        today = datetime_date.today()
+        today = datetime.date.today()
         if not calendar.is_cn_trading_day(today):
             msg = f"skip trading since {today} is not a trading day"
             self.notifier.send_message(msg)
             logger.info(msg)
             return
 
-        logger.info("Trading, prepare syncing the delta data")
+        logger.info("prepare syncing the delta data")
         self.delta_data_syncer.synchronize_delta_contracts()
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
-        logger.info("Trading, syncing the delta data success")
+        logger.info("finish preparing the delta data success")
 
+        trading_day = decision_regard_date()
         infer = inference.Inference(conf=self.conf,
                                     notifier=self.notifier,
-                                    trading_date=today)
+                                    trading_date=trading_day)
+        infer.account_overview()
         infer.run()
         infer.close()
 
@@ -127,6 +141,57 @@ class DeltaDataSyncer:
         self.conf = conf
         self.dbapi = dbapi
 
+    def has_delta_contracts_synced(self):
+        """
+        check the delta contracts has been synced or not
+
+        1. if today is not trading day, then check the data of the latest
+           trading day.
+        2. if today is trading day, then check the time. If the trading has
+           been closed, then check today's data. If the trading has not been
+           closed, then check the data of the latest trading day.
+
+        Then check if every variety has the contract in the trading date
+        """
+        # the data in the date which is used to make decision.
+        decision_date = decision_regard_date()
+
+        # convert date to datetime
+        decision_date_time = datetime.datetime.combine(
+            decision_date, datetime.datetime.min.time())
+
+        # prepare parameters
+        get = self.dbapi.contract_get_all_by_variety_source_country_since_date
+        since = decision_date_time + datetime.timedelta(days=-200)
+
+        for group in varieties.CN_VARIETIES.values():
+            for variety in group:
+                # contracts need to check
+                checks = set()
+                contracts = get(variety=variety,
+                                source=self.conf.source,
+                                country=self.conf.country,
+                                date=since)
+
+                for contract in contracts:
+                    if contract.expire >= decision_date_time:
+                        checks.add(contract.name)
+
+                # check the contracts
+                for name in checks:
+                    one = self.dbapi.contract_get_by_constraint(
+                        date=decision_date_time,
+                        name=name,
+                        variety=variety,
+                        source=self.conf.source,
+                        country=self.conf.country,
+                    )
+                    if not one:
+                        logger.warning("%s %s delta contract not synced yet",
+                                       name, decision_date_time)
+                        return False
+        return True
+
     def synchronize_delta_contracts(self):
         """synchronize delta data."""
         if not (
@@ -134,6 +199,10 @@ class DeltaDataSyncer:
                 (self.conf.source == types.AKSHARE)
         ):
             raise NotImplementedError
+
+        if self.has_delta_contracts_synced():
+            logger.info("skip sync delta contract since already synced")
+            return
 
         symbols_expire = self._get_symbols_expire(types.CN_EXCHANGES)
 
@@ -195,7 +264,8 @@ class DeltaDataSyncer:
                 return None
 
             for _, row in df.iterrows():
-                date = datetime.strptime(str(row.date), types.DATE_FORMAT)
+                date = datetime.datetime.strptime(str(row.date),
+                                                  types.DATE_FORMAT)
                 row = transform.pd_row_nan_2_none(row)
                 row = transform.pd_row_emptystring_2_none(row)
                 group = util.get_group(
