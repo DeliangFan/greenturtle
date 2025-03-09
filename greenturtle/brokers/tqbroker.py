@@ -98,7 +98,7 @@ class SymbolConvert:
         return contract.variety
 
 
-# pylint: disable=too-many-instance-attributes,
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
 class TQBroker(bt.BrokerBase):
     """tq broker class"""
 
@@ -504,6 +504,14 @@ class TQBroker(bt.BrokerBase):
             if order.status == ORDER_ALIVE:
                 orders_open.append(order)
         return orders_open
+
+    def get_orders(self):
+        """get all orders"""
+        return self._get_orders_from_tq()
+
+    def cancel_order(self, order_id, account=None):
+        """cancel order"""
+        self.tq_api.cancel_order(order_id, account=account)
 
     def _get_account_from_tq(self):
         """get account from tq broker"""
