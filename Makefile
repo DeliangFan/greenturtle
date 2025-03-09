@@ -1,5 +1,5 @@
 fmt:
-	pylint * --ignore="Makefile,README.md,requirements.txt,LICENSE,TODO.md"
+	pylint * --ignore="Makefile,README.md,requirements.txt,LICENSE,TODO.md,AUTHORS,version.txt"
 	flake8
 
 unittest:
