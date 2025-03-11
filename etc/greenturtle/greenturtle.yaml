@@ -13,6 +13,7 @@ strategy:
     metal: 0.02
     energy: 0.02
     indices: 0.015
+  max_margin_ratio: 0.2
   allow_short: true
 broker:
   tq_broker:

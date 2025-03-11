@@ -49,4 +49,5 @@ def get_tq_broker():
 
 if __name__ == "__main__":
     b = get_tq_broker()
+    print(b.account_overview())
     b.close()

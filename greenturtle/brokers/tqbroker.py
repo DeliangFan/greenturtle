@@ -128,10 +128,25 @@ class TQBroker(bt.BrokerBase):
         account = self._get_account_from_tq()
         self.cash = account["available"]
         self.value = account["balance"]
+        self.margin = account["margin"]
+        self.margin_ratio = self.margin / self.value
+        self.max_margin_ratio = self.get_max_margin_ratio(conf)
         self.positions = self.get_all_positions()
 
         # used in backtrader
         self.startingcash = self.cash
+
+    def get_max_margin_ratio(self, conf):
+        """get max margin ratio for broker"""
+        max_margin_ratio = 0.3
+        if not hasattr(conf, "strategy"):
+            return max_margin_ratio
+
+        strategy_conf = conf.strategy
+        if hasattr(strategy_conf, "max_margin_ratio"):
+            max_margin_ratio = strategy_conf.max_margin_ratio
+
+        return max_margin_ratio
 
     @staticmethod
     def validate_config(conf):
@@ -616,6 +631,11 @@ class TQBroker(bt.BrokerBase):
               f" {limit_price:0.2f} {volume} to tq broker"
         self._logger_and_notifier(msg)
 
+        if self.margin_ratio > self.max_margin_ratio:
+            msg = f"skip insert_order {symbol} due to margin limitation"
+            self._logger_and_notifier(msg)
+            return
+
         self.tq_api.insert_order(symbol=symbol,
                                  direction=direction,
                                  offset=offset,
@@ -645,13 +665,27 @@ class TQBroker(bt.BrokerBase):
         msg += f", margin {margin:.0f}."
 
         # position information
+        rolling_list = []
         tp_positions = self._get_positions_from_tq()
         for p in tp_positions.values():
+            if p.pos == 0 and p.pos_long == 0 and p.pos_short == 0:
+                continue
             msg += f"\n{p.exchange_id}.{p.instrument_id}:"
             msg += f" size {p.pos}"
             msg += f" float_profit {p.float_profit:.0f}"
             msg += f" position_profit {p.position_profit:.0f}"
             msg += f" margin {p.margin:.0f};"
+
+            actual = f"{p.exchange_id}.{p.instrument_id}"
+            variety = self.convert.tq_quote_2_db_variety(actual)
+            desired = self._get_tq_quote_from_db_by_variety(variety)
+            if actual != desired:
+                logger.info("need rolling, actual: %s, desired: %s",
+                            actual, desired)
+                rolling_list.append(actual)
+
+        if len(rolling_list) > 0:
+            msg += f"\nrolling list: {rolling_list}"
 
         # order information
         orders_open = self.get_orders_open()
