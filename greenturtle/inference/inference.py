@@ -112,6 +112,7 @@ class Inference:
             name=name,
         )
 
+    # pylint: disable=too-many-branches
     @staticmethod
     def validate_config(conf):
         """Validate config."""
@@ -140,6 +141,11 @@ class Inference:
             allow_short = strategy_conf.allow_short
             if allow_short not in [True, False]:
                 raise ValueError("allow_short must be True or False")
+
+        if hasattr(strategy_conf, "max_margin_ratio"):
+            max_margin_ratio = strategy_conf.max_margin_ratio
+            if max_margin_ratio <= 0 or max_margin_ratio > 0.3:
+                raise ValueError("max_margin_ratio must be 0 or 0.3")
 
         if hasattr(conf, "whitelist"):
             whitelist = conf.whitelist
