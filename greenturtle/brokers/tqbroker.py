@@ -129,14 +129,26 @@ class TQBroker(bt.BrokerBase):
         self.cash = account["available"]
         self.value = account["balance"]
         self.margin = account["margin"]
-        self.margin_ratio = self.margin / self.value
         self.max_margin_ratio = self.get_max_margin_ratio(conf)
         self.positions = self.get_all_positions()
 
         # used in backtrader
         self.startingcash = self.cash
 
-    def get_max_margin_ratio(self, conf):
+    def get_margin_ratio(self):
+        """get current margin ratio"""
+        account = self._get_account_from_tq()
+
+        self.margin = account["margin"]
+        self.value = account["balance"]
+        if self.value == 0:
+            return 0
+
+        margin_ratio = self.margin / self.value
+        return margin_ratio
+
+    @staticmethod
+    def get_max_margin_ratio(conf):
         """get max margin ratio for broker"""
         max_margin_ratio = 0.3
         if not hasattr(conf, "strategy"):
@@ -631,7 +643,8 @@ class TQBroker(bt.BrokerBase):
               f" {limit_price:0.2f} {volume} to tq broker"
         self._logger_and_notifier(msg)
 
-        if self.margin_ratio > self.max_margin_ratio:
+        margin_ratio = self.get_margin_ratio()
+        if margin_ratio > self.max_margin_ratio:
             msg = f"skip insert_order {symbol} due to margin limitation"
             self._logger_and_notifier(msg)
             return
@@ -730,11 +743,13 @@ class TQBroker(bt.BrokerBase):
                 continue
 
             # for the long position, sell to close and then buy to open
-            if p.pos_long > 0:
+            pos_long = p.pos_long
+            pos_short = p.pos_short
+            if pos_long > 0:
                 self.rolling_long(p, variety, actual, desired)
 
             # for the short position, buy to close and then sell to open
-            if p.pos_short > 0:
+            if pos_short > 0:
                 self.rolling_short(p, variety, actual, desired)
 
     def rolling_long(self, position, variety, actual, desired):
@@ -746,12 +761,13 @@ class TQBroker(bt.BrokerBase):
             self._logger_and_notifier(msg)
             return
 
+        volume = position.pos_long
         # close the actual contract
         self._insert_order_to_tq(symbol=actual,
                                  direction="SELL",
                                  offset="CLOSE",
                                  limit_price=quote.bid_price1,
-                                 volume=position.pos_long)
+                                 volume=volume)
 
         # prepare opening new contract
         quote = self._get_quote_from_tq(desired)
@@ -765,7 +781,7 @@ class TQBroker(bt.BrokerBase):
                                  direction="BUY",
                                  offset="OPEN",
                                  limit_price=quote.ask_price1,
-                                 volume=position.pos_long)
+                                 volume=volume)
 
     def rolling_short(self, position, variety, actual, desired):
         """rolling short contracts"""
@@ -776,12 +792,13 @@ class TQBroker(bt.BrokerBase):
             self._logger_and_notifier(msg)
             return
 
+        volume = position.pos_short
         # close the actual contract by opening
         self._insert_order_to_tq(symbol=actual,
                                  direction="BUY",
                                  offset="CLOSE",
                                  limit_price=quote.ask_price1,
-                                 volume=position.pos_short)
+                                 volume=volume)
 
         # prepare opening new contract
         quote = self._get_quote_from_tq(desired)
@@ -795,7 +812,7 @@ class TQBroker(bt.BrokerBase):
                                  direction="SELL",
                                  offset="OPEN",
                                  limit_price=quote.bid_price1,
-                                 volume=position.pos_short)
+                                 volume=volume)
 
     def _logger_and_notifier(self, msg):
         """logger and notifier the message"""
