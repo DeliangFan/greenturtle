@@ -17,17 +17,20 @@
 
 from greenturtle.util.notifier import fake
 from greenturtle.util.notifier import telegram
+from greenturtle.util.notifier import wechat
 
 
 def get_notifier(conf):
     """get notifier according to conf"""
 
-    if not hasattr(conf, 'notifier'):
+    if 'notifier' not in conf:
         raise ValueError("notifier not found")
 
     notifier_conf = conf.notifier
-    if hasattr(notifier_conf, 'telegram'):
+    if 'telegram' in notifier_conf:
         notifier = telegram.TelegramNotifier(notifier_conf.telegram)
+    elif 'wechat' in notifier_conf:
+        notifier = wechat.WechatNotifier(notifier_conf.wechat)
     else:
         notifier = fake.FakeNotifier()
 
