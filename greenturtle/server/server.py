@@ -113,7 +113,10 @@ class Server:
     def run(self):
         """run server"""
 
-        logger.info("Server is start running.")
+        msg = "Server is start running."
+        logger.info(msg)
+        self.notifier.send_message(msg)
+
         self.initialize()
 
         # Every day at 12am or 00:00 time bedtime() is called.
