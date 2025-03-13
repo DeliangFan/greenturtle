@@ -84,18 +84,17 @@
 - [P0][Done] [Serving] Contract rolling
 - [P0][Done] [Serving] Add warning information like margin ratio and rolling
 - [P0][Done] [Serving] Trading validation including margin ratio
+- [P1][Done] [Serving] Deployment
 
 ## TODO
 
-- [P1] [Serving] Deployment
 - [P1] [Backtesting] Analysis the profit and losing
-- [P1] [Serving] Decoupling the executing order
 - [P1] Refactor the e2etest according to local data
-- [P1] Refine the commission according to the varieties
 - [P1] Evaluate the CTA factors
 - [P1] Add more unittest(data, strategy, simulator)
 - [P2] [Serving] Add support for multi account, support for both CN and US.
 - [P2] [Serving] Persistence logs
+- [P2] [Serving] Decoupling the executing order
 - [P2] Add pyfolio
 
 # Issues
