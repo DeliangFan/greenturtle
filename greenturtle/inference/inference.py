@@ -28,6 +28,7 @@ from greenturtle.data.datafeed import db
 from greenturtle import exception
 from greenturtle.stragety import ema
 from greenturtle.util.logging import logging
+from greenturtle.util import util
 
 
 logger = logging.get_logger()
@@ -244,8 +245,7 @@ class Inference:
     def account_overview(self):
         """account_overview return the account status."""
         msg = self.cerebro.broker.account_overview()
-        self.notifier.send_message(msg)
-        logger.info(msg)
+        util.logger_and_notifier(self.notifier, msg)
 
     def close(self):
         """close the cerebro."""

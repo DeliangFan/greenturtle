@@ -26,6 +26,7 @@ from greenturtle.constants import types
 from greenturtle.db import api
 from greenturtle import exception
 from greenturtle.util.logging import logging
+from greenturtle.util import util
 
 
 logger = logging.get_logger()
@@ -340,7 +341,7 @@ class TQBroker(bt.BrokerBase):
         # check if have open order
         if self._has_open_order(variety):
             msg = f"skip buying {variety} due to remaining orders"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         # get the position by variety
@@ -353,7 +354,7 @@ class TQBroker(bt.BrokerBase):
         if current_size + size != desired_size:
             msg = f"{variety} skip due to current {current_size}" + \
                   f" + buy {size} != desired {desired_size}"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             raise exception.BuyOrSellSizeAbnormalError
 
         # determine the offset and quote_name
@@ -368,7 +369,7 @@ class TQBroker(bt.BrokerBase):
         quote = self._get_quote_from_tq(quote_name)
         if math.isnan(quote.ask_price1):
             msg = f"skip buy {variety} due to nan ask_price"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         # do insert order
@@ -414,7 +415,7 @@ class TQBroker(bt.BrokerBase):
         # check if have open order
         if self._has_open_order(variety):
             msg = f"skip selling {variety} due to remaining orders"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         # get the position by variety
@@ -427,7 +428,7 @@ class TQBroker(bt.BrokerBase):
         if current_size != desired_size + size:
             msg = f"{variety} skip due to current {current_size}" + \
                   f" != sell {size} + desired {desired_size}"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             raise exception.BuyOrSellSizeAbnormalError
 
         # determine the offset and quote_name
@@ -442,7 +443,7 @@ class TQBroker(bt.BrokerBase):
         quote = self._get_quote_from_tq(quote_name)
         if math.isnan(quote.bid_price1):
             msg = f"skip sell {variety} due to nan bid_price"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         # do insert order
@@ -641,12 +642,12 @@ class TQBroker(bt.BrokerBase):
 
         msg = f"start insert_order {symbol} {direction} {offset}" + \
               f" {limit_price:0.2f} {volume} to tq broker"
-        self._logger_and_notifier(msg)
+        util.logger_and_notifier(self.notifier, msg)
 
         margin_ratio = self.get_margin_ratio()
         if margin_ratio > self.max_margin_ratio:
             msg = f"skip insert_order {symbol} due to margin limitation"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         self.tq_api.insert_order(symbol=symbol,
@@ -735,11 +736,11 @@ class TQBroker(bt.BrokerBase):
                 continue
 
             msg = f"{variety} need to rolling from {actual} to {desired}"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
 
             if self._has_open_order(variety):
                 msg = f"skip rolling {variety} due to open order"
-                self._logger_and_notifier(msg)
+                util.logger_and_notifier(self.notifier, msg)
                 continue
 
             # for the long position, sell to close and then buy to open
@@ -758,7 +759,7 @@ class TQBroker(bt.BrokerBase):
         quote = self._get_quote_from_tq(actual)
         if math.isnan(quote.bid_price1):
             msg = f"skip rolling {variety} due to nan bid_price"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         volume = position.pos_long
@@ -773,7 +774,7 @@ class TQBroker(bt.BrokerBase):
         quote = self._get_quote_from_tq(desired)
         if math.isnan(quote.ask_price1):
             msg = f"skip rolling {variety} due to nan ask_price1"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         # open the desired contract
@@ -789,7 +790,7 @@ class TQBroker(bt.BrokerBase):
         quote = self._get_quote_from_tq(actual)
         if math.isnan(quote.ask_price1):
             msg = f"skip rolling {variety} due to nan ask_price1"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         volume = position.pos_short
@@ -804,7 +805,7 @@ class TQBroker(bt.BrokerBase):
         quote = self._get_quote_from_tq(desired)
         if math.isnan(quote.bid_price1):
             msg = f"skip rolling {variety} due to nan bid_price1"
-            self._logger_and_notifier(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
 
         # open the desired contract
@@ -813,8 +814,3 @@ class TQBroker(bt.BrokerBase):
                                  offset="OPEN",
                                  limit_price=quote.bid_price1,
                                  volume=volume)
-
-    def _logger_and_notifier(self, msg):
-        """logger and notifier the message"""
-        logger.info(msg)
-        self.notifier.send_message(msg)

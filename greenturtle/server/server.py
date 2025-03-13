@@ -91,14 +91,18 @@ class Server:
         today = datetime.date.today()
         if not calendar.is_cn_trading_day(today):
             msg = f"skip trading since {today} is not a trading day"
-            self.notifier.send_message(msg)
-            logger.info(msg)
+            util.logger_and_notifier(self.notifier, msg)
             return
+
+        util.logger_and_notifier(self.notifier,
+                                 "wakeup, it's time to swimming")
 
         logger.info("prepare syncing the delta data")
         self.delta_data_syncer.synchronize_delta_contracts()
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
-        logger.info("finish preparing the delta data success")
+
+        util.logger_and_notifier(self.notifier,
+                                 "finish preparing the delta data success")
 
         trading_day = decision_regard_date()
         infer = inference.Inference(conf=self.conf,
@@ -113,9 +117,7 @@ class Server:
     def run(self):
         """run server"""
 
-        msg = "Server is start running."
-        logger.info(msg)
-        self.notifier.send_message(msg)
+        util.logger_and_notifier(self.notifier, "greenturtle birth to cry.")
 
         self.initialize()
 
@@ -127,14 +129,13 @@ class Server:
         while True:
             # Checks whether a scheduled task is pending to run or not
             schedule.run_pending()
-            logger.info("Greenturtle is swimming, breath every minute")
+            logger.info("greenturtle is swimming, breath every minute")
             time.sleep(60)
 
     def heartbeat(self):
         """heartbeat"""
-        msg = "Little greenturtle is busy in making money," + \
-              " only take a break for two times everyday"
-        self.notifier.send_message(msg)
+        util.logger_and_notifier(
+            self.notifier, "little greenturtle heartbeat twice everyday.")
 
 
 class DeltaDataSyncer:

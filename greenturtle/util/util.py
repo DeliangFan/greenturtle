@@ -15,6 +15,11 @@
 
 """some utility functions"""
 
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
+
 
 def get_group(variety, varieties):
     """get group name by variety name"""
@@ -23,3 +28,9 @@ def get_group(variety, varieties):
             if variety_name == variety:
                 return group_name
     return None
+
+
+def logger_and_notifier(notifier, msg):
+    """logger and notifier"""
+    logger.debug(msg)
+    notifier.send_message(msg)
