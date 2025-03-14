@@ -34,6 +34,14 @@ git clone git@github.com:DeliangFan/greenturtle.git
 pip install -r requirements.txt
 ```
 
+Config mysql server in /etc/mysql/my.cnf with setting a large wait_timeout and interactive_timeout
+
+```
+[mysqld]
+wait_timeout = 31536000
+interactive_timeout = 31536000
+```
+
 Start mysql server
 
 ```

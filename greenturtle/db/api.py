@@ -35,7 +35,9 @@ class DBManager:
             port=db_conf.port,
             database=db_conf.database,
         )
-        self.engine = sqlalchemy.create_engine(url)
+        self.engine = sqlalchemy.create_engine(url,
+                                               pool_recycle=3600,
+                                               pool_pre_ping=True)
 
     def create_all(self):
         """create all tables."""
@@ -55,7 +57,9 @@ class DBAPI:
             port=db_conf.port,
             database=db_conf.database,
         )
-        self.engine = sqlalchemy.create_engine(url)
+        self.engine = sqlalchemy.create_engine(url,
+                                               pool_recycle=3600,
+                                               pool_pre_ping=True)
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def contract_create(self,
