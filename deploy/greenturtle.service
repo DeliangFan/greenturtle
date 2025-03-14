@@ -1,0 +1,14 @@
+[Unit]
+Description=greenturtle daemon service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=200
+User=root
+ExecStart=greenturtle-serve
+
+[Install]
+WantedBy=multi-user.target
