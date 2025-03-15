@@ -31,6 +31,9 @@ var/
 # IDE
 .idea/*
 
+# Venv
+.venv/*
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
