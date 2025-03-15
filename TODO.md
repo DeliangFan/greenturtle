@@ -89,9 +89,10 @@
 ## TODO
 
 - [P1] [Backtesting] Analysis the profit and losing
-- [P1] Refactor the e2etest according to local data
-- [P1] Evaluate the CTA factors
+- [P1] Need to check the bugs in portfolio
 - [P1] Add more unittest(data, strategy, simulator)
+- [P1] Add more documents, design document and strategy document
+- [P2] Evaluate the CTA factors
 - [P2] [Serving] Add support for multi account, support for both CN and US.
 - [P2] [Serving] Persistence logs
 - [P2] [Serving] Decoupling the executing order
