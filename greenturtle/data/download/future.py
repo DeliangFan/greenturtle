@@ -349,7 +349,8 @@ class DeltaCNFutureSymbolsFromAKShare:
             elif exchange in (types.CFFEX, types.DCE):
                 expire = row["最后交易日"]
             elif exchange == types.CZCE:
-                expire_str = row["交割结算日"]
+                # Suck CZCE again, the exception will be raised in someday!
+                expire_str = row["最后交易日待国家公布2025年节假日安排后进行调整"]
                 expire = datetime.datetime.strptime(expire_str, "%Y-%m-%d")
             elif exchange == types.GFEX:
                 expire = row["最后交易日"]
