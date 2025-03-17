@@ -129,3 +129,20 @@ def get_cn_next_trading_day(date):
         retry = retry - 1
 
     raise exception.TradingDayNotFoundError
+
+
+def decision_regard_date():
+    """return the date when making decision regard to"""
+    today = datetime.date.today()
+
+    # get the last trading day before today
+    decision_date = get_cn_last_trading_day(today)
+
+    # determine the decision date, and it's decided by the data
+    if is_cn_trading_day(today):
+        now = datetime.datetime.now().time()
+        # check if it's closed time
+        if now > datetime.time(15, 30):
+            decision_date = today
+
+    return decision_date
