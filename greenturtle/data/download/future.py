@@ -26,6 +26,7 @@ import pandas as pd
 
 from greenturtle.constants import types
 from greenturtle import exception
+from greenturtle.util import calendar as util_calendar
 from greenturtle.util.logging import logging
 
 
@@ -195,7 +196,10 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
         """download the full data by exchange"""
         delta = self.delta
         interval = 30
-        t = datetime.datetime.now()
+        t = datetime.date.today()
+        # CZCE sucks again.
+        if exchange == types.CZCE:
+            t = util_calendar.decision_regard_date()
         dfs = []
 
         while delta >= interval:

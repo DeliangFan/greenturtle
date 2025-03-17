@@ -6,14 +6,17 @@ backtrader==1.9.78.123
 baostock==0.8.9
 chinese_calendar==1.10.0
 cryptography==44.0.2
+flake8==7.1.1
 matplotlib==3.9.4
 munch==4.0.0
 numpy==1.26.4
 pandas==2.2.0
+pylint==3.3.5
 pymysql==1.1.1
 pyTelegramBotAPI==4.26.0
 pyyaml==6.0.2
 schedule==1.2.2
+scikit-learn==1.6.0
 tqsdk==3.7.8
 wxpusher==2.3.0
 yfinance==0.2.50

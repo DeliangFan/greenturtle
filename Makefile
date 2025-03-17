@@ -1,6 +1,6 @@
 fmt:
 	pylint * --ignore="Makefile,README.md,requirements.txt,LICENSE,TODO.md,AUTHORS,version.txt"
-	flake8
+	flake8 --exclude .venv
 
 unittest:
 	python -m unittest discover greenturtle/tests

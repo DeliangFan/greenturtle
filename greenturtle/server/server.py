@@ -38,23 +38,6 @@ from greenturtle.util import util
 logger = logging.get_logger()
 
 
-def decision_regard_date():
-    """return the date when making decision regard to"""
-    today = datetime.date.today()
-
-    # get the last trading day before today
-    decision_date = calendar.get_cn_last_trading_day(today)
-
-    # determine the decision date, and it's decided by the data
-    if calendar.is_cn_trading_day(today):
-        now = datetime.datetime.now().time()
-        # check if it's closed time
-        if now > datetime.time(15, 30):
-            decision_date = today
-
-    return decision_date
-
-
 class Server:
     """
     Online trading server
@@ -104,7 +87,7 @@ class Server:
         util.logger_and_notifier(self.notifier,
                                  "finish preparing the delta data success")
 
-        trading_day = decision_regard_date()
+        trading_day = calendar.decision_regard_date()
         infer = inference.Inference(conf=self.conf,
                                     notifier=self.notifier,
                                     trading_date=trading_day)
@@ -135,7 +118,7 @@ class Server:
     def heartbeat(self):
         """heartbeat"""
         util.logger_and_notifier(
-            self.notifier, "little greenturtle heartbeat twice everyday.")
+            self.notifier, "greenturtle liveness check twice everyday.")
 
 
 class DeltaDataSyncer:
@@ -160,7 +143,7 @@ class DeltaDataSyncer:
         Then check if every variety has the contract in the trading date
         """
         # the data in the date which is used to make decision.
-        decision_date = decision_regard_date()
+        decision_date = calendar.decision_regard_date()
 
         # convert date to datetime
         decision_date_time = datetime.datetime.combine(
