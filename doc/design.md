@@ -75,10 +75,10 @@ Greenturtle 基于 backtrader 构建回测和实盘，最大特色是回测和�
 
 交易板块，目前 CN 已有 80 多个品种，覆盖常见农产品、金属原料、能源、国债和股票指数。剔除 20 低流动性品种后，纳入 60 个作为候选池。
 
-|      | 农产品 | 金属 | 能源                                                           | 指数 |
-| -------- | ----- | ---- |--------------------------------------------------------------| --- |
-| 选取    | C、CS、A、M、Y、P、JD、RR、LH、PK、SR、CF、RM、OI、AP、CJ | CU、AL、ZN、PB、NI、SN、AO、PS、RB、HC、SS、J、JM、I、SM、AU、AG| LU、FU、BU、RU、NR、SP、TA、MA、FG、UR、SA、L、V、PP、EG、EB、PG、PF、BR、PX、SH | EC、IF、IC、IM、IH、TS、TF、T、TL
-| 剔除 | WR、LG、B、WH、RS、RI、PM、LR、JR、CY | BC、SF、LC、SI | FB、BB、ZC、PR、SC                                               | |
+|      | 农产品                                     | 金属 | 能源                                                           | 指数 |
+| -------- |-----------------------------------------| ---- |--------------------------------------------------------------| --- |
+| 选取    | C、CS、A、M、Y、P、JD、LH、PK、SR、CF、RM、OI、AP、CJ | CU、AL、ZN、PB、NI、SN、AO、PS、RB、HC、SS、J、JM、I、SM、AU、AG| LU、FU、BU、RU、NR、SP、TA、MA、FG、UR、SA、L、V、PP、EG、EB、PG、PF、BR、PX、SH | EC、IF、IC、IM、IH、TS、TF、T、TL
+| 剔除 | WR、LG、B、WH、RS、RI、PM、LR、JR、CY、RR         | BC、SF、LC、SI | FB、BB、ZC、PR、SC                                               | |
 
 
 
@@ -104,7 +104,7 @@ CN 券商 API 一言难尽，体验上和 IBRK 和 futuAPI 差距非常大。其
 
 Q：国际 Barclay BTOP50 Index 近 20 年表现？
 
-A：年化收益在 6% 左右，最大回撤在 20%。
+A：年化收益在 6% 左右，最大回撤在 10~20%。
 
 Q：和头部私募 5-10 年 CTA 代表投资产品相比如何？
 

@@ -402,11 +402,6 @@ CN_AGRICULTURE = {
         types.AUTO_MARGIN: 0.5,
         types.DESCRIPTION: "鲜鸡蛋",
     },
-    "RR": {
-        types.MULTIPLIER: 10,
-        types.AUTO_MARGIN: 1,
-        types.DESCRIPTION: "粳米",
-    },
     "LH": {
         types.MULTIPLIER: 16,
         types.AUTO_MARGIN: 1.6,
@@ -708,6 +703,7 @@ CN_INDICES = {
 # - WH(强麦)
 # - RS(油菜籽)
 # - RI(早籼稻)
+# - RR(粳米)
 # - PR(瓶片)
 # - PM(普麦)
 # - LR(晚稻)
