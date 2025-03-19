@@ -196,10 +196,8 @@ class DeltaCNFutureFromAKShare(CNFutureFromAKShare):
         """download the full data by exchange"""
         delta = self.delta
         interval = 30
-        t = datetime.date.today()
-        # CZCE sucks again.
-        if exchange == types.CZCE:
-            t = util_calendar.decision_regard_date()
+        t = util_calendar.decision_regard_date()
+
         dfs = []
 
         while delta >= interval:
