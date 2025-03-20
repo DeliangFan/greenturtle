@@ -16,6 +16,7 @@
 """ Base strategy class for backtrader which implements some basic interface"""
 
 import abc
+import copy
 from datetime import date as datetime_date
 
 import backtrader as bt
@@ -41,7 +42,6 @@ class BaseStrategy(bt.Strategy):
                  risk_factor=0.002,
                  atr_period=100,
                  leverage_limit=0.95,
-                 portfolio_type=types.PORTFOLIO_TYPE_ATR,
                  varieties=None,
                  group_risk_factors=None,
                  inference=False,
@@ -51,13 +51,13 @@ class BaseStrategy(bt.Strategy):
         self.allow_short = allow_short
         self.risk_factor = risk_factor
         self.leverage_limit = leverage_limit
-        self.portfolio_type = portfolio_type
         self.varieties = varieties
         self.group_risk_factors = group_risk_factors
         self.inference = inference
         self.trading_date = trading_date
         self.order = None
         self.bankruptcy = False
+        self.portfolio_type = types.PORTFOLIO_TYPE_ATR
         self._init_others(atr_period)
 
     def _init_others(self, atr_period):
@@ -146,7 +146,8 @@ class BaseStrategy(bt.Strategy):
         # 5. compute the desired portfolios with detailed size
         desired_portfolios = self.compute_desired_portfolios(
             desired_long,
-            desired_short)
+            desired_short,
+            current_portfolios)
 
         # 6. execute the orders.
         self.execute(current_portfolios, desired_portfolios)
@@ -323,15 +324,38 @@ class BaseStrategy(bt.Strategy):
 
         return portfolios
 
-    def _compute_portfolio_by_atr(self, name, commissioninfo):
+    def _compute_single_risk_with_size(self, name, size):
+        """compute real risk according to the size."""
+        # get the mult parameter
+        data = self.symbols_data[name]
+        commissioninfo = self.broker.getcommissioninfo(data)
+        mult = commissioninfo.p.mult
+
+        # get the atr
+        atr = self.atrs[name]
+
+        # get the total value
+        total_value = self.broker.get_value()
+
+        # compute the risk
+        risk = abs(size) * mult * atr[0] / total_value
+
+        return risk
+
+    def _compute_single_portfolio_by_atr(self, name):
         """compute portfolio by atr.
 
         formula: size = risk_factor * value / atr / mult
         """
-
-        # prepare the parameter
-        atr = self.atrs[name]
+        # get the mult parameter
+        data = self.symbols_data[name]
+        commissioninfo = self.broker.getcommissioninfo(data)
         mult = commissioninfo.p.mult
+
+        # get the atr
+        atr = self.atrs[name]
+
+        # get the total value
         total_value = self.broker.get_value()
 
         # compute the size
@@ -339,42 +363,13 @@ class BaseStrategy(bt.Strategy):
 
         return size
 
-    def _compute_portfolio_by_average(self, number, data, commissioninfo):
-        """this is the simple portfolios with average divided."""
-
-        # prepare the parameter
-        total_value = self.broker.get_value() * self.leverage_limit
-        single_value = total_value / number
-        close = data.close[0]
-
-        # compute teh size
-        size = commissioninfo.getsize(close, single_value)
-
-        return size
-
-    def _compute_portfolio(self, name, number):
+    def _compute_single_portfolio(self, name):
         """compute single portfolio."""
 
-        data = self.symbols_data[name]
-        commissioninfo = self.broker.getcommissioninfo(data)
-
         if self.portfolio_type == types.PORTFOLIO_TYPE_ATR:
-            return self._compute_portfolio_by_atr(name, commissioninfo)
-
-        if self.portfolio_type == types.PORTFOLIO_TYPE_AVERAGE:
-            return self._compute_portfolio_by_average(
-                number,
-                data,
-                commissioninfo)
-
-        # if portfolio_type is None, it depends on the type of the symbol
-        if commissioninfo.stocklike:
-            size = self._compute_portfolio_by_average(
-                number,
-                data,
-                commissioninfo)
+            size = self._compute_single_portfolio_by_atr(name)
         else:
-            size = self._compute_portfolio_by_atr(name, commissioninfo)
+            raise NotImplementedError
 
         return size
 
@@ -386,58 +381,138 @@ class BaseStrategy(bt.Strategy):
                     return group_name
         return None
 
-    def adjust_portfolio_by_group(self, portfolios):
+    # pylint: disable = too-many-branches, too-many-locals, too-many-statements
+    def adjust_portfolio_by_group(self,
+                                  desired_portfolios,
+                                  current_portfolios):
         """refine portfolio by group."""
         if self.group_risk_factors is None:
-            return portfolios
+            return desired_portfolios
+
+        adjust_desired_portfolios = copy.deepcopy(desired_portfolios)
 
         # 1. calculate the group risk
-        group_risk = {}
+        group_risk_dict = {}
         # calculate the group risk
-        for name in portfolios:
+        for name, size in desired_portfolios.items():
+            # get group name
             group_name = self._get_group_by_name(name)
             # raise exception if group not found.
             if group_name is None:
                 raise exception.GroupNameNotFound
-            # accumulate the group risk
-            if group_name in group_risk:
-                group_risk[group_name] += self.risk_factor
+
+            # accumulate group risk in the desired portfolio
+            risk = self._compute_single_risk_with_size(name, size)
+            if group_name in group_risk_dict:
+                group_risk_dict[group_name] += risk
             else:
-                group_risk[group_name] = self.risk_factor
+                group_risk_dict[group_name] = risk
 
         # 2. adjust the size according to current group risk and the
         # limitation of the group risk.
-        for name in portfolios:
+        adjust_group_risk_dict = {}
+        for name, size in desired_portfolios.items():
+            # get the group name, group risk and limit
             group_name = self._get_group_by_name(name)
-            risk = group_risk[group_name]
-            limit = self.group_risk_factors[group_name]
-            if risk > limit:
-                size = portfolios[name]
-                # adjust
-                portfolios[name] = int(size * limit / risk)
+            group_risk = group_risk_dict[group_name]
+            group_limit = self.group_risk_factors[group_name]
 
-        return portfolios
+            # if the group risk it more than limit, then adjust the size
+            if group_risk > group_limit:
+                size = int(size * group_limit / group_risk)
 
-    def compute_desired_portfolios(self, long_desired, short_desired):
+            # set the value to adjust_desired_portfolios
+            adjust_desired_portfolios[name] = size
+
+            # accumulate the adjust group risk in the desired portfolio
+            adjust_risk = self._compute_single_risk_with_size(name, size)
+            if group_name in adjust_group_risk_dict:
+                adjust_group_risk_dict[group_name] += adjust_risk
+            else:
+                adjust_group_risk_dict[group_name] = adjust_risk
+
+        # 3. refine the desired_portfolios with low startup value
+        # 3.1 refine the size with current and desired hold position
+        for name, current_size in current_portfolios.items():
+            # skip if it not in the desired and adjust portfolios
+            if name not in desired_portfolios:
+                continue
+            if name not in adjust_desired_portfolios:
+                continue
+
+            # refine the 0 adjust size
+            desired_size = desired_portfolios[name]
+            adjust_size = adjust_desired_portfolios[name]
+            if desired_size != 0 and adjust_size == 0 and current_size != 0:
+                adjust_size = 1 if desired_size > 0 else -1
+            else:
+                continue
+
+            # compute the risk and prepare the group risk parameters
+            risk = self._compute_single_risk_with_size(name, adjust_size)
+            group_name = self._get_group_by_name(name)
+            adjust_group_risk = adjust_group_risk_dict[group_name]
+            group_limit = self.group_risk_factors[group_name]
+
+            # check if respect to the group risk limitation
+            if risk + adjust_group_risk > group_limit:
+                continue
+
+            # meet the requirement and refine the risk and size value
+            adjust_group_risk_dict[group_name] += risk
+            adjust_desired_portfolios[name] = adjust_size
+
+        # 3.2 refine the size with desired hold position
+        for name, desired_size in desired_portfolios.items():
+            # skip if it not in the adjust portfolios
+            if name not in adjust_desired_portfolios:
+                continue
+
+            # refine the 0 adjust size
+            adjust_size = adjust_desired_portfolios[name]
+            if desired_size != 0 and adjust_size == 0:
+                adjust_size = 1 if desired_size > 0 else -1
+            else:
+                continue
+
+            # compute the risk and prepare the group risk parameters
+            risk = self._compute_single_risk_with_size(name, adjust_size)
+            group_name = self._get_group_by_name(name)
+            adjust_group_risk = adjust_group_risk_dict[group_name]
+            group_limit = self.group_risk_factors[group_name]
+
+            # check if respect to the group risk limitation
+            if risk + adjust_group_risk > group_limit:
+                continue
+
+            # meet the requirement and refine the risk and size value
+            adjust_group_risk_dict[group_name] += risk
+            adjust_desired_portfolios[name] = adjust_size
+
+        return adjust_desired_portfolios
+
+    def compute_desired_portfolios(self,
+                                   long_desired,
+                                   short_desired,
+                                   current_portfolios):
         """compute the desired portfolio."""
 
-        portfolios = {}
-
-        number = len(long_desired) + len(short_desired)
-        if number == 0:
-            return portfolios
+        desired_portfolios = {}
+        if len(long_desired) + len(short_desired) == 0:
+            return desired_portfolios
 
         for name in self.names:
-            size = self._compute_portfolio(name, number)
+            size = self._compute_single_portfolio(name)
 
             if name in long_desired:
-                portfolios[name] = size
+                desired_portfolios[name] = size
             if name in short_desired:
-                portfolios[name] = -size
+                desired_portfolios[name] = -size
 
-        portfolios = self.adjust_portfolio_by_group(portfolios)
+        desired_portfolios = self.adjust_portfolio_by_group(
+            desired_portfolios, current_portfolios)
 
-        return portfolios
+        return desired_portfolios
 
     def _filter_portfolios_by_valid(self, portfolios):
         """filter the portfolios by data valid."""

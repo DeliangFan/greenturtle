@@ -54,7 +54,6 @@ DESCRIPTION = "description"
 
 # portfolio constants
 PORTFOLIO_TYPE_ATR = "atr"
-PORTFOLIO_TYPE_AVERAGE = "average"
 
 # datetime format for future
 DATE_FORMAT = "%Y%m%d"
