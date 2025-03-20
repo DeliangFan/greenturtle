@@ -85,12 +85,13 @@
 - [P0][Done] [Serving] Add warning information like margin ratio and rolling
 - [P0][Done] [Serving] Trading validation including margin ratio
 - [P1][Done] [Serving] Deployment
-- [P1][Done] Add more documents, design document and strategy document
+- [P1][Done] [Doc] Add more documents, design document and strategy document
+- [P1][Done] [Backtesting] Analysis the profit and losing
+- [P1][Done] [Portfolio] Need to check the bugs in portfolio
+
 
 ## TODO
 
-- [P1] [Backtesting] Analysis the profit and losing
-- [P1] Need to check the bugs in portfolio
 - [P1] Add more unittest(data, strategy, simulator)
 - [P2] Evaluate the CTA factors
 - [P2] [Serving] Add support for multi account, support for both CN and US.
