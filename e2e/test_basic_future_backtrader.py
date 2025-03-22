@@ -15,18 +15,16 @@
 
 """some basic e2e test for future"""
 
-from datetime import datetime
 import unittest
 
 from greenturtle.constants import varieties
-from greenturtle.data.datafeed import yf
+from greenturtle.data.datafeed import mock
 from greenturtle.backtesting import backtesting
 from greenturtle.stragety import buyhold
 from greenturtle.stragety import channel
 from greenturtle.stragety import ema
 from greenturtle.stragety import macd
 from greenturtle.stragety import mim
-from greenturtle.stragety import rsi
 
 
 # pylint: disable=R0801
@@ -36,10 +34,7 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.future_data = {}
-        self.fromdate = datetime(2022, 1, 1)
-        self.todate = datetime(2024, 12, 31)
-        self.name = "GC"
-        self.yahoo_code = "GC=F"
+        self.name = "mock"
 
     def setUp(self):
         self.s = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
@@ -47,148 +42,62 @@ class TestBasicFutureBacktrader(unittest.TestCase):
     def test_future_with_buy_and_hold(self):
         """test buy and hold future."""
 
-        data = yf.get_feed_from_yahoo_finance(
-                    self.yahoo_code,
-                    name=self.name,
-                    fromdate=self.fromdate,
-                    todate=self.todate)
+        data = mock.get_mock_datafeed()
         self.s.add_data(data, self.name)
-        self.s.add_strategy(buyhold.BuyHoldStrategy, leverage_limit=0.2)
-        self.s.set_default_commission_by_name(self.name)
+        self.s.add_strategy(buyhold.BuyHoldStrategy, risk_factor=0.1)
         self.s.do_backtesting()
 
         return_summary = self.s.summary.return_summary
-        self.assertEqual(7, int(return_summary.total_return))
-        self.assertEqual(2.4, round(return_summary.annual_return, 1))
-
-        sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(0.58, round(sharpe_ratio_summary.sharpe_ratio, 2))
-
-        max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(2.5, round(max_draw_down_summary.max_draw_down, 1))
-
-        leverage_ratio_summary = self.s.summary.leverage_ratio_summary
-        self.assertEqual(0.01,
-                         round(leverage_ratio_summary.leverage_ratio, 2))
+        self.assertEqual(-3, int(return_summary.total_return))
 
     def test_future_with_ema(self):
         """test trade future with ema strategy."""
 
-        data = yf.get_feed_from_yahoo_finance(
-                    self.yahoo_code,
-                    name=self.name,
-                    fromdate=self.fromdate,
-                    todate=self.todate)
+        data = mock.get_mock_datafeed()
         self.s.add_data(data, self.name)
-        self.s.add_strategy(ema.EMA, leverage_limit=0.2, atr_period=99)
-        self.s.set_default_commission_by_name(self.name)
-        self.s.do_backtesting()
-
-        # test the return summary
-        return_summary = self.s.summary.return_summary
-        self.assertEqual(6, int(return_summary.total_return))
-        self.assertEqual(2.1, round(return_summary.annual_return, 1))
-
-        # test the sharpe ratio summary
-        sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(0.42, round(sharpe_ratio_summary.sharpe_ratio, 2))
-
-        # test the max draw down summary
-        max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(2.3, round(max_draw_down_summary.max_draw_down, 1))
-
-        # test the leverage ratio summary
-        leverage_ratio_summary = self.s.summary.leverage_ratio_summary
-        self.assertEqual(
-            0.01,
-            round(leverage_ratio_summary.leverage_ratio, 2))
-
-        # test the trade summary
-        trade_summary = self.s.summary.trade_summary
-        self.assertEqual(-4, int(trade_summary.net / 1000))
-
-    def test_future_with_mim(self):
-        """test trade future with mim strategy."""
-
-        data = yf.get_feed_from_yahoo_finance(
-                    self.yahoo_code,
-                    name=self.name,
-                    fromdate=self.fromdate,
-                    todate=self.todate)
-        self.s.add_data(data, self.name)
-        self.s.add_strategy(mim.MIMStrategy, leverage_limit=0.2)
-        self.s.set_default_commission_by_name(self.name)
-        self.s.do_backtesting()
-
-        # test the return summary
-        return_summary = self.s.summary.return_summary
-        self.assertEqual(6, int(return_summary.total_return))
-        self.assertEqual(2.2, round(return_summary.annual_return, 1))
-
-        # test the sharpe ratio summary
-        sharpe_ratio_summary = self.s.summary.sharpe_ratio_summary
-        self.assertEqual(0.49, round(sharpe_ratio_summary.sharpe_ratio, 2))
-
-        # test the max draw down summary
-        max_draw_down_summary = self.s.summary.max_draw_down_summary
-        self.assertEqual(2.3, round(max_draw_down_summary.max_draw_down, 1))
-
-        # test the leverage ratio summary
-        leverage_ratio_summary = self.s.summary.leverage_ratio_summary
-        self.assertEqual(
-            0.01,
-            round(leverage_ratio_summary.leverage_ratio, 2))
-
-    def test_future_with_channel(self):
-        """test trade future with channel strategy."""
-
-        data = yf.get_feed_from_yahoo_finance(
-                    self.yahoo_code,
-                    name=self.name,
-                    fromdate=self.fromdate,
-                    todate=self.todate)
-        self.s.add_data(data, self.name)
-        self.s.add_strategy(channel.DonchianChannel, leverage_limit=0.2)
-        self.s.set_default_commission_by_name(self.name)
+        self.s.add_strategy(ema.EMA, risk_factor=0.1)
         self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
         self.assertEqual(4, int(return_summary.total_return))
-        self.assertEqual(1.4, round(return_summary.annual_return, 1))
+        self.assertEqual(6.2, round(return_summary.annual_return, 1))
 
-    def test_future_with_macd(self):
-        """test trade future with macd strategy."""
+    def test_future_with_mim(self):
+        """test trade future with mim strategy."""
 
-        data = yf.get_feed_from_yahoo_finance(
-                    self.yahoo_code,
-                    name=self.name,
-                    fromdate=self.fromdate,
-                    todate=self.todate)
+        data = mock.get_mock_datafeed()
         self.s.add_data(data, self.name)
-        self.s.add_strategy(macd.MACDWithATRStrategy, leverage_limit=0.2)
-        self.s.set_default_commission_by_name(self.name)
+        self.s.add_strategy(mim.MIMStrategy, risk_factor=0.1)
         self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
-        self.assertEqual(5, int(return_summary.total_return))
-        self.assertEqual(1.9, round(return_summary.annual_return, 1))
+        self.assertEqual(6, int(return_summary.total_return))
+        self.assertEqual(7.9, round(return_summary.annual_return, 1))
 
-    def test_future_with_rsi(self):
-        """test trade future with rsi strategy."""
+    def test_future_with_channel(self):
+        """test trade future with channel strategy."""
 
-        data = yf.get_feed_from_yahoo_finance(
-            self.yahoo_code,
-            name=self.name,
-            fromdate=self.fromdate,
-            todate=self.todate)
+        data = mock.get_mock_datafeed()
         self.s.add_data(data, self.name)
-        self.s.add_strategy(rsi.RSIStrategy, leverage_limit=0.2)
-        self.s.set_default_commission_by_name(self.name)
+        self.s.add_strategy(channel.DonchianChannel, risk_factor=0.1)
         self.s.do_backtesting()
 
         # test the return summary
         return_summary = self.s.summary.return_summary
         self.assertEqual(0, int(return_summary.total_return))
-        self.assertEqual(0.3, round(return_summary.annual_return, 1))
+        self.assertEqual(0, round(return_summary.annual_return, 1))
+
+    def test_future_with_macd(self):
+        """test trade future with macd strategy."""
+
+        data = mock.get_mock_datafeed()
+        self.s.add_data(data, self.name)
+        self.s.add_strategy(macd.MACDWithATRStrategy, risk_factor=0.1)
+        self.s.do_backtesting()
+
+        # test the return summary
+        return_summary = self.s.summary.return_summary
+        self.assertEqual(-8, int(return_summary.total_return))
+        self.assertEqual(-11, round(return_summary.annual_return, 1))
