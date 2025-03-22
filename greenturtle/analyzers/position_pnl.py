@@ -24,6 +24,21 @@ from __future__ import (absolute_import, division, print_function,
 from backtrader import Analyzer
 
 
+def do_notify_trade(position_pln, trade):
+    """do_notify_trade deal with the notify trade"""
+
+    position_pln["net"] += trade.pnlcomm
+    position_pln["gross"] += trade.pnl
+    position_pln["trade_number"] += 1
+
+    if trade.pnlcomm >= 0.0:
+        position_pln["profit"] += trade.pnlcomm
+    else:
+        position_pln["lost"] += trade.pnlcomm
+
+    return position_pln
+
+
 class PositionPNL(Analyzer):
     """
     Provides statistics on closed trades (keeps also the count of open ones)
@@ -32,12 +47,13 @@ class PositionPNL(Analyzer):
     """
 
     def notify_trade(self, trade):
-
+        """deal with the notify trade"""
+        # Trade just closed
         if trade.status != trade.Closed:
             return
 
-        # Trade just closed
         name = trade.getdataname()
+
         if name in self.rets:
             position_pln = self.rets[name]
         else:
@@ -46,15 +62,7 @@ class PositionPNL(Analyzer):
                 "profit": 0.0,
                 "net": 0.0,
                 "gross": 0.0,
-                "trade_number": 0}
+                "trade_number": 0
+            }
 
-        position_pln["net"] += trade.pnlcomm
-        position_pln["gross"] += trade.pnl
-        position_pln["trade_number"] += 1
-
-        if trade.pnlcomm >= 0.0:
-            position_pln["profit"] += trade.pnlcomm
-        else:
-            position_pln["lost"] += trade.pnlcomm
-
-        self.rets[name] = position_pln
+        self.rets[name] = do_notify_trade(position_pln, trade)
