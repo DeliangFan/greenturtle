@@ -46,16 +46,8 @@ class ReturnSummary(BaseSummary):
 
         self.total_return = total_return
         self.annual_return = annual_return
-
-        if years_return is not None:
-            self.years_return = years_return
-        else:
-            self.years_return = None
-
-        if days_return is not None:
-            self.days_return = days_return
-        else:
-            self.days_return = None
+        self.years_return = years_return
+        self.days_return = days_return
 
     def to_string(self):
         """string of the return summary"""

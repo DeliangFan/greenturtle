@@ -39,7 +39,7 @@ class Correlation:
         if return_summary is not None:
             self.return_summaries[name] = return_summary
 
-    def compute_correlation(self):
+    def compute_correlation(self, method="spearman"):
         """compute the correlation by pandas dataframe."""
 
         # construct daily return dataframe to compute the correlation.
@@ -63,6 +63,6 @@ class Correlation:
             return_df_list.append(return_df)
 
         df = pd.concat(return_df_list, axis=1, join='inner')
-        cc = df.corr(method="spearman")
+        cc = df.corr(method=method)
 
         return cc

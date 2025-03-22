@@ -88,11 +88,10 @@
 - [P1][Done] [Doc] Add more documents, design document and strategy document
 - [P1][Done] [Backtesting] Analysis the profit and losing
 - [P1][Done] [Portfolio] Need to check the bugs in portfolio
-
+- [P1][Done] [Unittest] Add more unittest(data, strategy, simulator)
 
 ## TODO
 
-- [P1] Add more unittest(data, strategy, simulator)
 - [P2] Evaluate the CTA factors
 - [P2] [Serving] Add support for multi account, support for both CN and US.
 - [P2] [Serving] Persistence logs
