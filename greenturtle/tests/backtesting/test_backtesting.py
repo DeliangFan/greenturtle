@@ -20,6 +20,13 @@ import unittest
 from greenturtle import exception
 from greenturtle.backtesting import backtesting
 from greenturtle.constants import varieties
+from greenturtle.data.datafeed import mock
+from greenturtle.stragety import ema
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
+logger.disabled = True
 
 
 class TestFutureSimulator(unittest.TestCase):
@@ -27,58 +34,87 @@ class TestFutureSimulator(unittest.TestCase):
 
     def test_get_auto_margin_success(self):
         """test get_auto_margin success"""
-        f = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
-        ct_auto_margin = f.get_auto_margin("CT")
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        ct_auto_margin = b.get_auto_margin("CT")
         self.assertEqual(50, ct_auto_margin)
 
-        f = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
-        cu_auto_margin = f.get_auto_margin("CU")
+        b = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
+        cu_auto_margin = b.get_auto_margin("CU")
         self.assertEqual(0.5, cu_auto_margin)
 
     def test_get_auto_margin_failure(self):
         """test get_auto_margin failure"""
-        f = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
         self.assertRaises(
             exception.AutoMarginNotFound,
-            f.get_auto_margin, "failure"
+            b.get_auto_margin, "failure"
         )
 
-        f = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
+        b = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
         self.assertRaises(
             exception.AutoMarginNotFound,
-            f.get_auto_margin, "failure"
+            b.get_auto_margin, "failure"
         )
 
     def test_get_multiplier_success(self):
         """test get_multiplier success"""
-        f = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
-        ct_multiplier = f.get_multiplier("CT")
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        ct_multiplier = b.get_multiplier("CT")
         self.assertEqual(500, ct_multiplier)
 
-        f = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
-        cu_multiplier = f.get_multiplier("CU")
+        b = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
+        cu_multiplier = b.get_multiplier("CU")
         self.assertEqual(5, cu_multiplier)
 
     def test_get_multiplier_failure(self):
         """test get_multiplier failure"""
-        f = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
         self.assertRaises(
             exception.MultiplierNotFound,
-            f.get_multiplier, "failure"
+            b.get_multiplier, "failure"
         )
 
-        f = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
+        b = backtesting.BackTesting(varieties=varieties.CN_VARIETIES)
         self.assertRaises(
             exception.MultiplierNotFound,
-            f.get_multiplier, "failure"
+            b.get_multiplier, "failure"
         )
 
     def test_set_commission_success(self):
         """test set_commission success"""
-        f = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
-        f.set_commission(commission=4, name="GC")
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        b.set_commission(commission=4, name="GC")
 
     def test_set_default_commission_by_name_success(self):
         """test set_default_commission_by_name success"""
-        f = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
-        f.set_default_commission_by_name("GC", 4)
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        b.set_default_commission_by_name("GC", 4)
+
+    def test_do_backtesting(self):
+        """test do_backtesting"""
+        name = "mock"
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        data = mock.get_mock_datafeed(name)
+        b.add_data(data, name)
+        b.add_strategy(ema.EMA, risk_factor=0.1)
+        b.do_backtesting()
+
+        # test the return summary
+        return_summary = b.summary.return_summary
+        self.assertEqual(4, int(return_summary.total_return))
+        self.assertEqual(6.2, round(return_summary.annual_return, 1))
+
+    def test_do_backtesting_with_commission(self):
+        """test do_backtesting with commission"""
+        name = "mock"
+        b = backtesting.BackTesting(varieties=varieties.US_VARIETIES)
+        data = mock.get_mock_datafeed(name)
+        b.add_data(data, name)
+        b.set_commission(commission=4, margin=5, mult=10, name=name)
+        b.add_strategy(ema.EMA, risk_factor=0.1)
+        b.do_backtesting()
+
+        # test the return summary
+        return_summary = b.summary.return_summary
+        self.assertEqual(4, int(return_summary.total_return))
+        self.assertEqual(5.5, round(return_summary.annual_return, 1))
