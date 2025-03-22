@@ -23,6 +23,7 @@ import backtrader as bt
 
 from greenturtle.constants import types
 from greenturtle.data.datafeed import db
+from greenturtle.data.datafeed import mock
 from greenturtle.data import validation
 from greenturtle.util.logging import logging
 from greenturtle import exception
@@ -41,7 +42,6 @@ class BaseStrategy(bt.Strategy):
                  allow_short=False,
                  risk_factor=0.002,
                  atr_period=100,
-                 leverage_limit=0.95,
                  varieties=None,
                  group_risk_factors=None,
                  inference=False,
@@ -50,7 +50,6 @@ class BaseStrategy(bt.Strategy):
         super().__init__()
         self.allow_short = allow_short
         self.risk_factor = risk_factor
-        self.leverage_limit = leverage_limit
         self.varieties = varieties
         self.group_risk_factors = group_risk_factors
         self.inference = inference
@@ -191,6 +190,9 @@ class BaseStrategy(bt.Strategy):
 
         if isinstance(key, db.ContinuousContractDB):
             return key.p.variety
+
+        if isinstance(key, mock.MockPandasData):
+            return key.get_name()
 
         raise ValueError("unknown position key")
 
