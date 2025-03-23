@@ -351,7 +351,7 @@ class TQBroker(bt.BrokerBase):
         variety = kwargs[types.VARIETY]
         desired_size = kwargs[types.DESIRED_SIZE]
 
-        # check if have open order
+        # check if has open order
         if self._has_open_order(variety):
             msg = f"skip buying {variety} due to remaining orders"
             util.logger_and_notifier(self.notifier, msg)

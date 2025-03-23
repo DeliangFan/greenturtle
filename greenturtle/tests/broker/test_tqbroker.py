@@ -15,7 +15,6 @@
 
 """unittest for tq broker module"""
 
-import logging
 import unittest
 from unittest import mock
 
@@ -23,7 +22,12 @@ import munch
 
 from greenturtle.brokers import tqbroker
 from greenturtle import exception
+from greenturtle.util.logging import logging
 from greenturtle.util.notifier import fake
+
+
+logger = logging.get_logger()
+logger.disabled = True
 
 
 class TestSymbolConvert(unittest.TestCase):
@@ -98,6 +102,7 @@ class TestSymbolConvert(unittest.TestCase):
             "SP2601", "SHFaE")
 
 
+# pylint: disable=too-many-public-methods
 class TestTQBroker(unittest.TestCase):
     """unit tests for TQBroker class"""
 
@@ -183,6 +188,36 @@ class TestTQBroker(unittest.TestCase):
 
         return orders
 
+    def mock_get_quote(self, _):
+        """mock get_quote"""
+        quote = munch.Munch({
+            "ask_price1": float(1.01),
+            "bid_price1": float(1),
+        })
+        return quote
+
+    def mock_get_quote_with_nan_price(self, _):
+        """mock get_quote"""
+        quote = munch.Munch({
+            "ask_price1": float("nan"),
+            "bid_price1": float("nan"),
+        })
+        return quote
+
+    # pylint: disable=unused-argument
+    def mock_continuous_contract_get_latest_by_variety_source_country(
+            self, variety, *args):
+        """
+        mock the function
+        continuous_contract_get_latest_by_variety_source_country
+        """
+        contract = munch.Munch({
+            "variety": variety,
+            "exchange": "CFFEX",
+            "name": "IM2505",
+        })
+        return contract
+
     def mock_contract(self, name):
         """mock contract"""
         contract = munch.Munch({"variety": name})
@@ -262,11 +297,11 @@ class TestTQBroker(unittest.TestCase):
         conf = self.get_valid_mock_conf()
         notifier = fake.FakeNotifier()
         account = self.get_mock_account()
-        mock_tq_qpi = mock.MagicMock()
-        mock_tq_qpi.get_account = mock.MagicMock(return_value=account)
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_account = mock.MagicMock(return_value=account)
 
         b = tqbroker.TQBroker(conf, notifier)
-        b.tq_api = mock_tq_qpi
+        b.tq_api = mock_tq_api
         actual = b.get_margin_ratio()
         self.assertEqual(0.1, actual)
 
@@ -277,10 +312,10 @@ class TestTQBroker(unittest.TestCase):
         b = tqbroker.TQBroker(conf, notifier)
 
         # mock account
-        account = self.get_mock_account()
-        mock_tq_qpi = mock.MagicMock()
-        mock_tq_qpi.get_account = mock.MagicMock(return_value=account)
-        b.tq_api = mock_tq_qpi
+        mock_account = self.get_mock_account()
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_account = mock.MagicMock(return_value=mock_account)
+        b.tq_api = mock_tq_api
 
         # test _get_account_from_tq
         # pylint:disable=protected-access
@@ -304,8 +339,8 @@ class TestTQBroker(unittest.TestCase):
 
         # mock position
         mock_positions = self.get_mock_positions()
-        mock_tq_qpi = mock.MagicMock()
-        mock_tq_qpi.get_position = mock.MagicMock(return_value=mock_positions)
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
 
         # mock dbapi
         mock_dbapi = mock.MagicMock()
@@ -313,7 +348,7 @@ class TestTQBroker(unittest.TestCase):
             self.mock_contract_get_one_by_name_exchange
 
         # mock the methods
-        b.tq_api = mock_tq_qpi
+        b.tq_api = mock_tq_api
         b.dbapi = mock_dbapi
         b.convert = tqbroker.SymbolConvert(mock_dbapi)
 
@@ -359,8 +394,8 @@ class TestTQBroker(unittest.TestCase):
 
         # mock orders
         mock_orders = self.get_mock_orders()
-        mock_tq_qpi = mock.MagicMock()
-        mock_tq_qpi.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
 
         # mock dbapi
         mock_dbapi = mock.MagicMock()
@@ -368,7 +403,7 @@ class TestTQBroker(unittest.TestCase):
             self.mock_contract_get_one_by_name_exchange
 
         # mock the methods
-        b.tq_api = mock_tq_qpi
+        b.tq_api = mock_tq_api
         b.dbapi = mock_dbapi
         b.convert = tqbroker.SymbolConvert(mock_dbapi)
 
@@ -418,3 +453,273 @@ class TestTQBroker(unittest.TestCase):
         self.assertRaises(exception.DesiredSizeNotFound,
                           tqbroker.TQBroker._validate_trading_parameters,
                           kwargs={"variety": "IF"})
+
+    def test_buy_failed(self):
+        """test buy failed"""
+
+        conf = self.get_valid_mock_conf()
+        notifier = fake.FakeNotifier()
+        b = tqbroker.TQBroker(conf, notifier)
+
+        # mock orders and positions
+        mock_orders = self.get_mock_orders()
+        mock_positions = self.get_mock_positions()
+
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
+        mock_tq_api.get_quote = self.mock_get_quote_with_nan_price
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+
+        # mock the methods
+        b.tq_api = mock_tq_api
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test buy failed without variety
+        self.assertRaises(exception.VarietyNotFound,
+                          b.buy,
+                          None, None, 1)
+
+        # test buy failed with open orders
+        kwargs = {"variety": "IF", "desired_size": 1}
+        b.buy(None, None, 1, **kwargs)
+
+        # test buy failed with BuyOrSellSizeAbnormalError
+        kwargs = {"variety": "IM", "desired_size": -1}
+        self.assertRaises(exception.BuyOrSellSizeAbnormalError,
+                          b.buy,
+                          None, None, 1, **kwargs)
+
+        # test buy failed with nan price
+        kwargs = {"variety": "IM", "desired_size": -2}
+        b.buy(None, None, 1, **kwargs)
+
+    def test_buy_success(self):
+        """test buy success"""
+
+        conf = self.get_valid_mock_conf()
+        notifier = fake.FakeNotifier()
+        b = tqbroker.TQBroker(conf, notifier)
+        b.max_margin_ratio = 0.3
+
+        # mock account, orders and positions
+        mock_account = self.get_mock_account()
+        mock_positions = self.get_mock_positions()
+        mock_orders = self.get_mock_orders()
+
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
+        mock_tq_api.get_account = mock.MagicMock(return_value=mock_account)
+
+        mock_tq_api.get_quote = self.mock_get_quote
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+
+        # mock the methods
+        b.tq_api = mock_tq_api
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test buy failed with open orders
+        kwargs = {"variety": "IM", "desired_size": -1}
+        b.buy(None, None, 2, **kwargs)
+        b.tq_api.assert_has_calls(
+            [
+                mock.call.insert_order(symbol='CFFEX.IM2505',
+                                       direction='BUY',
+                                       offset='CLOSE',
+                                       limit_price=1.01,
+                                       volume=2),
+            ],
+            any_order=True)
+
+    def test_sell_failed(self):
+        """test sell failed"""
+
+        notifier = fake.FakeNotifier()
+        conf = self.get_valid_mock_conf()
+        b = tqbroker.TQBroker(conf, notifier)
+
+        # mock orders and positions
+        mock_positions = self.get_mock_positions()
+        mock_orders = self.get_mock_orders()
+
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
+        mock_tq_api.get_quote = self.mock_get_quote_with_nan_price
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+        mock_dbapi.continuous_contract_get_latest_by_variety_source_country = \
+            self.mock_continuous_contract_get_latest_by_variety_source_country
+
+        # mock the methods
+        b.tq_api = mock_tq_api
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test buy failed without variety
+        self.assertRaises(exception.VarietyNotFound,
+                          b.buy,
+                          None, None, 1)
+
+        # test buy failed with open orders
+        kwargs = {"variety": "IF", "desired_size": 1}
+        b.sell(None, None, 1, **kwargs)
+
+        # test buy failed with BuyOrSellSizeAbnormalError
+        kwargs = {"variety": "IM", "desired_size": -1}
+        self.assertRaises(exception.BuyOrSellSizeAbnormalError,
+                          b.sell,
+                          None, None, 1, **kwargs)
+
+        # test buy failed with nan price
+        kwargs = {"variety": "IM", "desired_size": -4}
+        b.sell(None, None, 1, **kwargs)
+
+    def test_sell_success(self):
+        """test sell success"""
+
+        conf = self.get_valid_mock_conf()
+        notifier = fake.FakeNotifier()
+        b = tqbroker.TQBroker(conf, notifier)
+        b.max_margin_ratio = 0.3
+
+        # mock account, orders and positions
+        mock_account = self.get_mock_account()
+        mock_orders = self.get_mock_orders()
+        mock_positions = self.get_mock_positions()
+
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
+        mock_tq_api.get_account = mock.MagicMock(return_value=mock_account)
+
+        mock_tq_api.get_quote = self.mock_get_quote
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+        mock_dbapi.continuous_contract_get_latest_by_variety_source_country = \
+            self.mock_continuous_contract_get_latest_by_variety_source_country
+
+        # mock the methods
+        b.tq_api = mock_tq_api
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test buy failed with open orders
+        kwargs = {"variety": "IM", "desired_size": -4}
+        b.sell(None, None, 1, **kwargs)
+        b.tq_api.assert_has_calls(
+            [
+                mock.call.insert_order(symbol='CFFEX.IM2505',
+                                       direction='SELL',
+                                       offset='OPEN',
+                                       limit_price=1,
+                                       volume=1),
+            ],
+            any_order=True)
+
+    def test_rolling_failed(self):
+        """test rolling failed"""
+        conf = self.get_valid_mock_conf()
+        notifier = fake.FakeNotifier()
+        b = tqbroker.TQBroker(conf, notifier)
+        b.max_margin_ratio = 0.3
+
+        # mock account, orders and positions
+        mock_account = self.get_mock_account()
+        mock_orders = self.get_mock_orders()
+        mock_positions = self.get_mock_positions()
+
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api.get_position = mock.MagicMock(return_value={})
+        mock_tq_api.get_account = mock.MagicMock(return_value=mock_account)
+
+        mock_tq_api.get_quote = self.mock_get_quote
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+        mock_dbapi.continuous_contract_get_latest_by_variety_source_country = \
+            self.mock_continuous_contract_get_latest_by_variety_source_country
+
+        # mock the methods
+        b.tq_api = mock_tq_api
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test rolling failed with non position
+        b.rolling()
+
+        # test rolling failed with same symbol
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
+        b.rolling()
+
+    def test_rolling_success(self):
+        """test rolling success"""
+        conf = self.get_valid_mock_conf()
+        notifier = fake.FakeNotifier()
+        b = tqbroker.TQBroker(conf, notifier)
+        b.max_margin_ratio = 0.3
+
+        # mock account, orders and positions
+        mock_account = self.get_mock_account()
+        mock_orders = self.get_mock_orders()
+        mock_positions = self.get_mock_positions()
+        tmp = mock_positions.pop("CFFEX.IM2505")
+        tmp["instrument_id"] = "IM2503"
+        mock_positions["CFFEX.IM2503"] = tmp
+
+        mock_tq_api = mock.MagicMock()
+        mock_tq_api.get_order = mock.MagicMock(return_value=mock_orders)
+        mock_tq_api.get_position = mock.MagicMock(return_value=mock_positions)
+        mock_tq_api.get_account = mock.MagicMock(return_value=mock_account)
+
+        mock_tq_api.get_quote = self.mock_get_quote
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+        mock_dbapi.continuous_contract_get_latest_by_variety_source_country = \
+            self.mock_continuous_contract_get_latest_by_variety_source_country
+
+        # mock the methods
+        b.tq_api = mock_tq_api
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test rolling failed with non position
+        b.rolling()
+
+        b.tq_api.assert_has_calls(
+            [
+                mock.call.insert_order(symbol='CFFEX.IM2505',
+                                       direction='SELL',
+                                       offset='OPEN',
+                                       limit_price=1.0,
+                                       volume=3),
+                mock.call.insert_order(symbol='CFFEX.IM2503',
+                                       direction='BUY',
+                                       offset='CLOSE',
+                                       limit_price=1.01,
+                                       volume=3),
+            ],
+            any_order=True)
