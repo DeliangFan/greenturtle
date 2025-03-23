@@ -75,6 +75,7 @@ class Inference:
         broker = backbroker.BackBroker()
         if hasattr(broker_conf, 'tq_broker'):
             broker = tqbroker.TQBroker(conf=self.conf, notifier=self.notifier)
+            broker.initiate()
 
         logger.info("start adding %s broker", broker.name)
         self.cerebro.setbroker(broker)
