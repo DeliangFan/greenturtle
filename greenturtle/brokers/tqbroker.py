@@ -110,27 +110,40 @@ class TQBroker(bt.BrokerBase):
         # validate the config
         self.validate_config(conf)
 
-        # initiate source and country
+        # set conf, source and country
+        self.conf = conf
         self.source = conf.source
         self.country = conf.country
 
+        # notifier
+        self.notifier = notifier
+
+        # other attributes, waiting for initiate
+        self.tq_api = None
+        self.dbapi = None
+        self.convert = None
+        self.cash = None
+        self.value = None
+        self.margin = None
+        self.max_margin_ratio = None
+        self.positions = None
+        self.startingcash = None
+
+    def initiate(self):
+        """initiate the tq client and db client"""
         # initiate the tq client api
-        self.conf = conf
         self.tq_api = self.get_tq_api()
 
         # initiate the db qpi
-        self.dbapi = api.DBAPI(conf.db)
+        self.dbapi = api.DBAPI(self.conf.db)
         self.convert = SymbolConvert(self.dbapi)
-
-        # notifier
-        self.notifier = notifier
 
         # initiate other attributes
         account = self._get_account_from_tq()
         self.cash = account["available"]
         self.value = account["balance"]
         self.margin = account["margin"]
-        self.max_margin_ratio = self.get_max_margin_ratio(conf)
+        self.max_margin_ratio = self.get_max_margin_ratio(self.conf)
         self.positions = self.get_all_positions()
 
         # used in backtrader

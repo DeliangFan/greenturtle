@@ -44,6 +44,7 @@ def get_tq_broker():
     conf = config.load_config("/etc/greenturtle/greenturtle.yaml")
     notifier = fake.FakeNotifier()
     broker = tqbroker.TQBroker(conf=conf, notifier=notifier)
+    broker.initiate()
     return broker
 
 
