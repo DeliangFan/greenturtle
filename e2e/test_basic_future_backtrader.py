@@ -25,6 +25,11 @@ from greenturtle.stragety import channel
 from greenturtle.stragety import ema
 from greenturtle.stragety import macd
 from greenturtle.stragety import mim
+from greenturtle.util.logging import logging
+
+
+logger = logging.get_logger()
+logger.disabled = True
 
 
 # pylint: disable=R0801

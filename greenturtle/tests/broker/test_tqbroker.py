@@ -15,6 +15,7 @@
 
 """unittest for tq broker module"""
 
+import logging
 import unittest
 from unittest import mock
 
@@ -152,6 +153,35 @@ class TestTQBroker(unittest.TestCase):
         }
 
         return positions
+
+    def get_mock_orders(self):
+        """get mock orders"""
+        orders = {
+            "order1": munch.Munch({
+                "exchange_id": "CFFEX",
+                "instrument_id": "IF2505",
+                "direction": "BUY",
+                "offset": "OPEN",
+                "volume_orign": 1,
+                "limit_price": 10.1,
+                "status": "ALIVE",
+                "last_msg": "",
+                "is_error": "",
+            }),
+            "order2": munch.Munch({
+                "exchange_id": "CFFEX",
+                "instrument_id": "IM2505",
+                "direction": "BUY",
+                "offset": "OPEN",
+                "volume_orign": 2,
+                "limit_price": 20.1,
+                "status": "CLOSED",
+                "last_msg": "",
+                "is_error": "",
+            }),
+        }
+
+        return orders
 
     def mock_contract(self, name):
         """mock contract"""
@@ -311,6 +341,55 @@ class TestTQBroker(unittest.TestCase):
         mock_data._name = "IF"
         actual = b.getposition(mock_data)
         self.assertEqual(2, actual.size)
+
+        # test _get_position_from_tq_by_variety
+        if_position = b._get_position_from_tq_by_variety("IF")
+        im_position = b._get_position_from_tq_by_variety("IM")
+        t_position = b._get_position_from_tq_by_variety("T")
+        self.assertEqual(2, if_position["pos_long"])
+        self.assertEqual(3, im_position["pos_short"])
+        self.assertIsNone(t_position)
+
+    def test_with_order_operations(self):
+        """test with order operations"""
+
+        conf = self.get_valid_mock_conf()
+        notifier = fake.FakeNotifier()
+        b = tqbroker.TQBroker(conf, notifier)
+
+        # mock orders
+        mock_orders = self.get_mock_orders()
+        mock_tq_qpi = mock.MagicMock()
+        mock_tq_qpi.get_order = mock.MagicMock(return_value=mock_orders)
+
+        # mock dbapi
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_one_by_name_exchange = \
+            self.mock_contract_get_one_by_name_exchange
+
+        # mock the methods
+        b.tq_api = mock_tq_qpi
+        b.dbapi = mock_dbapi
+        b.convert = tqbroker.SymbolConvert(mock_dbapi)
+
+        # test get_orders
+        orders = b.get_orders()
+        order1 = orders["order1"]
+        order2 = orders["order2"]
+        self.assertEqual(2, len(orders))
+        self.assertEqual("IF2505", order1.instrument_id)
+        self.assertEqual("IM2505", order2.instrument_id)
+
+        # test get_orders_open
+        orders = b.get_orders_open()
+        self.assertEqual(1, len(orders))
+        order = orders[0]
+        self.assertEqual("IF2505", order.instrument_id)
+
+        # test _has_open_order
+        # pylint:disable=protected-access
+        self.assertEqual(True, b._has_open_order("IF"))
+        self.assertEqual(False, b._has_open_order("IM"))
 
     def test_other_operations(self):
         """test other operations"""
