@@ -92,5 +92,70 @@ class TestContinuousContractDB(unittest.TestCase):
                           datafeed.validate,
                           [c1, c2])
 
-        # adjust_price
-        # align_and_padding
+    def test_adjust_price(self):
+        """test adjust_price"""
+        c1 = models.ContinuousContract(
+            date=datetime.datetime(2025, 3, 24),
+            open=9,
+            high=9,
+            low=9,
+            close=9,
+            settle=10,
+            pre_settle=10,
+            adjust_factor=1,
+        )
+        c2 = models.ContinuousContract(
+            date=datetime.datetime(2025, 3, 25),
+            open=10,
+            high=10,
+            low=10,
+            close=10,
+            settle=10,
+            pre_settle=10,
+            adjust_factor=2,
+        )
+
+        datafeed = db.ContinuousContractDB()
+        datafeed.adjust_price([c1, c2])
+
+        self.assertEqual(10, c2.open)
+        self.assertEqual(10, c2.close)
+        self.assertEqual(18, c1.open)
+        self.assertEqual(18, c1.close)
+
+    def test_align_and_padding(self):
+        """test align_and_padding"""
+        c1 = models.ContinuousContract(
+            date=datetime.datetime(2025, 3, 24),
+            open=9,
+            high=9,
+            low=9,
+            close=9,
+            settle=10,
+            pre_settle=10,
+            adjust_factor=1,
+        )
+        c2 = models.ContinuousContract(
+            date=datetime.datetime(2025, 3, 25),
+            open=10,
+            high=10,
+            low=10,
+            close=10,
+            settle=10,
+            pre_settle=10,
+            adjust_factor=1,
+        )
+
+        datafeed = db.ContinuousContractDB(
+            start_date=datetime.datetime(2025, 3, 21),
+            end_date=datetime.datetime(2025, 3, 25),
+        )
+
+        continuous_contracts = [c1, c2]
+        datafeed.align_and_padding(continuous_contracts)
+        self.assertEqual(3, len(continuous_contracts))
+        self.assertEqual(9, continuous_contracts[0].open)
+        self.assertEqual(10, continuous_contracts[1].open)
+        self.assertEqual(9, continuous_contracts[2].open)
+        self.assertEqual(datetime.datetime(2025, 3, 21),
+                         continuous_contracts[2].date)
