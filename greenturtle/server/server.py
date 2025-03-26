@@ -234,7 +234,7 @@ class DeltaDataSyncer:
         # exceptions will be raised.
         for exchange in exchanges:
             # load data by exchange
-            loader = future.DeltaCNFutureFromAKShare([exchange], 7)
+            loader = future.DeltaCNFutureFromAKShare([exchange], 20)
             df_map[exchange] = loader.download()
 
         logger.info("get contracts success")
