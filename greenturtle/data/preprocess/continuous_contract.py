@@ -121,20 +121,6 @@ class ContinuousContract:
         """
         return self.get_main_contract_by_open_interest(date, prev_contract)
 
-    def get_main_contract_by_volume(self, date):
-        """
-        get the main contract according to volume
-        according to the benchmark, the volume is always a bad metrics.
-        """
-        getter = self.dbapi.contract_get_all_by_date_variety_source_country
-        contracts = getter(date, self.variety, self.source, self.country)
-        contracts.sort(key=lambda x: x.volume, reverse=True)
-
-        if len(contracts) == 0:
-            raise exception.ContractNotFound
-
-        return contracts[0]
-
     def get_main_contract_by_open_interest(self, date, prev_contract):
         """
         1. get the main contract according to open interest
@@ -209,7 +195,6 @@ class ContinuousContract:
             contracts = getter(date, self.variety, self.source, self.country)
             total_volume = self._get_total_volume(contracts)
             total_open_interest = self._get_total_open_interest(contracts)
-
             # set the total_volume and total_open_interest
             current = continuous_contracts[date]
             current.total_volume = total_volume
