@@ -237,8 +237,9 @@ class ContinuousContract:
 
     def _validate_order(self, dates, continuous_contracts):
         """validate the contract order"""
+        is_ok = True
         if len(dates) == 0:
-            return
+            return is_ok
 
         sets = set()
         prev = continuous_contracts[dates[0]]
@@ -250,11 +251,14 @@ class ContinuousContract:
                 continue
             # raise exception for not continuous contract
             if now.name in sets:
+                is_ok = False
                 msg = f"{self.variety} contract {date} bad order"
                 logger.error(msg)
 
             sets.add(now.name)
             prev = now
+
+        return is_ok
 
     def _validate_and_fix_price(self,
                                 dates,
@@ -338,20 +342,26 @@ class ContinuousContract:
         - volume < 1000
         - open interest < 1500
         """
+        is_ok = True
+
         for date in dates:
             contract = continuous_contracts[date]
             if contract.volume < 1000:
+                is_ok = False
                 logger.warning(
                     "%s %s low volume: %d",
                     self.variety,
                     date,
                     contract.volume)
             if contract.open_interest < 1500:
+                is_ok = False
                 logger.warning(
                     "%s %s low open interest: %d",
                     self.variety,
                     date,
                     contract.open_interest)
+
+        return is_ok
 
     def write_to_db(self, continuous_contracts):
         """write to database."""
@@ -371,6 +381,8 @@ class ContinuousContract:
             logger.info("insert %s %s to db success", c.variety, c.date)
 
         logger.info("insert %d row for %s to db success", count, self.variety)
+
+        return count
 
 
 class DeltaContinuousContract(ContinuousContract):

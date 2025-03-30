@@ -72,6 +72,72 @@ class TestContinuousContract(unittest.TestCase):
 
         return ret
 
+    def mock_contract_get_by_constraint(self, date, name, *args):
+        """test contract_get_by_constraint"""
+        contracts = [
+            models.Contract(
+                name="IF2503",
+                date=datetime.datetime(2025, 3, 25),
+                close=100,
+            ),
+            models.Contract(
+                name="IF2503",
+                date=datetime.datetime(2025, 3, 26),
+                close=101,
+            ),
+            models.Contract(
+                name="IF2503",
+                date=datetime.datetime(2025, 3, 27),
+                close=102,
+            ),
+            models.Contract(
+                name="IF2505",
+                date=datetime.datetime(2025, 3, 25),
+                close=200,
+            ),
+            models.Contract(
+                name="IF2505",
+                date=datetime.datetime(2025, 3, 26),
+                close=202,
+            ),
+            models.Contract(
+                name="IF2505",
+                date=datetime.datetime(2025, 3, 27),
+                close=204,
+            ),
+        ]
+
+        for contract in contracts:
+            if contract.date == date and contract.name == name:
+                return contract
+
+        return None
+
+    def mock_continuous_contract_create(self, *args):
+        """mock continuous_contract_create"""
+
+    def mock_continuous_contract_get_by_constraint(self, date, *args):
+        """mock continuous_contract_get_by_constraint"""
+        contracts = [
+            models.Contract(
+                name="IF2503",
+                date=datetime.datetime(2025, 3, 25),
+                close=100,
+            ),
+            models.Contract(
+                name="IF2503",
+                date=datetime.datetime(2025, 3, 26),
+                close=101,
+            ),
+        ]
+
+        ret = []
+        for contract in contracts:
+            if contract.date == date:
+                ret.append(contract)
+
+        return ret
+
     def test_get_sorted_dates(self):
         """test get_sorted_dates"""
         c1 = models.Contract(date=datetime.datetime(2025, 3, 26))
@@ -223,3 +289,251 @@ class TestContinuousContract(unittest.TestCase):
         c1 = contracts[date1]
         self.assertEqual(111100, c1.total_open_interest)
         self.assertEqual(14, c1.total_volume)
+
+    def test_compute_adjust_factor(self):
+        """test compute_adjust_factor"""
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.contract_get_by_constraint = \
+            self.mock_contract_get_by_constraint
+
+        c = continuous_contract.ContinuousContract(variety="IF",
+                                                   source="akshare",
+                                                   country="CN",
+                                                   dbapi=mock_dbapi)
+
+        date0 = datetime.datetime(2025, 3, 25)
+        date1 = datetime.datetime(2025, 3, 26)
+        date2 = datetime.datetime(2025, 3, 27)
+        dates = [date0, date1, date2]
+        contracts = {
+            date0: models.ContinuousContract(
+                name="IF2503",
+                adjust_factor=1.0,
+                close=100,
+            ),
+            date1: models.ContinuousContract(
+                name="IF2505",
+                adjust_factor=1.0,
+                close=202,
+            ),
+            date2: models.ContinuousContract(
+                name="IF2505",
+                close=204,
+                adjust_factor=1.0),
+        }
+
+        c.compute_adjust_factor(dates, contracts)
+        self.assertEqual(1, contracts[date0].adjust_factor)
+        self.assertEqual(2, contracts[date1].adjust_factor)
+        self.assertEqual(1, contracts[date2].adjust_factor)
+
+    def test_validate_order(self):
+        """test validate_order"""
+        c = continuous_contract.ContinuousContract(variety="IF",
+                                                   source="akshare",
+                                                   country="CN",
+                                                   dbapi=None)
+
+        date0 = datetime.datetime(2025, 3, 26)
+        date1 = datetime.datetime(2025, 3, 27)
+        date2 = datetime.datetime(2025, 3, 28)
+        dates = [date0, date1, date2]
+
+        # test validate order success
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503"),
+            date1: models.ContinuousContract(name="IF2505"),
+            date2: models.ContinuousContract(name="IF2505"),
+        }
+        # pylint:disable=protected-access
+        self.assertEqual(True, c._validate_order(dates, contracts))
+
+        # test validate order failed
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503"),
+            date1: models.ContinuousContract(name="IF2505"),
+            date2: models.ContinuousContract(name="IF2503"),
+        }
+        # pylint:disable=protected-access
+        self.assertEqual(False, c._validate_order(dates, contracts))
+
+    def test_validate_and_fix_price(self):
+        """test validate_and_fix_price"""
+
+        c = continuous_contract.ContinuousContract(variety="IF",
+                                                   source="akshare",
+                                                   country="CN",
+                                                   dbapi=None)
+
+        date0 = datetime.datetime(2025, 3, 26)
+        date1 = datetime.datetime(2025, 3, 27)
+
+        # test validate high/low price abnormal for offline
+        dates = [date0]
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=9,
+                                             low=9,
+                                             close=9),
+        }
+        # pylint:disable=protected-access
+        c._validate_and_fix_price(dates, contracts)
+        self.assertEqual(10, contracts[date0].high)
+
+        # test validate high/low price abnormal for online
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=9,
+                                             low=9,
+                                             close=9),
+        }
+        # pylint:disable=protected-access
+        self.assertRaises(exception.DataPriceHighAbnormalError,
+                          c._validate_and_fix_price,
+                          dates, contracts, True)
+
+        # test validate DataPriceNonPositiveError abnormal for offline
+        dates = [date0, date1]
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=9,
+                                             close=9),
+            date1: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=-1,
+                                             close=9),
+        }
+        # pylint:disable=protected-access
+        c._validate_and_fix_price(dates, contracts)
+        self.assertEqual(9, contracts[date1].low)
+
+        # test validate DataPriceNonPositiveError abnormal for online
+        dates = [date0, date1]
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=9,
+                                             close=9),
+            date1: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=-1,
+                                             close=9),
+        }
+        # pylint:disable=protected-access
+        self.assertRaises(exception.DataPriceNonPositiveError,
+                          c._validate_and_fix_price,
+                          dates, contracts, True)
+
+    def test_validate_prices_between_days(self):
+        """test _validate_prices_between_days"""
+
+        c = continuous_contract.ContinuousContract(variety="IF",
+                                                   source="akshare",
+                                                   country="CN",
+                                                   dbapi=None)
+
+        date0 = datetime.datetime(2025, 3, 26)
+        date1 = datetime.datetime(2025, 3, 27)
+        dates = [date0, date1]
+
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=9,
+                                             close=9),
+            date1: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=10,
+                                             close=9),
+        }
+
+        # validate prices between days success
+        # pylint:disable=protected-access
+        c._validate_prices_between_days(dates, contracts)
+
+        # validate prices between days failed
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             open=10,
+                                             high=11,
+                                             low=9,
+                                             close=9),
+            date1: models.ContinuousContract(name="IF2503",
+                                             open=20,
+                                             high=22,
+                                             low=20,
+                                             close=19),
+        }
+        # pylint:disable=protected-access
+        self.assertRaises(exception.DataPriceExceedDailyLimitError,
+                          c._validate_prices_between_days,
+                          dates, contracts)
+
+    def test_validate_volume_and_open_interest(self):
+        """test _validate_volume_and_open_interest"""
+
+        c = continuous_contract.ContinuousContract(variety="IF",
+                                                   source="akshare",
+                                                   country="CN",
+                                                   dbapi=None)
+
+        date0 = datetime.datetime(2025, 3, 26)
+        dates = [date0]
+
+        # test validate failed with low volume and open interest
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             volume=10,
+                                             open_interest=10),
+        }
+        # pylint:disable=protected-access
+        self.assertEqual(
+            False,
+            c._validate_volume_and_open_interest(dates, contracts))
+
+        # test validate failed with low volume and open interest
+        contracts = {
+            date0: models.ContinuousContract(name="IF2503",
+                                             volume=10000,
+                                             open_interest=10000),
+        }
+        # pylint:disable=protected-access
+        self.assertEqual(
+            True,
+            c._validate_volume_and_open_interest(dates, contracts))
+
+    def test_write_to_db(self):
+        """test write_to_db"""
+
+        mock_dbapi = mock.MagicMock()
+        mock_dbapi.continuous_contract_get_by_constraint = \
+            self.mock_continuous_contract_get_by_constraint
+        mock_dbapi.continuous_contract_create = \
+            self.mock_continuous_contract_create
+
+        c = continuous_contract.ContinuousContract(variety="IF",
+                                                   source="akshare",
+                                                   country="CN",
+                                                   dbapi=mock_dbapi)
+
+        date0 = datetime.datetime(2025, 3, 26)
+        date1 = datetime.datetime(2025, 3, 27)
+        date2 = datetime.datetime(2025, 3, 28)
+
+        # test validate order success
+        continuous_contracts = {
+            date0: models.ContinuousContract(name="IF2503", date=date0),
+            date1: models.ContinuousContract(name="IF2505", date=date1),
+            date2: models.ContinuousContract(name="IF2507", date=date2),
+        }
+
+        self.assertEqual(2, c.write_to_db(continuous_contracts))
