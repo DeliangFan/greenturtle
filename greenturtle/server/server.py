@@ -55,10 +55,19 @@ class Server:
     - send the trading status including positions, orders.
     """
 
-    def __init__(self, conf):
+    def __init__(self, conf, dbapi=None, delta_data_syncer=None):
         self.conf = conf
-        self.dbapi = api.DBAPI(self.conf.db)
-        self.delta_data_syncer = DeltaDataSyncer(self.conf, self.dbapi)
+
+        if dbapi is None:
+            self.dbapi = api.DBAPI(self.conf.db)
+        else:
+            self.dbapi = dbapi
+
+        if delta_data_syncer is None:
+            self.delta_data_syncer = DeltaDataSyncer(self.conf, self.dbapi)
+        else:
+            self.delta_data_syncer = delta_data_syncer
+
         self.notifier = notifier.get_notifier(conf)
 
     def initialize(self):
@@ -68,7 +77,7 @@ class Server:
         self.delta_data_syncer.synchronize_delta_continuous_contracts()
         logger.info("initializing syncing delta data success")
 
-    def trading(self):
+    def trading(self, sleep_time=200):
         """do trading"""
 
         today = datetime.date.today()
@@ -93,7 +102,7 @@ class Server:
                                     trading_date=trading_day)
         infer.account_overview()
         infer.run()
-        time.sleep(888)
+        time.sleep(sleep_time)
         infer.rolling()
         infer.close()
 
