@@ -136,7 +136,7 @@ class Inference:
                 if factor <= 0 or factor > 0.02:
                     raise exception.ValidateGroupRiskFactorError
                 total_risk_factor += factor
-            if total_risk_factor <= 0 or total_risk_factor > 0.08:
+            if total_risk_factor <= 0 or total_risk_factor > 0.06:
                 raise exception.ValidateGroupRiskFactorError
 
         if hasattr(strategy_conf, "allow_short"):
